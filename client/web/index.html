@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A* Pathfinding on Kathmandu Roads</title>
+    <title>A* Pathfinding with Obstacles</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
@@ -11,7 +11,20 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   </head>
   <body>
-    <!-- <h2>Click on two points to find the shortest path</h2> -->
+    <h2>A* Pathfinding on Kathmandu Roads</h2>
+    <p><strong>Instructions:</strong></p>
+    <ul>
+      <li>
+        Left-click a node to set <strong>Source (Blue)</strong> and
+        <strong>Destination (Green)</strong>.
+      </li>
+      <li>
+        Right-click a node to
+        <strong>Mark/Unmark as an Obstacle (Black)</strong>.
+      </li>
+      <li>Click "Reset Obstacles" to clear all obstacles.</li>
+    </ul>
+    <button onclick="resetObstacles()">Reset Obstacles</button>
     <div id="map" style="width: 100%; height: 600px"></div>
 
     <script>
@@ -22,7 +35,8 @@
       }).addTo(map);
 
       let sourceNode = null,
-        destinationNode = null;
+        destinationNode = null,
+        obstacles = new Set();
 
       // Load road edges
       fetch("http://127.0.0.1:5000/edges")
@@ -39,28 +53,63 @@
           L.geoJSON(JSON.parse(data), {
             pointToLayer: function (feature, latlng) {
               return L.circleMarker(latlng, {
-                radius: 4,
+                radius: 6,
                 fillColor: "red",
                 color: "red",
                 fillOpacity: 1,
-              }).on("click", function () {
-                let nodeId = feature.properties.osmid || feature.id;
-
-                if (!sourceNode) {
-                  sourceNode = nodeId;
-                  this.setStyle({ fillColor: "blue", color: "blue" });
-                  console.log("✅ Source Node Selected:", sourceNode);
-                } else if (!destinationNode) {
-                  destinationNode = nodeId;
-                  this.setStyle({ fillColor: "green", color: "green" });
-                  console.log("✅ Destination Node Selected:", destinationNode);
-                  findShortestPath();
-                }
-              });
+              })
+                .on("click", function () {
+                  let nodeId = feature.properties.osmid || feature.id;
+                  if (!sourceNode) {
+                    sourceNode = nodeId;
+                    this.setStyle({ fillColor: "blue", color: "blue" });
+                    console.log("✅ Source Node Selected:", sourceNode);
+                  } else if (!destinationNode) {
+                    destinationNode = nodeId;
+                    this.setStyle({ fillColor: "green", color: "green" });
+                    console.log(
+                      "✅ Destination Node Selected:",
+                      destinationNode
+                    );
+                    findShortestPath();
+                  }
+                })
+                .on("contextmenu", function (event) {
+                  event.originalEvent.preventDefault();
+                  let nodeId = feature.properties.osmid || feature.id;
+                  toggleObstacle(nodeId, this);
+                });
             },
           }).addTo(map);
         })
         .catch((error) => console.error("❌ Error loading nodes:", error));
+
+      function toggleObstacle(nodeId, marker) {
+        if (obstacles.has(nodeId)) {
+          obstacles.delete(nodeId);
+          marker.setStyle({ fillColor: "red", color: "red" });
+        } else {
+          obstacles.add(nodeId);
+          marker.setStyle({ fillColor: "black", color: "black" });
+        }
+        updateObstaclesOnServer();
+      }
+
+      function updateObstaclesOnServer() {
+        fetch("http://127.0.0.1:5000/obstacles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ obstacles: Array.from(obstacles) }),
+        })
+          .then((response) => response.json())
+          .then((data) => console.log("Obstacles updated:", data))
+          .catch((error) => console.error("Error updating obstacles:", error));
+      }
+
+      function resetObstacles() {
+        obstacles.clear();
+        location.reload();
+      }
 
       function findShortestPath() {
         if (!sourceNode || !destinationNode) {
@@ -69,30 +118,24 @@
         }
 
         console.log("Source Node: " + sourceNode);
-        console.log("Destionation Node: " + destinationNode);
+        console.log("Destination Node: " + destinationNode);
 
         fetch("http://127.0.0.1:5000/shortest_path", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            source: sourceNode,
-            destination: destinationNode,
+            source: Number(sourceNode), // Ensure it's a number
+            destination: Number(destinationNode),
           }),
         })
           .then((response) => response.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              let error = JSON.stringify(data);
+              alert(error);
               return;
             }
-
-            // First, visualize explored paths
-            animateExploration(data.explored, () => {
-              // Then, animate the final shortest path
-              animatePath(data.path);
-            });
+            animateExploration(data.explored, () => animatePath(data.path));
           })
           .catch((error) => console.error("Error finding path:", error));
       }
@@ -100,15 +143,15 @@
       function animateExploration(exploredEdges, callback) {
         let index = 0;
         let interval = setInterval(() => {
-          if (index >= exploredEdges.length - 1) {
+          if (index >= exploredEdges.length) {
             clearInterval(interval);
-            callback(); // Once done, start animating shortest path
+            callback();
           } else {
             let coords = exploredEdges[index];
-            L.polyline(coords, { color: "yellow", weight: 10 }).addTo(map);
+            L.polyline(coords, { color: "yellow", weight: 5 }).addTo(map);
             index++;
           }
-        }, 0); // Faster animation for exploration
+        }, 50);
       }
 
       function animatePath(pathCoords) {
@@ -119,11 +162,11 @@
           } else {
             L.polyline([pathCoords[index], pathCoords[index + 1]], {
               color: "blue",
-              weight: 10,
+              weight: 8,
             }).addTo(map);
             index++;
           }
-        }, 0); // Slower animation for shortest path
+        }, 100);
       }
     </script>
   </body>

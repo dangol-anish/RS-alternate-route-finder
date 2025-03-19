@@ -39,6 +39,8 @@ export default function App() {
           : response.data;
       if (!parsedData.features) throw new Error("Invalid GeoJSON format");
 
+      console.log(parsedData.features);
+
       nodes.current = parsedData.features;
     } catch (error: any) {
       Alert.alert(
