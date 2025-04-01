@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Alert } from "react-native";
+import { View, Alert, TouchableOpacity, Text } from "react-native";
 import MapView, {
   Marker,
   Polyline,
@@ -22,6 +22,8 @@ export default function App() {
   const [destination, setDestination] = useState<GeoJSONFeature | null>(null);
   const [path, setPath] = useState<LatLng[]>([]);
   const [exploredEdges, setExploredEdges] = useState<LatLng[][]>([]);
+  const [obstacles, setObstacles] = useState<Set<string>>(new Set());
+  const [isObstacleMode, setIsObstacleMode] = useState(false);
   const nodes = useRef<GeoJSONFeature[]>([]);
 
   useEffect(() => {
@@ -37,9 +39,9 @@ export default function App() {
         typeof response.data === "string"
           ? JSON.parse(response.data)
           : response.data;
-      if (!parsedData.features) throw new Error("Invalid GeoJSON format");
 
-      console.log(parsedData.features);
+      console.log(parsedData);
+      if (!parsedData.features) throw new Error("Invalid GeoJSON format");
 
       nodes.current = parsedData.features;
     } catch (error: any) {
@@ -50,27 +52,40 @@ export default function App() {
     }
   };
 
+  const toggleObstacle = async (nodeId: string) => {
+    const newObstacles = new Set(obstacles);
+    if (newObstacles.has(nodeId)) {
+      newObstacles.delete(nodeId);
+    } else {
+      newObstacles.add(nodeId);
+    }
+    setObstacles(newObstacles);
+
+    try {
+      await axios.post(
+        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacles`,
+        { obstacles: Array.from(newObstacles) }
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to update obstacles");
+    }
+  };
+
   useEffect(() => {
     if (source && destination) {
-      console.log("Calling findShortestPath with:", { source, destination });
       findShortestPath();
     }
-  }, [source, destination]); // Runs when source or destination changes
+  }, [source, destination]);
 
   const findShortestPath = async () => {
     if (!source || !destination) {
       Alert.alert("Error", "Source or Destination is missing!");
-      console.log("Source:", source, "Destination:", destination);
       return;
     }
     try {
-      console.log("Fetching shortest path for:", source.id, destination.id);
       const response = await axios.post(
         `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/shortest_path`,
-        {
-          source: source.id,
-          destination: destination.id,
-        }
+        { source: source.id, destination: destination.id }
       );
 
       if (response.data.error) {
@@ -83,14 +98,17 @@ export default function App() {
           }))
         );
 
-        // setExploredEdges(
-        //   response.data.explored.map((edge: [number, number][]) =>
-        //     edge.map(([lat, lon]) => ({ latitude: lat, longitude: lon }))
-        //   )
-        // );
+        setExploredEdges(
+          response.data.explored.map((edge: [number, number][]) =>
+            edge.map(([lat, lon]) => ({
+              latitude: lat,
+              longitude: lon,
+            }))
+          )
+        );
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to find shortest path" + error);
+      Alert.alert("Error", "Failed to find shortest path");
     }
   };
 
@@ -98,12 +116,7 @@ export default function App() {
     latitude: number,
     longitude: number
   ): GeoJSONFeature | null => {
-    if (!nodes.current.length) {
-      console.log("No nodes available");
-      return null;
-    }
-
-    console.log("Finding nearest node for:", latitude, longitude);
+    if (!nodes.current.length) return null;
 
     let nearestNode = nodes.current[0];
     let minDist = Math.hypot(
@@ -116,14 +129,11 @@ export default function App() {
         node.geometry.coordinates[1] - latitude,
         node.geometry.coordinates[0] - longitude
       );
-
       if (dist < minDist) {
         nearestNode = node;
         minDist = dist;
       }
     });
-
-    console.log("Nearest node found:", nearestNode);
     return nearestNode;
   };
 
@@ -139,27 +149,19 @@ export default function App() {
           longitudeDelta: 0.1,
         }}
         onPress={(event: MapPressEvent) => {
-          if (!nodes.current.length) {
-            Alert.alert("Error", "Nodes are not loaded yet!");
-            return;
-          }
-
           const { latitude, longitude } = event.nativeEvent.coordinate;
-          console.log("Clicked Location:", { latitude, longitude });
-
           const closestNode = findNearestNode(latitude, longitude);
 
           if (!closestNode) {
             Alert.alert("Error", "No closest node found!");
-            console.log("No closest node found!");
             return;
           }
 
-          if (!source) {
-            console.log("Setting source:", closestNode);
+          if (isObstacleMode) {
+            toggleObstacle(closestNode.id);
+          } else if (!source) {
             setSource(closestNode);
           } else if (!destination) {
-            console.log("Setting destination:", closestNode);
             setDestination(closestNode);
           }
         }}
@@ -184,19 +186,50 @@ export default function App() {
           />
         )}
 
-        {exploredEdges.map((edge, index) => (
+        {Array.from(obstacles).map((nodeId) => {
+          const node = nodes.current.find((n) => n.id === nodeId);
+          return (
+            node && (
+              <Marker
+                key={node.id}
+                coordinate={{
+                  latitude: node.geometry.coordinates[1],
+                  longitude: node.geometry.coordinates[0],
+                }}
+                pinColor="black"
+              />
+            )
+          );
+        })}
+        {/* {exploredEdges.map((edge, index) => (
           <Polyline
             key={index}
             coordinates={edge}
-            strokeColor="yellow"
+            strokeColor="red"
             strokeWidth={3}
           />
-        ))}
+        ))} */}
 
         {path.length > 0 && (
-          <Polyline coordinates={path} strokeColor="blue" strokeWidth={5} />
+          <Polyline coordinates={path} strokeColor="green" strokeWidth={5} />
         )}
       </MapView>
+
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          backgroundColor: "red",
+          padding: 15,
+          borderRadius: 30,
+        }}
+        onPress={() => setIsObstacleMode(!isObstacleMode)}
+      >
+        <Text style={{ color: "white", fontWeight: "bold" }}>
+          {isObstacleMode ? "Stop Obstacle" : "Set Obstacle"}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
