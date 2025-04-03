@@ -6,6 +6,11 @@ import math
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:5500"}})
+CORS(app, resources={r"/*": {"origins": "http://192.168.120.164:3000"}})
+# CORS(app, resources={r"/*": {"origins": "http://192.168.1.100:3000"}})
+CORS(app, resources={r"/*": {"origins": "*"}})  
+
+
 
 # Load road network graph
 place_name = "Kathmandu, Nepal"
