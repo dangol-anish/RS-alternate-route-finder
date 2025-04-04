@@ -23,6 +23,7 @@ export const useNodes = () => {
         nodesRef.current = parsedData.features;
         setNodes(parsedData.features);
       } catch (error: any) {
+        console.log(error);
         Alert.alert(
           "Error",
           `Failed to load nodes: ${error.message || "Unknown error"}`
