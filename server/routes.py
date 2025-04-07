@@ -1,7 +1,16 @@
-# routes.py
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Blueprint, jsonify, request, render_template
 from pathfinding import bidirectional_astar
 from utils import haversine, heuristic
+import os
+from supabase import create_client, Client
+from flask import jsonify
+
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
 # Define a Blueprint to keep routes separate
 main_routes = Blueprint('main', __name__)
@@ -87,3 +96,34 @@ def shortest_path():
     
     except ValueError:
         return jsonify({'error': 'Invalid node IDs, must be integers'}), 400
+
+@main_routes.route("/sign_up", methods=['POST'])
+def sign_up():
+    data = request.get_json()
+    
+    users_email = data.get("email")
+    users_password = data.get("password")
+    
+    if not users_email or not users_password:
+        return jsonify({"error": "Email and password required"}), 400
+
+    response = supabase.auth.sign_up({
+            "email": users_email,
+            "password": users_password
+    })
+
+    return jsonify(response.model_dump())
+
+@main_routes.route("/sign_in_with_password", methods=['POST'])
+def sign_in_with_password():
+    data = request.get_json()
+
+    users_email = data.get("email")
+    users_password = data.get("password")
+
+    if not users_email or not users_password:
+        return jsonify({"error": "Email and password required"}), 400
+    
+    user = supabase.auth.sign_in_with_password({ "email": users_email, "password": users_password })
+
+    return jsonify(user.model_dump())
