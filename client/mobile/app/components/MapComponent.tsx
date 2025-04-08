@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Alert } from "react-native";
 import MapView, {
   Marker,
@@ -8,24 +8,7 @@ import MapView, {
 } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { fetchShortestPath } from "../utils/api";
-
-// const mapStyle = [
-//   {
-//     featureType: "all",
-//     elementType: "geometry.fill",
-//     stylers: [{ color: customColors.secondaryFg }],
-//   },
-//   {
-//     featureType: "road",
-//     elementType: "geometry",
-//     stylers: [{ color: customColors.tertiaryBg }],
-//   },
-//   {
-//     featureType: "road",
-//     elementType: "labels.text.stroke",
-//     stylers: [{ color: "#000000" }],
-//   },
-// ];
+import * as Location from "expo-location";
 
 interface MapComponentProps {
   source: GeoJSONFeature | null;
@@ -52,6 +35,45 @@ const MapComponent: React.FC<MapComponentProps> = ({
   setDestination,
   nodes,
 }) => {
+  // State to hold the user's current location
+  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
+
+  // user location
+  const getUserLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission for location not granted");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({
+      // enableHighAccuracy: true,
+    });
+
+    const { latitude, longitude } = location.coords;
+    setUserLocation({ latitude, longitude });
+
+    // Set map region based on user location
+    setMapRegion({
+      latitude,
+      longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    });
+  };
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
+
+  // map location state
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 27.7,
+    longitude: 85.3,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  });
+
   const findNearestNode = (
     latitude: number,
     longitude: number
@@ -80,15 +102,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   return (
     <View style={{ flex: 1 }}>
       <MapView
-        // customMapStyle={mapStyle}
         style={{ flex: 1 }}
-        initialRegion={{
-          // Change the latitude and longitude to center the map on a different area
-          latitude: 27.721, // Adjusted latitude for a different center
-          longitude: 85.3245, // Adjusted longitude for a different center
-          latitudeDelta: 0.03, // Smaller delta for more zoomed-in view
-          longitudeDelta: 0.03, // Smaller delta for more zoomed-in view
-        }}
+        region={mapRegion} // use region instead of initialRegion for dynamic updates
         onPress={(event: MapPressEvent) => {
           const { latitude, longitude } = event.nativeEvent.coordinate;
           const closestNode = findNearestNode(latitude, longitude);
@@ -143,17 +158,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
           );
         })}
 
-        {/* {exploredEdges.map((edge, index) => (
-          <Polyline
-            key={index}
-            coordinates={edge}
-            strokeColor="red"
-            strokeWidth={3}
-          />
-        ))} */}
-
         {path.length > 0 && (
           <Polyline coordinates={path} strokeColor="green" strokeWidth={5} />
+        )}
+
+        {/* User Location Marker */}
+        {userLocation && (
+          <Marker
+            coordinate={userLocation}
+            title="Your Location"
+            pinColor="purple"
+          />
         )}
       </MapView>
     </View>
