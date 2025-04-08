@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>A* Pathfinding with Obstacles</title>
+    <title>A* Pathfinding with Animation</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
@@ -111,24 +111,34 @@
               alert(JSON.stringify(data));
               return;
             }
-            drawExploration(data.explored);
-            drawPath(data.path);
+            drawExploration(data.explored, () => drawPath(data.path));
           })
           .catch((error) => console.error("Error finding path:", error));
       }
 
-      function drawExploration(exploredEdges) {
-        exploredEdges.forEach((coords) => {
-          L.polyline(coords, { color: "yellow", weight: 4 }).addTo(map);
+      function drawExploration(exploredEdges, callback) {
+        let delay = 0;
+        exploredEdges.forEach((coords, index) => {
+          setTimeout(() => {
+            L.polyline(coords, { color: "yellow", weight: 4 }).addTo(map);
+            if (index === exploredEdges.length - 1 && callback) {
+              setTimeout(callback, 200);
+            }
+          }, delay);
+          delay += 50; // adjust speed here
         });
       }
 
       function drawPath(pathCoords) {
+        let delay = 0;
         for (let i = 0; i < pathCoords.length - 1; i++) {
-          L.polyline([pathCoords[i], pathCoords[i + 1]], {
-            color: "green",
-            weight: 8,
-          }).addTo(map);
+          setTimeout(() => {
+            L.polyline([pathCoords[i], pathCoords[i + 1]], {
+              color: "green",
+              weight: 8,
+            }).addTo(map);
+          }, delay);
+          delay += 100; // adjust path drawing speed here
         }
       }
     </script>

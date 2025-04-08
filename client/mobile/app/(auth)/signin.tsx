@@ -2,13 +2,17 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 
 const signin = () => {
-  return (
-    <View>
-      <Text>signin</Text>
-    </View>
-  );
+  return <View style={styles.container}></View>;
 };
 
 export default signin;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: "black",
+  },
+});

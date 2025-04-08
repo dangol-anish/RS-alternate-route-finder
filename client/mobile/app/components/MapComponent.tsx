@@ -8,6 +8,25 @@ import MapView, {
 } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { fetchShortestPath } from "../utils/api";
+import { customColors } from "@/constants/Colors";
+
+// const mapStyle = [
+//   {
+//     featureType: "all",
+//     elementType: "geometry.fill",
+//     stylers: [{ color: customColors.secondaryFg }],
+//   },
+//   {
+//     featureType: "road",
+//     elementType: "geometry",
+//     stylers: [{ color: customColors.tertiaryBg }],
+//   },
+//   {
+//     featureType: "road",
+//     elementType: "labels.text.stroke",
+//     stylers: [{ color: "#000000" }],
+//   },
+// ];
 
 interface MapComponentProps {
   source: GeoJSONFeature | null;
@@ -62,6 +81,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   return (
     <View style={{ flex: 1 }}>
       <MapView
+        // customMapStyle={mapStyle}
         style={{ flex: 1 }}
         initialRegion={{
           latitude: 27.7172,

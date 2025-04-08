@@ -13,6 +13,7 @@ export const useNodes = () => {
         const response = await axios.get(
           `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/nodes`
         );
+
         const parsedData =
           typeof response.data === "string"
             ? JSON.parse(response.data)
@@ -26,7 +27,7 @@ export const useNodes = () => {
         console.log(error);
         Alert.alert(
           "Error",
-          `Failed to load nodes: ${error.message || "Unknown error"}`
+          `Failed to load nodes: ${error || "Unknown error"}`
         );
       }
     };

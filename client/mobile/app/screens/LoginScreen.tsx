@@ -1,28 +1,28 @@
-import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+// import React from "react";
+// import { View, Text, Button, StyleSheet } from "react-native";
 
-const LoginScreen = ({ navigation }) => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Login Screen</Text>
-      <Button
-        title="Go to Register"
-        onPress={() => navigation.navigate("Register")}
-      />
-    </View>
-  );
-};
+// const LoginScreen = ({ navigation }) => {
+//   return (
+//     <View style={styles.container}>
+//       <Text style={styles.header}>Login Screen</Text>
+//       <Button
+//         title="Go to Register"
+//         onPress={() => navigation.navigate("Register")}
+//       />
+//     </View>
+//   );
+// };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     justifyContent: "center",
+//     alignItems: "center",
+//   },
+//   header: {
+//     fontSize: 24,
+//     marginBottom: 20,
+//   },
+// });
 
-export default LoginScreen;
+// export default LoginScreen;
