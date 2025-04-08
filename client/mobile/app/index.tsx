@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { View, Alert, Text, TextInput } from "react-native";
-import MapComponent from "./components/MapComponent";
-import ObstacleToggleButton from "./components/ObstacleToggleButton";
-import { useNodes } from "./hooks/useNodes";
+import MapComponent from "@/app/components/MapComponent";
+import ObstacleToggleButton from "@/app/components/ObstacleToggleButton";
+import { useNodes } from "@/app/hooks/useNodes";
 import { updateObstacles, fetchShortestPath } from "./utils/api";
-import { GeoJSONFeature } from "./types/geoJSON";
+import { GeoJSONFeature } from "@/app/types/geoJSON";
 import { LatLng } from "react-native-maps";
-import SearchbarComponent from "./components/HeaderComponent";
-import HeaderComponent from "./components/HeaderComponent";
+import HeaderComponent from "@/app/components/HeaderComponent";
 
-export default function App() {
+export default function ExploreScreen() {
   const { nodes } = useNodes();
   const [source, setSource] = useState<GeoJSONFeature | null>(null);
   const [destination, setDestination] = useState<GeoJSONFeature | null>(null);

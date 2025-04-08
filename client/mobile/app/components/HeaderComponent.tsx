@@ -8,7 +8,7 @@ import {
 import React, { useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
-const SearchbarComponent = () => {
+const HeaderComponent = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState("");
   const inputRef = useRef<TextInput>(null);
@@ -70,7 +70,7 @@ const SearchbarComponent = () => {
   );
 };
 
-export default SearchbarComponent;
+export default HeaderComponent;
 
 const styles = StyleSheet.create({
   wrapper: {

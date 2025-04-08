@@ -14,7 +14,7 @@ const ObstacleToggleButton: React.FC<ObstacleToggleButtonProps> = ({
     <TouchableOpacity
       style={{
         position: "absolute",
-        bottom: 20,
+        bottom: 100,
         right: 20,
         backgroundColor: "red",
         padding: 15,
@@ -23,7 +23,7 @@ const ObstacleToggleButton: React.FC<ObstacleToggleButtonProps> = ({
       onPress={() => setIsObstacleMode(!isObstacleMode)}
     >
       <Text style={{ color: "white", fontWeight: "bold" }}>
-        {isObstacleMode ? "Stop Obstacle" : "Set Obstacle"}
+        {isObstacleMode ? "Stop" : "Set"}
       </Text>
     </TouchableOpacity>
   );

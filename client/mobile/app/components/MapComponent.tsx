@@ -8,7 +8,6 @@ import MapView, {
 } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { fetchShortestPath } from "../utils/api";
-import { customColors } from "@/constants/Colors";
 
 // const mapStyle = [
 //   {
@@ -84,10 +83,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
         // customMapStyle={mapStyle}
         style={{ flex: 1 }}
         initialRegion={{
-          latitude: 27.7172,
-          longitude: 85.324,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
+          // Change the latitude and longitude to center the map on a different area
+          latitude: 27.721, // Adjusted latitude for a different center
+          longitude: 85.3245, // Adjusted longitude for a different center
+          latitudeDelta: 0.03, // Smaller delta for more zoomed-in view
+          longitudeDelta: 0.03, // Smaller delta for more zoomed-in view
         }}
         onPress={(event: MapPressEvent) => {
           const { latitude, longitude } = event.nativeEvent.coordinate;
