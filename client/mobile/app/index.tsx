@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Alert, Text, TextInput } from "react-native";
+import { View, Alert } from "react-native";
 import MapComponent from "@/app/components/MapComponent";
-import ObstacleToggleButton from "@/app/components/ObstacleToggleButton";
 import { useNodes } from "@/app/hooks/useNodes";
 import { updateObstacles, fetchShortestPath } from "./utils/api";
 import { GeoJSONFeature } from "@/app/types/geoJSON";
 import { LatLng } from "react-native-maps";
 import HeaderComponent from "@/app/components/HeaderComponent";
+import FloatingActionComponent from "./components/FloatingActionComponent";
+import * as Location from "expo-location";
 
-export default function ExploreScreen() {
+export default function App() {
   const { nodes } = useNodes();
   const [source, setSource] = useState<GeoJSONFeature | null>(null);
   const [destination, setDestination] = useState<GeoJSONFeature | null>(null);
@@ -16,6 +17,45 @@ export default function ExploreScreen() {
   const [exploredEdges, setExploredEdges] = useState<LatLng[][]>([]);
   const [obstacles, setObstacles] = useState<Set<string>>(new Set());
   const [isObstacleMode, setIsObstacleMode] = useState(false);
+
+  // State to hold the user's current location
+  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 27.7,
+    longitude: 85.3,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  });
+
+  // Get user location
+  const getUserLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission for location not granted");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync();
+    const { latitude, longitude } = location.coords;
+    setUserLocation({ latitude, longitude });
+  };
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
+
+  const locateCurrentLocation = () => {
+    if (userLocation) {
+      setMapRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+
+    console.log("Current User Location: " + JSON.stringify(userLocation));
+  };
 
   useEffect(() => {
     if (source && destination) {
@@ -84,13 +124,17 @@ export default function ExploreScreen() {
         setSource={setSource}
         setDestination={setDestination}
         nodes={nodes}
+        userLocation={userLocation}
+        mapRegion={mapRegion}
+        setMapRegion={setMapRegion}
       />
 
       <HeaderComponent />
 
-      <ObstacleToggleButton
+      <FloatingActionComponent
         isObstacleMode={isObstacleMode}
         setIsObstacleMode={setIsObstacleMode}
+        onLocateCurrentLocation={locateCurrentLocation}
       />
     </View>
   );

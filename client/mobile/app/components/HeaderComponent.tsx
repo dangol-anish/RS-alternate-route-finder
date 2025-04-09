@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    paddingTop: 10,
   },
   container: {
     flexDirection: "row",

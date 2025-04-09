@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Alert } from "react-native";
-import MapView, {
-  Marker,
-  Polyline,
-  LatLng,
-  MapPressEvent,
-} from "react-native-maps";
+import MapView, { Marker, Polyline, MapPressEvent } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
-import { fetchShortestPath } from "../utils/api";
-import * as Location from "expo-location";
+import { LatLng } from "react-native-maps";
 
 interface MapComponentProps {
   source: GeoJSONFeature | null;
@@ -21,6 +15,21 @@ interface MapComponentProps {
   setSource: (source: GeoJSONFeature) => void;
   setDestination: (destination: GeoJSONFeature) => void;
   nodes: GeoJSONFeature[];
+  userLocation: LatLng | null;
+  mapRegion: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  };
+  setMapRegion: React.Dispatch<
+    React.SetStateAction<{
+      latitude: number;
+      longitude: number;
+      latitudeDelta: number;
+      longitudeDelta: number;
+    }>
+  >;
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({
@@ -34,46 +43,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
   setSource,
   setDestination,
   nodes,
+  userLocation,
+  mapRegion,
+  setMapRegion,
 }) => {
-  // State to hold the user's current location
-  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
-
-  // user location
-  const getUserLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission for location not granted");
-      return;
-    }
-
-    let location = await Location.getCurrentPositionAsync({
-      // enableHighAccuracy: true,
-    });
-
-    const { latitude, longitude } = location.coords;
-    setUserLocation({ latitude, longitude });
-
-    // Set map region based on user location
-    setMapRegion({
-      latitude,
-      longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
-  };
-
-  useEffect(() => {
-    getUserLocation();
-  }, []);
-
-  // map location state
-  const [mapRegion, setMapRegion] = useState({
-    latitude: 27.7,
-    longitude: 85.3,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005,
-  });
-
   const findNearestNode = (
     latitude: number,
     longitude: number
@@ -99,11 +72,23 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return nearestNode;
   };
 
+  useEffect(() => {
+    if (userLocation) {
+      setMapRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [userLocation]);
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
         style={{ flex: 1 }}
-        region={mapRegion} // use region instead of initialRegion for dynamic updates
+        region={mapRegion} // Dynamically controlled by the state
+        onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it
         onPress={(event: MapPressEvent) => {
           const { latitude, longitude } = event.nativeEvent.coordinate;
           const closestNode = findNearestNode(latitude, longitude);
