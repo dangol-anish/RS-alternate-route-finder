@@ -2,30 +2,24 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import ObstacleToggleButton from "./ObstacleToggleButton";
 import CurrentLocationButton from "./CurrentLocationButton";
+import ClearPathButton from "./ClearPathButton";
 
 interface ObstacleToggleButtonProps {
   isObstacleMode: boolean;
   setIsObstacleMode: (isObstacleMode: boolean) => void;
   onLocateCurrentLocation: () => void;
+  clearPath: () => void;
 }
 
 const FloatingActionComponent: React.FC<ObstacleToggleButtonProps> = ({
   isObstacleMode,
   setIsObstacleMode,
   onLocateCurrentLocation,
+  clearPath,
 }) => {
   return (
-    <View
-      style={{
-        position: "absolute",
-        bottom: 0,
-        right: 0,
-        backgroundColor: "gray",
-        height: 300,
-        width: 80,
-        margin: 16,
-      }}
-    >
+    <View style={styles.floatingView}>
+      <ClearPathButton clearPath={clearPath} />
       <ObstacleToggleButton
         isObstacleMode={isObstacleMode}
         setIsObstacleMode={setIsObstacleMode}
@@ -40,16 +34,13 @@ const FloatingActionComponent: React.FC<ObstacleToggleButtonProps> = ({
 export default FloatingActionComponent;
 
 const styles = StyleSheet.create({
-  locateButton: {
-    backgroundColor: "blue",
-    padding: 10,
-    marginTop: 20,
-    borderRadius: 5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  locateButtonText: {
-    color: "white",
-    fontSize: 16,
+  floatingView: {
+    position: "absolute",
+    bottom: 50,
+    right: 0,
+    // backgroundColor: "gray",
+    margin: 16,
+    flex: 1,
+    gap: 16,
   },
 });

@@ -27,6 +27,14 @@ export default function App() {
     longitudeDelta: 0.005,
   });
 
+  //clear path
+  const clearPath = () => {
+    setSource(null);
+    setDestination(null);
+    setPath([]);
+    setExploredEdges([]);
+  };
+
   // Get user location
   const getUserLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -54,7 +62,7 @@ export default function App() {
       });
     }
 
-    console.log("Current User Location: " + JSON.stringify(userLocation));
+    // console.log("Current User Location: " + JSON.stringify(userLocation));
   };
 
   useEffect(() => {
@@ -135,6 +143,7 @@ export default function App() {
         isObstacleMode={isObstacleMode}
         setIsObstacleMode={setIsObstacleMode}
         onLocateCurrentLocation={locateCurrentLocation}
+        clearPath={clearPath}
       />
     </View>
   );
