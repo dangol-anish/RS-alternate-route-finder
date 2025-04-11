@@ -8,16 +8,14 @@ type MapStore = {
   path: LatLng[];
   exploredEdges: LatLng[][];
   obstacles: Set<string>;
-  isObstacleMode: boolean;
-
+  setObstacles: (obstacles: Set<string>) => void;
   setSource: (source: GeoJSONFeature | null) => void;
   setDestination: (destination: GeoJSONFeature | null) => void;
   setPath: (path: LatLng[]) => void;
   setExploredEdges: (edges: LatLng[][]) => void;
-  toggleObstacle: (nodeId: string) => void;
+  isObstacleMode: boolean;
   setIsObstacleMode: (val: boolean) => void;
   clearPath: () => void;
-  setObstacles: (obstacles: Set<string>) => void;
 };
 
 export const useMapStore = create<MapStore>((set, get) => ({
@@ -33,11 +31,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
   setPath: (path) => set({ path }),
   setExploredEdges: (edges) => set({ exploredEdges: edges }),
   setObstacles: (obstacles) => set({ obstacles }),
-  toggleObstacle: (nodeId) => {
-    const current = new Set(get().obstacles);
-    current.has(nodeId) ? current.delete(nodeId) : current.add(nodeId);
-    set({ obstacles: current });
-  },
   setIsObstacleMode: (val) => set({ isObstacleMode: val }),
   clearPath: () =>
     set({ source: null, destination: null, path: [], exploredEdges: [] }),

@@ -6,8 +6,8 @@ import { LatLng } from "react-native-maps";
 import { useMapStore } from "../store/useMapStore";
 
 interface MapComponentProps {
-  obstacles: Set<string>;
-  isObstacleMode: boolean;
+  // obstacles: Set<string>;
+  // isObstacleMode: boolean;
   toggleObstacle: (nodeId: string) => void;
   nodes: GeoJSONFeature[];
   userLocation: LatLng | null;
@@ -28,8 +28,6 @@ interface MapComponentProps {
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({
-  obstacles,
-  isObstacleMode,
   toggleObstacle,
   nodes,
   userLocation,
@@ -43,6 +41,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
     exploredEdges,
     setSource,
     setDestination,
+    obstacles,
+    isObstacleMode,
   } = useMapStore();
 
   const findNearestNode = (

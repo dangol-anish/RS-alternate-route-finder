@@ -15,19 +15,20 @@ export default function App() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const { nodes } = useNodes();
-  const [obstacles, setObstacles] = useState<Set<string>>(new Set());
-  const [isObstacleMode, setIsObstacleMode] = useState(false);
 
   const {
     source,
     destination,
     path,
     exploredEdges,
-
+    obstacles,
+    setObstacles,
     setSource,
     setDestination,
     setPath,
     setExploredEdges,
+    isObstacleMode,
+    setIsObstacleMode,
   } = useMapStore();
 
   // State to hold the user's current location
@@ -45,6 +46,7 @@ export default function App() {
     setDestination(null);
     setPath([]);
     setExploredEdges([]);
+    setObstacles(new Set());
   };
 
   // Get user location
@@ -135,8 +137,6 @@ export default function App() {
     <View style={{ flex: 1 }}>
       <HeaderComponent />
       <MapComponent
-        obstacles={obstacles}
-        isObstacleMode={isObstacleMode}
         toggleObstacle={toggleObstacle}
         nodes={nodes}
         userLocation={userLocation}
