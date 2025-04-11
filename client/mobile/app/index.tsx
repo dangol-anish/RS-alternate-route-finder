@@ -8,15 +8,27 @@ import { LatLng } from "react-native-maps";
 import HeaderComponent from "@/app/components/HeaderComponent";
 import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import { useMapStore } from "./store/useMapStore";
 
 export default function App() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const { nodes } = useNodes();
-  const [source, setSource] = useState<GeoJSONFeature | null>(null);
-  const [destination, setDestination] = useState<GeoJSONFeature | null>(null);
-  const [path, setPath] = useState<LatLng[]>([]);
-  const [exploredEdges, setExploredEdges] = useState<LatLng[][]>([]);
   const [obstacles, setObstacles] = useState<Set<string>>(new Set());
   const [isObstacleMode, setIsObstacleMode] = useState(false);
+
+  const {
+    source,
+    destination,
+    path,
+    exploredEdges,
+
+    setSource,
+    setDestination,
+    setPath,
+    setExploredEdges,
+  } = useMapStore();
 
   // State to hold the user's current location
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
@@ -121,23 +133,16 @@ export default function App() {
 
   return (
     <View style={{ flex: 1 }}>
+      <HeaderComponent />
       <MapComponent
-        source={source}
-        destination={destination}
         obstacles={obstacles}
-        path={path}
-        exploredEdges={exploredEdges}
         isObstacleMode={isObstacleMode}
         toggleObstacle={toggleObstacle}
-        setSource={setSource}
-        setDestination={setDestination}
         nodes={nodes}
         userLocation={userLocation}
         mapRegion={mapRegion}
         setMapRegion={setMapRegion}
       />
-
-      <HeaderComponent />
 
       <FloatingActionComponent
         isObstacleMode={isObstacleMode}

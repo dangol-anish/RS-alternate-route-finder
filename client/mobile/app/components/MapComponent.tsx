@@ -3,17 +3,12 @@ import { View, Alert } from "react-native";
 import MapView, { Marker, Polyline, MapPressEvent } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { LatLng } from "react-native-maps";
+import { useMapStore } from "../store/useMapStore";
 
 interface MapComponentProps {
-  source: GeoJSONFeature | null;
-  destination: GeoJSONFeature | null;
   obstacles: Set<string>;
-  path: LatLng[];
-  exploredEdges: LatLng[][];
   isObstacleMode: boolean;
   toggleObstacle: (nodeId: string) => void;
-  setSource: (source: GeoJSONFeature) => void;
-  setDestination: (destination: GeoJSONFeature) => void;
   nodes: GeoJSONFeature[];
   userLocation: LatLng | null;
   mapRegion: {
@@ -33,20 +28,23 @@ interface MapComponentProps {
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({
-  source,
-  destination,
   obstacles,
-  path,
-  exploredEdges,
   isObstacleMode,
   toggleObstacle,
-  setSource,
-  setDestination,
   nodes,
   userLocation,
   mapRegion,
   setMapRegion,
 }) => {
+  const {
+    source,
+    destination,
+    path,
+    exploredEdges,
+    setSource,
+    setDestination,
+  } = useMapStore();
+
   const findNearestNode = (
     latitude: number,
     longitude: number

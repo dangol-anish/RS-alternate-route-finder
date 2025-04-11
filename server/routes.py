@@ -17,8 +17,9 @@ main_routes = Blueprint('main', __name__)
 
 # Load road network graph
 import osmnx as ox
-place_name = "Kathmandu, Nepal"
-graph = ox.graph_from_place(place_name, network_type="all")
+place_names = ["Kathmandu, Nepal", "Lalitpur, Nepal"]
+graph = ox.graph_from_place(place_names, network_type="all")
+
 nodes, edges = ox.graph_to_gdfs(graph)
 
 # Set to store obstacle nodes
