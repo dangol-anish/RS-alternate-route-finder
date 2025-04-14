@@ -97,34 +97,89 @@ def shortest_path():
     
     except ValueError:
         return jsonify({'error': 'Invalid node IDs, must be integers'}), 400
+    
 
-@main_routes.route("/sign_up", methods=['POST'])
-def sign_up():
-    data = request.get_json()
+# auth routes
+
+# @main_routes.route("/sign_up", methods=['POST'])
+# def sign_up():
+#     data = request.get_json()
     
-    users_email = data.get("email")
-    users_password = data.get("password")
+#     users_email = data.get("email")
+#     users_password = data.get("password")
     
-    if not users_email or not users_password:
+#     if not users_email or not users_password:
+#         return jsonify({"error": "Email and password required"}), 400
+
+#     response = supabase.auth.sign_up({
+#             "email": users_email,
+#             "password": users_password
+#     })
+
+#     return jsonify(response.model_dump())
+
+# @main_routes.route("/sign_in_with_password", methods=['POST'])
+# def sign_in_with_password():
+#     data = request.get_json()
+
+#     users_email = data.get("email")
+#     users_password = data.get("password")
+
+#     if not users_email or not users_password:
+#         return jsonify({"error": "Email and password required"}), 400
+    
+#     user = supabase.auth.sign_in_with_password({ "email": users_email, "password": users_password })
+
+#     return jsonify(user.model_dump())
+
+# routes.py
+# ----------------------
+# Sign-up Route
+# ----------------------
+@main_routes.route("/signup", methods=["POST"])
+def signup():
+    data = request.json
+    full_name = data.get("full_name")
+    email = data.get("email")
+    password = data.get("password")
+    phone = data.get("phone")
+
+    if not all([full_name, email, password, phone]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        # Create the user in Supabase Auth
+        result = supabase.auth.sign_up(
+            {
+                "email": email,
+                "password": password,
+                "options": {
+                    "data": {
+                        "full_name": full_name,
+                        "phone": phone,
+                        "photo": None 
+                    }
+                }
+            }
+        )
+        return jsonify(result.model_dump()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ----------------------
+# Sign-in Route
+# ----------------------
+@main_routes.route("/signin", methods=["POST"])
+def signin():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+
+    if not all([email, password]):
         return jsonify({"error": "Email and password required"}), 400
 
-    response = supabase.auth.sign_up({
-            "email": users_email,
-            "password": users_password
-    })
-
-    return jsonify(response.model_dump())
-
-@main_routes.route("/sign_in_with_password", methods=['POST'])
-def sign_in_with_password():
-    data = request.get_json()
-
-    users_email = data.get("email")
-    users_password = data.get("password")
-
-    if not users_email or not users_password:
-        return jsonify({"error": "Email and password required"}), 400
-    
-    user = supabase.auth.sign_in_with_password({ "email": users_email, "password": users_password })
-
-    return jsonify(user.model_dump())
+    try:
+        result = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        return jsonify(result.model_dump()), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401

@@ -7,10 +7,15 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import SettingsOption from "./auth/Menu";
+import { useMapStore } from "../store/useMapStore";
 
 const HeaderComponent = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const showSettings = useMapStore((state) => state.showSettings);
+  const setShowSettings = useMapStore((state) => state.setShowSettings);
+
   const inputRef = useRef<TextInput>(null);
 
   const handleUnfocus = () => {
@@ -24,6 +29,10 @@ const HeaderComponent = () => {
     if (inputRef.current) {
       inputRef.current.focus(); // Keep focus after clearing
     }
+  };
+
+  const handlePress = () => {
+    setShowSettings(true);
   };
 
   return (
@@ -59,11 +68,13 @@ const HeaderComponent = () => {
         )}
 
         {/* Right Icon when not focused */}
-        {!isFocused && (
-          <Image
-            source={require("../../public/my-notion-face-portrait.png")}
-            style={styles.image}
-          />
+        {!isFocused && !showSettings && (
+          <TouchableOpacity onPress={() => setShowSettings(true)}>
+            <Image
+              source={require("../../public/my-notion-face-portrait.png")}
+              style={styles.image}
+            />
+          </TouchableOpacity>
         )}
       </View>
     </View>

@@ -16,6 +16,9 @@ type MapStore = {
   isObstacleMode: boolean;
   setIsObstacleMode: (val: boolean) => void;
   clearPath: () => void;
+  // settings
+  showSettings: boolean;
+  setShowSettings: (val: boolean) => void;
 };
 
 export const useMapStore = create<MapStore>((set, get) => ({
@@ -33,5 +36,13 @@ export const useMapStore = create<MapStore>((set, get) => ({
   setObstacles: (obstacles) => set({ obstacles }),
   setIsObstacleMode: (val) => set({ isObstacleMode: val }),
   clearPath: () =>
-    set({ source: null, destination: null, path: [], exploredEdges: [] }),
+    set({
+      source: null,
+      destination: null,
+      path: [],
+      exploredEdges: [],
+      obstacles: new Set(null),
+    }),
+  showSettings: false,
+  setShowSettings: (val) => set({ showSettings: val }),
 }));

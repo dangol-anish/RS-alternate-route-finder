@@ -10,10 +10,11 @@ import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useMapStore } from "./store/useMapStore";
+import SettingsOption from "./components/auth/Menu";
+import Menu from "./components/auth/Menu";
 
 export default function App() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const { nodes } = useNodes();
 
   const {
@@ -29,6 +30,8 @@ export default function App() {
     setExploredEdges,
     isObstacleMode,
     setIsObstacleMode,
+    showSettings,
+    setShowSettings,
   } = useMapStore();
 
   // State to hold the user's current location
@@ -75,8 +78,6 @@ export default function App() {
         longitudeDelta: 0.005,
       });
     }
-
-    // console.log("Current User Location: " + JSON.stringify(userLocation));
   };
 
   useEffect(() => {
@@ -150,6 +151,7 @@ export default function App() {
         onLocateCurrentLocation={locateCurrentLocation}
         clearPath={clearPath}
       />
+      {showSettings && <Menu />}
     </View>
   );
 }
