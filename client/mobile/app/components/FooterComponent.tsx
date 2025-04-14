@@ -1,16 +1,21 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { usePathname, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, Text, View, Pressable } from "react-native";
+import React from "react";
 
-interface FooterComponentProps {
-  setSelectedTab: (tab: string) => void;
-  selectedTab: string;
-}
+const FooterComponent: React.FC = () => {
+  const pathname = usePathname();
+  const router = useRouter();
 
-const FooterComponent: React.FC<FooterComponentProps> = ({
-  setSelectedTab,
-  selectedTab,
-}) => {
+  // Map route paths to tab identifiers
+  const routeToTab: Record<string, string> = {
+    "/": "index",
+    "/settings": "settings",
+    "/roadblock": "roadblock",
+  };
+
+  const selectedTab = routeToTab[pathname] || "index";
+
   const getIconColor = (tab: string) =>
     selectedTab === tab ? "blue" : "black";
 
@@ -21,25 +26,30 @@ const FooterComponent: React.FC<FooterComponentProps> = ({
 
   return (
     <View style={styles.view}>
-      <View style={styles.container} onTouchEnd={() => setSelectedTab("index")}>
+      <Pressable style={styles.container} onPress={() => router.push("/")}>
         <Ionicons
           name="compass-outline"
           size={20}
           color={getIconColor("index")}
         />
         <Text style={[styles.iconText, getTextStyle("index")]}>Explore</Text>
-      </View>
-      <View style={styles.container} onTouchEnd={() => setSelectedTab("you")}>
+      </Pressable>
+      <Pressable
+        style={styles.container}
+        onPress={() => router.push("/settings")}
+      >
         <Ionicons
           name="bookmark-outline"
           size={20}
-          color={getIconColor("you")}
+          color={getIconColor("settings")}
         />
-        <Text style={[styles.iconText, getTextStyle("you")]}>You</Text>
-      </View>
-      <View
+        <Text style={[styles.iconText, getTextStyle("settings")]}>
+          Settings
+        </Text>
+      </Pressable>
+      <Pressable
         style={styles.container}
-        onTouchEnd={() => setSelectedTab("roadblock")}
+        onPress={() => router.push("/roadblock")}
       >
         <Ionicons
           name="warning-outline"
@@ -49,12 +59,10 @@ const FooterComponent: React.FC<FooterComponentProps> = ({
         <Text style={[styles.iconText, getTextStyle("roadblock")]}>
           Roadblock
         </Text>
-      </View>
+      </Pressable>
     </View>
   );
 };
-
-export default FooterComponent;
 
 const styles = StyleSheet.create({
   view: {
@@ -74,3 +82,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
 });
+
+export default FooterComponent;

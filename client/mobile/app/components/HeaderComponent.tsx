@@ -4,17 +4,19 @@ import {
   View,
   TouchableOpacity,
   Image,
+  Text,
 } from "react-native";
 import React, { useRef, useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
-import SettingsOption from "./auth/Menu";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMapStore } from "../store/useMapStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 const HeaderComponent = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState("");
   const showSettings = useMapStore((state) => state.showSettings);
   const setShowSettings = useMapStore((state) => state.setShowSettings);
+  const user = useAuthStore((state) => state.user);
 
   const inputRef = useRef<TextInput>(null);
 
@@ -29,10 +31,6 @@ const HeaderComponent = () => {
     if (inputRef.current) {
       inputRef.current.focus(); // Keep focus after clearing
     }
-  };
-
-  const handlePress = () => {
-    setShowSettings(true);
   };
 
   return (
@@ -67,15 +65,16 @@ const HeaderComponent = () => {
           </TouchableOpacity>
         )}
 
-        {/* Right Icon when not focused */}
-        {!isFocused && !showSettings && (
-          <TouchableOpacity onPress={() => setShowSettings(true)}>
-            <Image
-              source={require("../../public/my-notion-face-portrait.png")}
-              style={styles.image}
-            />
-          </TouchableOpacity>
+        {!user?.photo ? (
+          <MaterialCommunityIcons name="face-man" size={30} color="black" />
+        ) : (
+          <Text>{user.photo}</Text>
         )}
+
+        {/* <Image
+          source={require("../../public/my-notion-face-portrait.png")}
+          style={styles.image}
+        /> */}
       </View>
     </View>
   );

@@ -1,14 +1,11 @@
-// you.js
+// settings.js
 
+import SettingsItem from "@/app/components/auth/SettingsItem";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const you = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>you</Text>
-    </View>
-  );
+const settings = () => {
+  return <SettingsItem />;
 };
 
 const styles = StyleSheet.create({
@@ -24,4 +21,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default you;
+export default settings;

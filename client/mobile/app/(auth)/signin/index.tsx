@@ -4,21 +4,51 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
+import { useAuthStore } from "@/app/store/useAuthStore";
 
 const Signin = () => {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignIn = () => {
-    // Add sign-in logic here
-    console.log("Email:", email);
-    console.log("Password:", password);
+  const handleSignIn = async () => {
+    try {
+      const res = await fetch(
+        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signin`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        const user = data?.user?.user_metadata;
+        useAuthStore.getState().setUser(user);
+        useAuthStore.getState().setIsAuthenticated(true);
+
+        Toast.show({
+          type: "success",
+          text1: "Welcome back!",
+        });
+
+        router.replace("/"); // Redirect to home
+      } else {
+        Alert.alert("Sign in failed", data?.error || "Unknown error");
+      }
+    } catch (error: any) {
+      Alert.alert("Sign In Error", error.message);
+    }
   };
 
   return (

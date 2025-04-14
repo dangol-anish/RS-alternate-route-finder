@@ -9,7 +9,7 @@ import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useMapStore } from "./store/useMapStore";
-import Menu from "./components/auth/Menu";
+// import Menu from "./components/auth/Menu";
 
 export default function App() {
   const router = useRouter();
@@ -149,7 +149,7 @@ export default function App() {
         onLocateCurrentLocation={locateCurrentLocation}
         clearPath={clearPath}
       />
-      {showSettings && <Menu />}
+      {/* {showSettings && <Menu />} */}
     </View>
   );
 }

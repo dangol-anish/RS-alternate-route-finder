@@ -101,38 +101,6 @@ def shortest_path():
 
 # auth routes
 
-# @main_routes.route("/sign_up", methods=['POST'])
-# def sign_up():
-#     data = request.get_json()
-    
-#     users_email = data.get("email")
-#     users_password = data.get("password")
-    
-#     if not users_email or not users_password:
-#         return jsonify({"error": "Email and password required"}), 400
-
-#     response = supabase.auth.sign_up({
-#             "email": users_email,
-#             "password": users_password
-#     })
-
-#     return jsonify(response.model_dump())
-
-# @main_routes.route("/sign_in_with_password", methods=['POST'])
-# def sign_in_with_password():
-#     data = request.get_json()
-
-#     users_email = data.get("email")
-#     users_password = data.get("password")
-
-#     if not users_email or not users_password:
-#         return jsonify({"error": "Email and password required"}), 400
-    
-#     user = supabase.auth.sign_in_with_password({ "email": users_email, "password": users_password })
-
-#     return jsonify(user.model_dump())
-
-# routes.py
 # ----------------------
 # Sign-up Route
 # ----------------------
