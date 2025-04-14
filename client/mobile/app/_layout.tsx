@@ -1,11 +1,16 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import FooterComponent from "./components/FooterComponent";
 import { View, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
+import { useAuthStore } from "./store/useAuthStore";
 
 export default function RootLayout() {
   const router = useRouter();
+
+  useEffect(() => {
+    useAuthStore.getState().loadSession();
+  }, []);
 
   return (
     <View style={styles.container}>

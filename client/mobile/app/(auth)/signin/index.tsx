@@ -33,9 +33,19 @@ const Signin = () => {
       const data = await res.json();
 
       if (res.ok) {
+        const session = data.session;
         const user = data?.user?.user_metadata;
-        useAuthStore.getState().setUser(user);
-        useAuthStore.getState().setIsAuthenticated(true);
+
+        await useAuthStore.getState().saveSession({
+          user: {
+            email: user.email,
+            full_name: user.full_name,
+            phone: user.phone,
+            photo: user.photo || null,
+          },
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+        });
 
         Toast.show({
           type: "success",
