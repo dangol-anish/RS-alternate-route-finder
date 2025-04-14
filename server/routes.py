@@ -151,3 +151,14 @@ def signin():
         return jsonify(result.model_dump()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 401
+# ----------------------
+# Sign-out Route
+# ----------------------
+@main_routes.route("/signout", methods=["POST"])
+def logout():
+    try:
+        supabase.auth.sign_out()
+
+        return jsonify({"message": "Successfully signed out"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

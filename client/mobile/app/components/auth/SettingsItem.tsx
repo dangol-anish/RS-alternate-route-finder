@@ -13,6 +13,33 @@ const SettingsItem = () => {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
+  // utils/api/logout.ts
+  const logoutUser = async () => {
+    try {
+      const response = await fetch(
+        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signout`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // if you're using cookies for auth/session
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Logout failed");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
+  };
+
   const redirectLogin = () => {
     router.push({ pathname: "/(auth)/signin" });
   };
@@ -42,9 +69,9 @@ const SettingsItem = () => {
             <Text style={styles.authSubHeaderText}>{user.email}</Text>
 
             <TouchableOpacity
-              onPress={() => {
-                useAuthStore.getState().setUser(null);
-                useAuthStore.getState().setIsAuthenticated(false);
+              onPress={async () => {
+                await logoutUser();
+                await useAuthStore.getState().clearSession();
               }}
             >
               <Text style={styles.loginButtonText}>Logout</Text>
