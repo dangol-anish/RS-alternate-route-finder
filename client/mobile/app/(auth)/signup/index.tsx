@@ -9,6 +9,7 @@ import {
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
 
 const Signup = () => {
   const router = useRouter();
@@ -27,7 +28,7 @@ const Signup = () => {
     );
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
@@ -46,11 +47,46 @@ const Signup = () => {
       return;
     }
 
-    // Call your signup logic here
-    console.log("Full Name:", fullName);
-    console.log("Email:", email);
-    console.log("Phone:", phoneNumber);
-    console.log("Password:", password);
+    try {
+      const response = await fetch(
+        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            full_name: fullName,
+            email,
+            phone: phoneNumber,
+            password,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        Alert.alert(
+          "Signup Failed",
+          result.error || "An error occurred. Please try again."
+        );
+        return;
+      }
+
+      Toast.show({
+        type: "success",
+        text1: "Signup Successful",
+        text2: "Please sign in to continue.",
+      });
+
+      // Delay to let the toast show
+      setTimeout(() => {
+        router.replace("/signin");
+      }, 1500);
+    } catch (err: any) {
+      Alert.alert("Signup Failed", err.message);
+    }
   };
 
   return (

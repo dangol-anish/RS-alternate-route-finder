@@ -2,12 +2,11 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import FooterComponent from "./components/FooterComponent";
 import { View, StyleSheet } from "react-native";
 import React, { useState } from "react";
+import Toast from "react-native-toast-message";
 
 export default function RootLayout() {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState("index");
-
-  console.log(selectedTab);
 
   // Handle tab change
   const handleTabChange = (tab: string) => {
@@ -27,13 +26,17 @@ export default function RootLayout() {
           <Stack.Screen name="index" options={{ title: "Home" }} />
           <Stack.Screen name="roadblock" options={{ title: "RoadBlock" }} />
           <Stack.Screen name="you" options={{ title: "You" }} />
-          {/* <Stack.Screen name="explore" options={{ title: "Explore" }} /> */}
         </Stack>
       </View>
+
+      {/* Your footer */}
       <FooterComponent
         setSelectedTab={handleTabChange}
         selectedTab={selectedTab}
       />
+
+      {/* ✅ Toast should be here at the root */}
+      <Toast />
     </View>
   );
 }

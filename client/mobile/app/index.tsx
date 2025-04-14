@@ -3,14 +3,12 @@ import { View, Alert } from "react-native";
 import MapComponent from "@/app/components/MapComponent";
 import { useNodes } from "@/app/hooks/useNodes";
 import { updateObstacles, fetchShortestPath } from "./utils/api";
-import { GeoJSONFeature } from "@/app/types/geoJSON";
 import { LatLng } from "react-native-maps";
 import HeaderComponent from "@/app/components/HeaderComponent";
 import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useMapStore } from "./store/useMapStore";
-import SettingsOption from "./components/auth/Menu";
 import Menu from "./components/auth/Menu";
 
 export default function App() {
