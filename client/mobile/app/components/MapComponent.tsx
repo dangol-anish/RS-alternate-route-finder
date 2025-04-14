@@ -6,8 +6,6 @@ import { LatLng } from "react-native-maps";
 import { useMapStore } from "../store/useMapStore";
 
 interface MapComponentProps {
-  // obstacles: Set<string>;
-  // isObstacleMode: boolean;
   toggleObstacle: (nodeId: string) => void;
   nodes: GeoJSONFeature[];
   userLocation: LatLng | null;

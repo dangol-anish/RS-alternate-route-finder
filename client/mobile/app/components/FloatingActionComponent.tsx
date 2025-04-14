@@ -36,7 +36,7 @@ export default FloatingActionComponent;
 const styles = StyleSheet.create({
   floatingView: {
     position: "absolute",
-    bottom: 50,
+    bottom: 10,
     right: 0,
     // backgroundColor: "gray",
     margin: 16,
