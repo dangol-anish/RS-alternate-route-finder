@@ -3,6 +3,7 @@ import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
 
 type User = {
+  id: string; // Add the 'id' field
   email: string;
   full_name: string;
   phone: string;

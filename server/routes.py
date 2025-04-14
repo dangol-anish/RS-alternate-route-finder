@@ -53,6 +53,51 @@ def set_obstacles():
     except ValueError:
         return jsonify({"error": "Obstacle node IDs must be integers"}), 400
 
+# @main_routes.route('/shortest_path', methods=['POST'])
+# def shortest_path():
+#     data = request.get_json()
+    
+#     if not data or 'source' not in data or 'destination' not in data:
+#         return jsonify({'error': 'Invalid input data'}), 400
+
+#     try:
+#         source_node = int(data['source'])
+#         destination_node = int(data['destination'])
+
+#         if source_node not in graph.nodes or destination_node not in graph.nodes:
+#             return jsonify({'error': f"Invalid nodes: {source_node}, {destination_node}"}), 400
+
+#         path, explored_edges = bidirectional_astar(graph, source_node, destination_node, obstacles)
+#         if path is None:
+#             return jsonify({'error': 'No path found'}), 400
+        
+#         path_coordinates = []
+#         for u, v in zip(path[:-1], path[1:]):
+#             edge_data = graph.get_edge_data(u, v)
+#             if edge_data:
+#                 edge_info = edge_data[0]
+#                 if 'geometry' in edge_info:
+#                     path_coordinates.extend([(lat, lon) for lon, lat in edge_info['geometry'].coords])
+#                 else:
+#                     path_coordinates.append((graph.nodes[u]['y'], graph.nodes[u]['x']))
+#                     path_coordinates.append((graph.nodes[v]['y'], graph.nodes[v]['x']))
+        
+#         explored_coordinates = []   
+#         for u, v in explored_edges:
+#             edge_data = graph.get_edge_data(u, v)
+#             if edge_data:
+#                 edge_info = edge_data[0]
+#                 if 'geometry' in edge_info:
+#                     explored_coordinates.append([(lat, lon) for lon, lat in edge_info['geometry'].coords])
+#                 else:
+#                     explored_coordinates.append([(graph.nodes[u]['y'], graph.nodes[u]['x']),
+#                                                  (graph.nodes[v]['y'], graph.nodes[v]['x'])])
+        
+#         return jsonify({'path': path_coordinates, 'explored': explored_coordinates})
+    
+#     except ValueError:
+#         return jsonify({'error': 'Invalid node IDs, must be integers'}), 400
+    
 @main_routes.route('/shortest_path', methods=['POST'])
 def shortest_path():
     data = request.get_json()
@@ -67,7 +112,15 @@ def shortest_path():
         if source_node not in graph.nodes or destination_node not in graph.nodes:
             return jsonify({'error': f"Invalid nodes: {source_node}, {destination_node}"}), 400
 
-        path, explored_edges = bidirectional_astar(graph, source_node, destination_node, obstacles)
+        try:
+            response = supabase.table('obstacles').select('node_id').execute()
+            obstacles_from_db = {int(obstacle['node_id']) for obstacle in response.data}
+        except Exception as e:
+            return jsonify({'error': f"Error fetching obstacles: {str(e)}"}), 500
+
+        # Perform pathfinding while avoiding obstacles
+        path, explored_edges = bidirectional_astar(graph, source_node, destination_node, obstacles_from_db)
+        
         if path is None:
             return jsonify({'error': 'No path found'}), 400
         
@@ -95,9 +148,9 @@ def shortest_path():
         
         return jsonify({'path': path_coordinates, 'explored': explored_coordinates})
     
-    except ValueError:
-        return jsonify({'error': 'Invalid node IDs, must be integers'}), 400
-    
+    except ValueError as e:
+        return jsonify({'error': f'Invalid node IDs, must be integers. {str(e)}'}), 400
+
 
 # auth routes
 
@@ -162,3 +215,53 @@ def logout():
         return jsonify({"message": "Successfully signed out"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# ----------------------
+# Obstacle Report Route
+# ----------------------
+@main_routes.route("/save_obstacles", methods=["POST"])
+def create_obstacle():
+    data = request.json
+
+    print("Received Data:", data)
+
+    required_fields = ["node_id", "latitude", "longitude", "name", "type", "expected_duration", "severity", "owner"]
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing fields"}), 400
+    
+    # Logging the incoming data to debug
+
+
+    try:
+        # Insert into Supabase
+        response = supabase.table("obstacles").insert({
+            "node_id": data["node_id"],
+            "latitude": data["latitude"],
+            "longitude": data["longitude"],
+            "name": data["name"],
+            "type": data["type"],
+            "expected_duration": data["expected_duration"],
+            "severity": data["severity"],
+            "comments": data.get("comments", ""),
+            "owner": data["owner"],
+        }).execute()
+
+        print("Response from Supabase:", response)
+
+        return jsonify({"success": True, "data": response.data}), 201
+
+    except Exception as e:
+        print("Error occurred:", e)  # Log the actual error
+        return jsonify({"error": str(e)}), 500
+    
+# ----------------------
+# Obstacle Report Route
+# ----------------------
+
+@main_routes.route('/get_obstacles', methods=['GET'])
+def get_obstacles():
+    # Assuming you're already connected to Supabase
+    response = supabase.table('obstacles').select('*').execute()
+    return jsonify(response.data)
+
+

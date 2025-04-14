@@ -9,11 +9,13 @@ import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import { useMapStore } from "./store/useMapStore";
+import { useObstacles } from "./hooks/useObstacles";
 // import Menu from "./components/auth/Menu";
 
 export default function App() {
   const router = useRouter();
   const { nodes } = useNodes();
+  const { obstaclesDb } = useObstacles();
 
   const {
     source,
@@ -141,6 +143,8 @@ export default function App() {
         userLocation={userLocation}
         mapRegion={mapRegion}
         setMapRegion={setMapRegion}
+        // test
+        obstaclesDb={obstaclesDb}
       />
 
       <FloatingActionComponent
