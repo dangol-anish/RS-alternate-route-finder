@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Modal, View, Text, TextInput, Button, StyleSheet } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { Picker } from "@react-native-picker/picker"; // Importing the Picker for Expo
 
 interface ObstacleFormProps {
   visible: boolean;
@@ -13,6 +22,18 @@ interface ObstacleFormProps {
   }) => void;
 }
 
+const obstacleTypes: string[] = [
+  "Pothole",
+  "Accident",
+  "Construction",
+  "Debris",
+  "Flooding",
+  "Traffic Jam",
+  "Others",
+];
+
+const severityLevels: string[] = ["Low", "Moderate", "High", "Critical"];
+
 const ObstacleForm: React.FC<ObstacleFormProps> = ({
   visible,
   onClose,
@@ -20,9 +41,10 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     name: "",
-    type: "",
-    expected_duration: "",
-    severity: "",
+    type: "Others",
+    expected_duration_hours: "0", // Default to 0 hours
+    expected_duration_minutes: "0", // Default to 0 minutes
+    severity: "Low",
     comments: "",
   });
 
@@ -30,9 +52,37 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const validateForm = () => {
+    const {
+      name,
+      type,
+      expected_duration_hours,
+      expected_duration_minutes,
+      severity,
+    } = formData;
+    if (
+      !name ||
+      !type ||
+      !expected_duration_hours ||
+      !expected_duration_minutes ||
+      !severity
+    ) {
+      Alert.alert(
+        "Validation Error",
+        "All fields except Comments are required."
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = () => {
-    onSubmit(formData);
-    onClose();
+    if (validateForm()) {
+      const { expected_duration_hours, expected_duration_minutes } = formData;
+      const totalDuration = `${expected_duration_hours}:${expected_duration_minutes}:00`; // Create the "HH:MM:SS" format
+      onSubmit({ ...formData, expected_duration: totalDuration });
+      onClose();
+    }
   };
 
   return (
@@ -42,31 +92,77 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
           <Text style={styles.label}>Obstacle Name</Text>
           <TextInput
             style={styles.input}
+            value={formData.name}
             onChangeText={(text) => handleChange("name", text)}
           />
 
           <Text style={styles.label}>Type</Text>
-          <TextInput
+          <Picker
+            selectedValue={formData.type}
+            onValueChange={(itemValue) => handleChange("type", itemValue)}
             style={styles.input}
-            onChangeText={(text) => handleChange("type", text)}
-          />
+          >
+            {obstacleTypes.map((type) => (
+              <Picker.Item key={type} label={type} value={type} />
+            ))}
+          </Picker>
 
-          <Text style={styles.label}>Expected Duration (e.g., 01:00:00)</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => handleChange("expected_duration", text)}
-          />
+          <Text style={styles.label}>Expected Duration</Text>
+          <View style={styles.durationRow}>
+            <Text>Hours:</Text>
+            <Picker
+              selectedValue={formData.expected_duration_hours}
+              onValueChange={(itemValue) =>
+                handleChange("expected_duration_hours", itemValue)
+              }
+              style={styles.durationInput}
+            >
+              {[...Array(24).keys()].map((i) => (
+                <Picker.Item
+                  key={i}
+                  label={i.toString()}
+                  value={i.toString()}
+                />
+              ))}
+            </Picker>
+
+            <Text>Minutes:</Text>
+            <Picker
+              selectedValue={formData.expected_duration_minutes}
+              onValueChange={(itemValue) =>
+                handleChange("expected_duration_minutes", itemValue)
+              }
+              style={styles.durationInput}
+            >
+              {[...Array(60).keys()].map((i) => (
+                <Picker.Item
+                  key={i}
+                  label={i.toString()}
+                  value={i.toString()}
+                />
+              ))}
+            </Picker>
+          </View>
 
           <Text style={styles.label}>Severity</Text>
-          <TextInput
+          <Picker
+            selectedValue={formData.severity}
+            onValueChange={(itemValue) => handleChange("severity", itemValue)}
             style={styles.input}
-            onChangeText={(text) => handleChange("severity", text)}
-          />
+          >
+            {severityLevels.map((level) => (
+              <Picker.Item key={level} label={level} value={level} />
+            ))}
+          </Picker>
 
           <Text style={styles.label}>Comments (optional)</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, styles.textarea]}
+            value={formData.comments}
             onChangeText={(text) => handleChange("comments", text)}
+            multiline
+            numberOfLines={4}
+            placeholder="Add any comments here"
           />
 
           <Button title="Submit" onPress={handleSubmit} />
@@ -99,6 +195,24 @@ const styles = StyleSheet.create({
     padding: 8,
     marginTop: 5,
     borderRadius: 5,
+  },
+  textarea: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  durationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 5,
+  },
+  durationInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    marginHorizontal: 5,
+    borderRadius: 5,
+    width: 70,
+    textAlign: "center",
   },
 });
 
