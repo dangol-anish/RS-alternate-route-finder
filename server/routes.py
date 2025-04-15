@@ -190,6 +190,7 @@ def signup():
 # ----------------------
 # Sign-in Route
 # ----------------------
+
 @main_routes.route("/signin", methods=["POST"])
 def signin():
     data = request.json
@@ -200,10 +201,44 @@ def signin():
         return jsonify({"error": "Email and password required"}), 400
 
     try:
-        result = supabase.auth.sign_in_with_password({"email": email, "password": password})
-        return jsonify(result.model_dump()), 200
+        # Authenticate with Supabase Auth
+        result = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+
+        session = result.session
+        user = result.user
+
+        if not user or not session:
+            return jsonify({"error": "Invalid login credentials"}), 401
+
+        # Fetch profile from `profiles` table using the user ID
+        profile_response = supabase.table("profiles").select("*").eq("id", user.id).single().execute()
+
+        # Safer error handling
+        if not profile_response or not profile_response.data:
+            return jsonify({"error": "Failed to fetch user profile"}), 500
+
+        profile = profile_response.data
+
+        return jsonify({
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "full_name": profile.get("full_name"),
+                "phone": profile.get("phone"),
+                "photo": profile.get("photo")
+            },
+            "session": {
+                "access_token": session.access_token,
+                "refresh_token": session.refresh_token
+            }
+        }), 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 401
+        return jsonify({"error": str(e)}), 500
+
 # ----------------------
 # Sign-out Route
 # ----------------------
@@ -265,3 +300,25 @@ def get_obstacles():
     return jsonify(response.data)
 
 
+# ----------------------
+# Update Profile
+# ----------------------
+@main_routes.route("/update_profile", methods=["POST"])
+def update_profile():
+    data = request.json
+    user_id = data.get("id")
+    full_name = data.get("full_name")
+    photo = data.get("photo")
+
+    if not user_id:
+        return jsonify({"error": "User ID is required"}), 400
+
+    try:
+        response = supabase.table("profiles").update({
+            "full_name": full_name,
+            "photo": photo
+        }).eq("id", user_id).execute()
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

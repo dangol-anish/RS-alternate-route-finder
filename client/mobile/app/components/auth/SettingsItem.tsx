@@ -43,6 +43,11 @@ const SettingsItem = () => {
   const redirectLogin = () => {
     router.push({ pathname: "/(auth)/signin" });
   };
+
+  const redirectProfile = () => {
+    router.push({ pathname: "/(auth)/profile/page" });
+  };
+
   return (
     <View style={styles.menuView}>
       <View style={styles.headerMenu}>
@@ -88,6 +93,14 @@ const SettingsItem = () => {
             </TouchableOpacity>
           </View>
         )}
+      </View>
+      <View>
+        <TouchableOpacity onPress={redirectProfile}>
+          <Text>Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Text>Dark Mode</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

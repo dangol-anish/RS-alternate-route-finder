@@ -32,9 +32,11 @@ const Signin = () => {
 
       const data = await res.json();
 
+      console.log(data);
+
       if (res.ok) {
         const session = data.session;
-        const user = data?.user?.user_metadata;
+        const user = data?.user;
 
         await useAuthStore.getState().saveSession({
           user: {
