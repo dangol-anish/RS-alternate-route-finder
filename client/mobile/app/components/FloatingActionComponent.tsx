@@ -3,6 +3,7 @@ import React from "react";
 import ObstacleToggleButton from "./ObstacleToggleButton";
 import CurrentLocationButton from "./CurrentLocationButton";
 import ClearPathButton from "./ClearPathButton";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface ObstacleToggleButtonProps {
   isObstacleMode: boolean;
@@ -17,12 +18,15 @@ const FloatingActionComponent: React.FC<ObstacleToggleButtonProps> = ({
   onLocateCurrentLocation,
   clearPath,
 }) => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   return (
     <View style={styles.floatingView}>
       <ClearPathButton clearPath={clearPath} />
       <ObstacleToggleButton
         isObstacleMode={isObstacleMode}
         setIsObstacleMode={setIsObstacleMode}
+        // disabled={!isAuthenticated}
       />
       <CurrentLocationButton
         onLocateCurrentLocation={onLocateCurrentLocation}

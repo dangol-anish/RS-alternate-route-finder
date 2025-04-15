@@ -66,7 +66,7 @@ const HeaderComponent = () => {
         )}
 
         {!user?.photo ? (
-          <MaterialCommunityIcons name="face-man" size={100} color="black" />
+          <MaterialCommunityIcons name="face-man" size={30} color="black" />
         ) : (
           <Image
             source={{ uri: user.photo }}

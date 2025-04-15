@@ -98,13 +98,20 @@ const SettingsItem = () => {
           </View>
         )}
       </View>
-      <View>
-        <TouchableOpacity onPress={redirectProfile}>
-          <Text>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity>
-          <Text>Dark Mode</Text>
-        </TouchableOpacity>
+      <View style={styles.container}>
+        <View style={styles.buttonWrapper}>
+          <View style={styles.horizontalLine} />
+          <TouchableOpacity style={styles.button} onPress={redirectProfile}>
+            <Text style={styles.buttonText}>Profile</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.buttonWrapper}>
+          <View style={styles.horizontalLine} />
+          <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Dark Mode</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -169,5 +176,32 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     marginBottom: 10,
+  },
+
+  container: {
+    padding: 20,
+    borderRadius: 12,
+
+    gap: 12,
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    width: 200,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  buttonWrapper: {
+    flexDirection: "column",
+    gap: 8,
+  },
+
+  horizontalLine: {
+    height: 0.5,
+    width: "100%",
+    backgroundColor: "grey", // Adjust to fit your theme
   },
 });
