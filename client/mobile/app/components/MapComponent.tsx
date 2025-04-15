@@ -80,8 +80,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
       setMapRegion({
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
       });
     }
   }, [userLocation]);
@@ -131,7 +131,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     <View style={{ flex: 1 }}>
       <MapView
         style={{ flex: 1 }}
-        region={mapRegion} // Dynamically controlled by the state
+        initialRegion={mapRegion} // Dynamically controlled by the state
         onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it
         onPress={(event: MapPressEvent) => {
           const { latitude, longitude } = event.nativeEvent.coordinate;

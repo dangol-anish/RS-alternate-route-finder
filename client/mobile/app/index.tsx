@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Alert } from "react-native";
 import MapComponent from "@/app/components/MapComponent";
 import { useNodes } from "@/app/hooks/useNodes";
@@ -74,8 +74,8 @@ export default function App() {
       setMapRegion({
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
       });
     }
   };
