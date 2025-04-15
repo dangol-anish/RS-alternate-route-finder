@@ -8,9 +8,26 @@ import os
 from supabase import create_client, Client
 from flask import jsonify
 
+import cloudinary
+import cloudinary.uploader
+import base64
+import io
+from PIL import Image
+
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
+
 supabase: Client = create_client(url, key)
+
+cloudName: str = os.environ.get("CLOUDINARY_CLOUD_NAME")
+cloudApiKey: str = os.environ.get("CLOUDINARY_API_KEY")
+cloudSecretKey: str = os.environ.get("CLOUDINARY_SECRET_KEY")
+
+cloudinary.config(
+    cloud_name=cloudName,
+    api_key=cloudApiKey,
+    api_secret=cloudSecretKey
+)
 
 # Define a Blueprint to keep routes separate
 main_routes = Blueprint('main', __name__)
@@ -308,17 +325,31 @@ def update_profile():
     data = request.json
     user_id = data.get("id")
     full_name = data.get("full_name")
-    photo = data.get("photo")
+    photo_base64 = data.get("photo")
 
     if not user_id:
         return jsonify({"error": "User ID is required"}), 400
 
     try:
-        response = supabase.table("profiles").update({
-            "full_name": full_name,
-            "photo": photo
-        }).eq("id", user_id).execute()
+        photo_url = None
 
-        return jsonify({"success": True})
+        if photo_base64:
+            if "," in photo_base64:
+                _, encoded = photo_base64.split(",", 1)
+            else:
+                encoded = photo_base64
+
+            image_data = base64.b64decode(encoded)
+
+            upload_result = cloudinary.uploader.upload(io.BytesIO(image_data))
+            photo_url = upload_result.get("secure_url")
+
+        update_data = {"full_name": full_name}
+        if photo_url:
+            update_data["photo"] = photo_url
+
+        supabase.table("profiles").update(update_data).eq("id", user_id).execute()
+
+        return jsonify({"success": True, "photo_url": photo_url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

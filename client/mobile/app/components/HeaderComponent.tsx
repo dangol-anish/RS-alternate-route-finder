@@ -66,9 +66,13 @@ const HeaderComponent = () => {
         )}
 
         {!user?.photo ? (
-          <MaterialCommunityIcons name="face-man" size={30} color="black" />
+          <MaterialCommunityIcons name="face-man" size={100} color="black" />
         ) : (
-          <Text>{user.photo}</Text>
+          <Image
+            source={{ uri: user.photo }}
+            style={styles.image}
+            resizeMode="cover"
+          />
         )}
 
         {/* <Image

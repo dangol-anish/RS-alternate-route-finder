@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { useMapStore } from "@/app/store/useMapStore";
 import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -67,7 +67,11 @@ const SettingsItem = () => {
                 color="black"
               />
             ) : (
-              <Text style={styles.authHeaderText}>{user.photo}</Text>
+              <Image
+                source={{ uri: user.photo }}
+                style={styles.profileImage}
+                resizeMode="cover"
+              />
             )}
 
             <Text style={styles.authHeaderText}>Hi, {user.full_name}</Text>
@@ -158,5 +162,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     color: "white",
     fontSize: 20,
+  },
+
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
   },
 });

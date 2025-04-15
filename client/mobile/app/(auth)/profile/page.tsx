@@ -1,3 +1,4 @@
+// ProfileEditPage.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,6 +11,7 @@ import {
   Pressable,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "@/app/store/useAuthStore";
 
 const ProfileEditPage = () => {
@@ -18,47 +20,7 @@ const ProfileEditPage = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
-
-  const handleSave = async () => {
-    if (!user) return;
-
-    try {
-      const response = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/update_profile`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: user.id,
-            full_name: fullName,
-            photo: photo,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error("Failed to update profile:", result.error);
-        Alert.alert("Error", result.error || "Failed to update profile.");
-        return;
-      }
-
-      // ✅ Update user in the store with the new full_name and photo
-      setUser({
-        ...user,
-        full_name: fullName,
-        photo: photo || user.photo,
-      });
-
-      Alert.alert("Success", "Profile updated successfully!");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      Alert.alert("Error", "Something went wrong.");
-    }
-  };
+  const [isPhotoChanged, setIsPhotoChanged] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -84,6 +46,63 @@ const ProfileEditPage = () => {
 
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
+      setIsPhotoChanged(true);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    let base64Image = null;
+
+    if (photo && isPhotoChanged && photo.startsWith("file://")) {
+      try {
+        const imageBase64 = await FileSystem.readAsStringAsync(photo, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        base64Image = `data:image/jpeg;base64,${imageBase64}`;
+      } catch (error) {
+        console.error("Error converting image:", error);
+        Alert.alert("Error", "Failed to process the image.");
+        return;
+      }
+    }
+
+    try {
+      const response = await fetch(
+        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/update_profile`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: user.id,
+            full_name: fullName,
+            photo: base64Image, // null or data URI
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Failed to update profile:", result.error);
+        Alert.alert("Error", result.error || "Failed to update profile.");
+        return;
+      }
+
+      setUser({
+        ...user,
+        full_name: fullName,
+        photo: result.photo_url || user.photo,
+      });
+
+      Alert.alert("Success", "Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "Something went wrong.");
     }
   };
 
