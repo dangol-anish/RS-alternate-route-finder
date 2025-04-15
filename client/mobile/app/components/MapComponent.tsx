@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Alert } from "react-native";
 import MapView, { Marker, Polyline, MapPressEvent } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
@@ -15,6 +15,7 @@ interface MapComponentProps {
   nodes: GeoJSONFeature[];
   obstaclesDb: LatLng[];
   userLocation: LatLng | null;
+  mapRef: React.RefObject<MapView>;
   mapRegion: {
     latitude: number;
     longitude: number;
@@ -38,6 +39,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   mapRegion,
   setMapRegion,
   obstaclesDb,
+  mapRef,
 }) => {
   const {
     source,
@@ -76,8 +78,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
   };
 
   useEffect(() => {
-    if (userLocation) {
-      setMapRegion({
+    if (userLocation && mapRef.current) {
+      // Animate map to the current user location
+      mapRef.current.animateToRegion({
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
         latitudeDelta: 0.01,
@@ -86,10 +89,22 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   }, [userLocation]);
 
+  const locateCurrentLocation = () => {
+    if (userLocation) {
+      setMapRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
+  };
+
   //testing
   const [showForm, setShowForm] = useState(false);
   const [selectedNode, setSelectedNode] = useState<GeoJSONFeature | null>(null);
   const user = useAuthStore((state) => state.user);
+  // const mapRef = useRef<MapView | null>(null);
 
   const handleFormSubmit = async (formData: {
     name: string;
@@ -130,6 +145,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   return (
     <View style={{ flex: 1 }}>
       <MapView
+        ref={mapRef}
         style={{ flex: 1 }}
         initialRegion={mapRegion} // Dynamically controlled by the state
         onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it

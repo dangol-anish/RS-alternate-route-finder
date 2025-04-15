@@ -11,11 +11,13 @@ import { useRouter } from "expo-router";
 import { useMapStore } from "./store/useMapStore";
 import { useObstacles } from "./hooks/useObstacles";
 // import Menu from "./components/auth/Menu";
+import MapView from "react-native-maps";
 
 export default function App() {
   const router = useRouter();
   const { nodes } = useNodes();
   const { obstaclesDb } = useObstacles();
+  const mapRef = useRef<MapView | null>(null);
 
   const {
     source,
@@ -71,7 +73,7 @@ export default function App() {
 
   const locateCurrentLocation = () => {
     if (userLocation) {
-      setMapRegion({
+      mapRef.current?.animateToRegion({
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
         latitudeDelta: 0.01,
@@ -145,6 +147,7 @@ export default function App() {
         setMapRegion={setMapRegion}
         // test
         obstaclesDb={obstaclesDb}
+        mapRef={mapRef}
       />
 
       <FloatingActionComponent
