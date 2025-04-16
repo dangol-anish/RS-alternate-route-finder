@@ -26,29 +26,28 @@ const ObstacleDetailsModal = () => {
         }
       );
 
-      const result = await response.json(); // <-- try parsing it always
+      const result = await response.json();
 
       if (response.ok) {
-        Alert.alert("Success", "Obstacle deleted.");
         setSelectedObstacle(null);
-        // refresh map or obstacle list here
+        Alert.alert("Success", "Obstacle deleted.");
       } else {
-        console.warn("Delete failed:", result); // <-- log full response
+        console.warn("Delete failed:", result);
         Alert.alert("Error", result.error || "Failed to delete obstacle.");
       }
     } catch (error: any) {
-      console.error("Unexpected error:", error); // <-- catch unknown errors
+      console.error("Unexpected error:", error);
       Alert.alert("Error", error.message || "Something went wrong.");
     }
   };
 
-  if (!selectedObstacle) return null;
+  if (!selectedObstacle) return null; // ✅ Only render if obstacle is selected
 
   const isOwner = selectedObstacle.owner === user?.id;
 
   return (
     <Modal
-      visible={!!selectedObstacle}
+      visible={true} // ✅ Always visible when rendered
       transparent
       animationType="slide"
       onRequestClose={() => setSelectedObstacle(null)}
@@ -69,18 +68,14 @@ const ObstacleDetailsModal = () => {
               title="Delete Obstacle"
               color="red"
               onPress={() =>
-                Alert.alert(
-                  "Confirm",
-                  "Are you sure you want to delete this?",
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    {
-                      text: "Delete",
-                      style: "destructive",
-                      onPress: handleDelete,
-                    },
-                  ]
-                )
+                Alert.alert("Confirm", "Are you sure?", [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: handleDelete,
+                  },
+                ])
               }
             />
           )}

@@ -196,7 +196,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         onClose={() => setShowForm(false)}
         onSubmit={handleFormSubmit}
       />
-      <ObstacleDetailsModal />
+      {selectedObstacle && <ObstacleDetailsModal />}
     </View>
   );
 };
