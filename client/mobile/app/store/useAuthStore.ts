@@ -1,28 +1,6 @@
-// useAuthStore.ts
 import { create } from "zustand";
 import * as SecureStore from "expo-secure-store";
-
-type User = {
-  id: string; // Add the 'id' field
-  email: string;
-  full_name: string;
-  phone: string;
-  photo: string | null;
-};
-
-type AuthStore = {
-  user: User | null;
-  isAuthenticated: boolean;
-  setUser: (user: User | null) => void;
-  setIsAuthenticated: (status: boolean) => void;
-  saveSession: (session: {
-    user: User;
-    accessToken: string;
-    refreshToken: string;
-  }) => Promise<void>;
-  loadSession: () => Promise<void>;
-  clearSession: () => Promise<void>;
-};
+import { AuthStore } from "../types/authStore";
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,

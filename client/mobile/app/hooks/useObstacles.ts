@@ -4,7 +4,7 @@ import { Alert } from "react-native";
 import { supabase } from "@/lib/supabase"; // adjust path as needed
 import { useMapStore } from "../store/useMapStore";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
-import { Obstacle } from "@/types/obstacle";
+import { Obstacle } from "@/app/types/obstacle";
 
 export const useObstacles = () => {
   const [obstaclesDb, setObstaclesDb] = useState<Obstacle[]>([]);

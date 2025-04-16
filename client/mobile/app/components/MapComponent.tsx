@@ -10,7 +10,7 @@ import ObstacleDetailsModal from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
 import axios from "axios";
 import { useAuthStore } from "../store/useAuthStore";
-import { Obstacle } from "@/types/obstacle";
+import { Obstacle } from "@/app/types/obstacle";
 
 interface MapComponentProps {
   toggleObstacle: (nodeId: string) => void;

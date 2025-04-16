@@ -36,7 +36,6 @@ export default function App() {
     setShowSettings,
   } = useMapStore();
 
-  // State to hold the user's current location
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [mapRegion, setMapRegion] = useState({
     latitude: 27.7,
@@ -145,18 +144,15 @@ export default function App() {
         userLocation={userLocation}
         mapRegion={mapRegion}
         setMapRegion={setMapRegion}
-        // test
         obstaclesDb={obstaclesDb}
         mapRef={mapRef}
       />
-
       <FloatingActionComponent
         isObstacleMode={isObstacleMode}
         setIsObstacleMode={setIsObstacleMode}
         onLocateCurrentLocation={locateCurrentLocation}
         clearPath={clearPath}
       />
-      {/* {showSettings && <Menu />} */}
     </View>
   );
 }

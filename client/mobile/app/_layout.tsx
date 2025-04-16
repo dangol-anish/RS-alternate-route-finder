@@ -25,11 +25,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" options={{ title: "Settings" }} />
         </Stack>
       </View>
-
-      {/* Your footer */}
       <FooterComponent />
-
-      {/* ✅ Toast should be here at the root */}
       <Toast />
     </View>
   );

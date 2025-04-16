@@ -14,8 +14,6 @@ import { useAuthStore } from "../store/useAuthStore";
 const HeaderComponent = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const showSettings = useMapStore((state) => state.showSettings);
-  const setShowSettings = useMapStore((state) => state.setShowSettings);
   const user = useAuthStore((state) => state.user);
 
   const inputRef = useRef<TextInput>(null);
@@ -74,11 +72,6 @@ const HeaderComponent = () => {
             resizeMode="cover"
           />
         )}
-
-        {/* <Image
-          source={require("../../public/my-notion-face-portrait.png")}
-          style={styles.image}
-        /> */}
       </View>
     </View>
   );

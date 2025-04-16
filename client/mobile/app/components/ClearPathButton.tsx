@@ -1,10 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-
-interface ClearPathProps {
-  clearPath: () => void;
-}
+import { ClearPathProps } from "../types/clearPath";
 
 const ClearPathButton: React.FC<ClearPathProps> = ({ clearPath }) => {
   return (
