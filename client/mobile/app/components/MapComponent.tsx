@@ -172,7 +172,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
         {obstaclesDb.map((obstacle, index) => (
           <ObstacleMapMarker
-            key={`db-obstacle-${index}`}
+            key={`db-obstacle-${obstacle.id}`}
             obstacle={obstacle}
             onPress={() => setSelectedObstacle(obstacle)}
           />
