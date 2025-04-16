@@ -9,12 +9,12 @@ interface ObstacleMarkerProps {
 
 const ObstacleMarker: React.FC<ObstacleMarkerProps> = ({ type, severity }) => {
   return (
-    <View style={{ width: 40, height: 40 }}>
+    <View style={{ width: 30, height: 30 }}>
       <Image
         source={getObstacleIcon(type)}
         style={{
-          width: 40,
-          height: 40,
+          width: 30,
+          height: 30,
           resizeMode: "contain",
           tintColor: getSeverityColor(severity),
         }}
