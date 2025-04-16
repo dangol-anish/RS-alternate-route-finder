@@ -18,6 +18,7 @@ const obstacleTypes: string[] = [
   "Debris",
   "Flooding",
   "Traffic Jam",
+  "Protest",
   "Others",
 ];
 

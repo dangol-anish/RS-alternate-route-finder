@@ -1,38 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Alert } from "react-native";
+import { View, Alert, Image } from "react-native";
 import MapView, { Marker, Polyline, MapPressEvent } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { LatLng } from "react-native-maps";
 import { useMapStore } from "../store/useMapStore";
 import ObstacleDetailsModal from "./obstacles/ObstacleDetailsModal";
-
-// testing
 import ObstacleForm from "./obstacles/ObstacleForm";
 import axios from "axios";
 import { useAuthStore } from "../store/useAuthStore";
 import { Obstacle } from "@/app/types/obstacle";
-
-interface MapComponentProps {
-  toggleObstacle: (nodeId: string) => void;
-  nodes: GeoJSONFeature[];
-  obstaclesDb: Obstacle[];
-  userLocation: LatLng | null;
-  mapRef: React.RefObject<MapView>;
-  mapRegion: {
-    latitude: number;
-    longitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-  };
-  setMapRegion: React.Dispatch<
-    React.SetStateAction<{
-      latitude: number;
-      longitude: number;
-      latitudeDelta: number;
-      longitudeDelta: number;
-    }>
-  >;
-}
+import { MapComponentProps } from "../types/map";
+import { getObstacleIcon, getSeverityColor } from "../utils/obstacleUtils";
+import ObstacleMarker from "./obstacles/ObstacleMarker";
+import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
 
 const MapComponent: React.FC<MapComponentProps> = ({
   toggleObstacle,
@@ -53,6 +33,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     obstacles,
     isObstacleMode,
   } = useMapStore();
+
+  const [showForm, setShowForm] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<GeoJSONFeature | null>(null);
+  const user = useAuthStore((state) => state.user);
+  const selectedObstacle = useMapStore((state) => state.selectedObstacle);
+  const setSelectedObstacle = useMapStore((state) => state.setSelectedObstacle);
 
   const findNearestNode = (
     latitude: number,
@@ -101,14 +87,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
       });
     }
   };
-
-  //testing
-  const [showForm, setShowForm] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<GeoJSONFeature | null>(null);
-  const user = useAuthStore((state) => state.user);
-  const selectedObstacle = useMapStore((state) => state.selectedObstacle);
-  const setSelectedObstacle = useMapStore((state) => state.setSelectedObstacle);
-  // const mapRef = useRef<MapView | null>(null);
 
   const handleFormSubmit = async (formData: {
     name: string;
@@ -193,13 +171,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
         )}
 
         {obstaclesDb.map((obstacle, index) => (
-          <Marker
+          <ObstacleMapMarker
             key={`db-obstacle-${index}`}
-            coordinate={{
-              latitude: obstacle.latitude,
-              longitude: obstacle.longitude,
-            }}
-            pinColor="red"
+            obstacle={obstacle}
             onPress={() => setSelectedObstacle(obstacle)}
           />
         ))}
