@@ -353,3 +353,36 @@ def update_profile():
         return jsonify({"success": True, "photo_url": photo_url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# ----------------------
+# Delete Obstacle (Only by Owner)
+# ----------------------
+@main_routes.route('/delete_obstacle', methods=['POST'])
+def delete_obstacle():
+    data = request.json
+    obstacle_id = data.get("id")
+    requester_id = data.get("owner")
+
+    print("Received request to delete:", obstacle_id, "from user:", requester_id)
+
+
+    if not obstacle_id or not requester_id:
+        return jsonify({"error": "Missing obstacle ID or owner ID"}), 400
+
+    try:
+        # First, check if the obstacle exists and is owned by the requester
+        response = supabase.table("obstacles").select("id", "owner").eq("id", obstacle_id).single().execute()
+
+        if not response.data:
+            return jsonify({"error": "Obstacle not found"}), 404
+
+        if response.data["owner"] != requester_id:
+            return jsonify({"error": "Unauthorized: You can only delete your own obstacle"}), 403
+
+        # Perform the deletion
+        delete_response = supabase.table("obstacles").delete().eq("id", obstacle_id).execute()
+
+        return jsonify({"success": True, "message": "Obstacle deleted"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -2,7 +2,7 @@ export type Obstacle = {
   id: string;
   latitude: number;
   longitude: number;
-  // test
+  owner: string;
   name: string;
   type: string;
   expected_duration: string;
