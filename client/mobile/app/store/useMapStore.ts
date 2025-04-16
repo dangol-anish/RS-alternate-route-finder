@@ -2,6 +2,18 @@ import { create } from "zustand";
 import { GeoJSONFeature } from "@/app/types/geoJSON";
 import { LatLng } from "react-native-maps";
 
+type Obstacle = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  name: string;
+  type: string;
+  expected_duration: string;
+  severity: string;
+  comments: string;
+  created_at: string | number;
+};
+
 type MapStore = {
   source: GeoJSONFeature | null;
   destination: GeoJSONFeature | null;
@@ -19,6 +31,9 @@ type MapStore = {
   // settings
   showSettings: boolean;
   setShowSettings: (val: boolean) => void;
+  // obstacles
+  selectedObstacle: Obstacle | null;
+  setSelectedObstacle: (obstacle: Obstacle | null) => void;
 };
 
 export const useMapStore = create<MapStore>((set, get) => ({
@@ -45,4 +60,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
     }),
   showSettings: false,
   setShowSettings: (val) => set({ showSettings: val }),
+  selectedObstacle: null,
+  setSelectedObstacle: (obstacle) => set({ selectedObstacle: obstacle }),
 }));

@@ -80,8 +80,17 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
     if (validateForm()) {
       const { expected_duration_hours, expected_duration_minutes } = formData;
       const totalDuration = `${expected_duration_hours}:${expected_duration_minutes}:00`; // Create the "HH:MM:SS" format
+
       onSubmit({ ...formData, expected_duration: totalDuration });
       onClose();
+      setFormData({
+        name: "",
+        type: "Others",
+        expected_duration_hours: "0",
+        expected_duration_minutes: "0",
+        severity: "Low",
+        comments: "",
+      });
     }
   };
 

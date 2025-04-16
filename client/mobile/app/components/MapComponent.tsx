@@ -4,16 +4,18 @@ import MapView, { Marker, Polyline, MapPressEvent } from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { LatLng } from "react-native-maps";
 import { useMapStore } from "../store/useMapStore";
+import ObstacleDetailsModal from "./obstacles/ObstacleDetailsModal";
 
 // testing
 import ObstacleForm from "./obstacles/ObstacleForm";
 import axios from "axios";
 import { useAuthStore } from "../store/useAuthStore";
+import { Obstacle } from "@/types/obstacle";
 
 interface MapComponentProps {
   toggleObstacle: (nodeId: string) => void;
   nodes: GeoJSONFeature[];
-  obstaclesDb: LatLng[];
+  obstaclesDb: Obstacle[];
   userLocation: LatLng | null;
   mapRef: React.RefObject<MapView>;
   mapRegion: {
@@ -104,6 +106,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const [showForm, setShowForm] = useState(false);
   const [selectedNode, setSelectedNode] = useState<GeoJSONFeature | null>(null);
   const user = useAuthStore((state) => state.user);
+  const selectedObstacle = useMapStore((state) => state.selectedObstacle);
+  const setSelectedObstacle = useMapStore((state) => state.setSelectedObstacle);
   // const mapRef = useRef<MapView | null>(null);
 
   const handleFormSubmit = async (formData: {
@@ -188,22 +192,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
         )}
 
-        {Array.from(obstacles).map((nodeId) => {
-          const node = nodes.find((n) => n.id === nodeId);
-          return (
-            node && (
-              <Marker
-                key={node.id}
-                coordinate={{
-                  latitude: node.geometry.coordinates[1],
-                  longitude: node.geometry.coordinates[0],
-                }}
-                pinColor="black"
-              />
-            )
-          );
-        })}
-
         {obstaclesDb.map((obstacle, index) => (
           <Marker
             key={`db-obstacle-${index}`}
@@ -211,7 +199,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: obstacle.latitude,
               longitude: obstacle.longitude,
             }}
-            pinColor="red" // or whatever color you want for database obstacles
+            pinColor="red"
+            onPress={() => setSelectedObstacle(obstacle)}
           />
         ))}
 
@@ -233,6 +222,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         onClose={() => setShowForm(false)}
         onSubmit={handleFormSubmit}
       />
+      <ObstacleDetailsModal />
     </View>
   );
 };

@@ -3,12 +3,8 @@ import axios from "axios";
 import { Alert } from "react-native";
 import { supabase } from "@/lib/supabase"; // adjust path as needed
 import { useMapStore } from "../store/useMapStore";
-
-type Obstacle = {
-  id: string;
-  latitude: number;
-  longitude: number;
-};
+import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
+import { Obstacle } from "@/types/obstacle";
 
 export const useObstacles = () => {
   const [obstaclesDb, setObstaclesDb] = useState<Obstacle[]>([]);
