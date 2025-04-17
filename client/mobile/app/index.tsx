@@ -148,8 +148,8 @@ export default function App() {
         mapRef={mapRef}
       />
       <FloatingActionComponent
-        isObstacleMode={isObstacleMode}
-        setIsObstacleMode={setIsObstacleMode}
+        // isObstacleMode={isObstacleMode}
+        // setIsObstacleMode={setIsObstacleMode}
         onLocateCurrentLocation={locateCurrentLocation}
         clearPath={clearPath}
       />
