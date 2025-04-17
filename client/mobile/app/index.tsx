@@ -137,7 +137,7 @@ export default function App() {
 
   return (
     <View style={{ flex: 1 }}>
-      <HeaderComponent />
+      <HeaderComponent mapRef={mapRef} />
       <MapComponent
         toggleObstacle={toggleObstacle}
         nodes={nodes}

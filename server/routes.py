@@ -7,6 +7,7 @@ from utils import haversine, heuristic
 import os
 from supabase import create_client, Client
 from flask import jsonify
+import requests
 
 import cloudinary
 import cloudinary.uploader
@@ -401,5 +402,41 @@ def map_boundary():
         hull = ConvexHull(coords)
         boundary_coords = [(coords[vertex][1], coords[vertex][0]) for vertex in hull.vertices]  # lat, lon
         return jsonify({"boundary": boundary_coords})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+    # Add search functionality to backend (Flask)
+# Define a search route
+@main_routes.route('/search_place', methods=['GET'])
+def search_place():
+    query = request.args.get('q')
+    if not query:
+        return jsonify({"error": "Query parameter 'q' is required"}), 400
+
+    try:
+        nominatim_url = f"https://nominatim.openstreetmap.org/search"
+        params = {
+            'q': query,
+            'format': 'json',
+            'limit': 5,
+            'countrycodes': 'np'
+        }
+
+        headers = {
+            'User-Agent': 'YourAppName/1.0 (your@email.com)'
+        }
+
+        response = requests.get(nominatim_url, params=params, headers=headers)
+        results = response.json()
+
+        places = [{
+            "display_name": place.get("display_name"),
+            "lat": float(place.get("lat")),
+            "lon": float(place.get("lon"))
+        } for place in results]
+
+        return jsonify(places)
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500

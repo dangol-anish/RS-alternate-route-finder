@@ -10,59 +10,85 @@ import React, { useRef, useState } from "react";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useMapStore } from "../store/useMapStore";
 import { useAuthStore } from "../store/useAuthStore";
+import SearchOverlay from "./search/SearchOverlay";
+import MapView from "react-native-maps";
 
-const HeaderComponent = () => {
+// Props now accepts the mapRef
+const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [searchText, setSearchText] = useState("");
   const user = useAuthStore((state) => state.user);
-
   const inputRef = useRef<TextInput>(null);
 
-  const handleUnfocus = () => {
-    if (inputRef.current) {
-      inputRef.current.blur();
+  // Animate map to the selected location
+  const handleResultPress = ({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+      setIsFocused(false); // close overlay
+      inputRef.current?.blur();
     }
   };
 
   const handleClear = () => {
-    setSearchText(""); // Clear the text
-    if (inputRef.current) {
-      inputRef.current.focus(); // Keep focus after clearing
-    }
+    setSearchText("");
+  };
+
+  const handleUnfocus = () => {
+    setIsFocused(false);
+    inputRef.current?.blur();
   };
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.container}>
-        {/* Left Icon or Back Button */}
-        {isFocused ? (
-          <TouchableOpacity onPress={handleUnfocus}>
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity>
-            <Ionicons name="menu" size={24} color="black" />
-          </TouchableOpacity>
-        )}
+        {/* Left Icon */}
+        <TouchableOpacity onPress={isFocused ? handleUnfocus : () => {}}>
+          <Ionicons
+            name={isFocused ? "arrow-back" : "menu"}
+            size={24}
+            color="black"
+          />
+        </TouchableOpacity>
 
         {/* TextInput */}
-        <TextInput
-          ref={inputRef}
-          placeholder="Search..."
-          style={styles.textInput}
-          value={searchText}
-          onChangeText={setSearchText}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
+        <TouchableOpacity
+          style={styles.textInputWrapper}
+          onPress={() => {
+            setIsFocused(true);
+            inputRef.current?.focus();
+          }}
+          activeOpacity={1}
+        >
+          <TextInput
+            ref={inputRef}
+            placeholder="Search..."
+            style={styles.textInput}
+            value={searchText}
+            onChangeText={setSearchText}
+            onFocus={() => setIsFocused(true)}
+            editable={false}
+          />
+        </TouchableOpacity>
 
-        {/* Clear Button (Cross Icon) on Focus */}
+        {/* Clear icon */}
         {isFocused && searchText !== "" && (
           <TouchableOpacity onPress={handleClear}>
             <Ionicons name="close-circle" size={24} color="black" />
           </TouchableOpacity>
         )}
 
+        {/* Profile */}
         {!user?.photo ? (
           <MaterialCommunityIcons name="face-man" size={30} color="black" />
         ) : (
@@ -73,6 +99,17 @@ const HeaderComponent = () => {
           />
         )}
       </View>
+
+      {/* Search Modal Overlay */}
+      <SearchOverlay
+        visible={isFocused}
+        searchText={searchText}
+        onChangeText={setSearchText}
+        onClear={handleClear}
+        onClose={handleUnfocus}
+        inputRef={inputRef}
+        onResultPress={handleResultPress} // 🔥 KEY LINE
+      />
     </View>
   );
 };
@@ -101,15 +138,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     alignItems: "center",
   },
-  textInput: {
+  textInputWrapper: {
     flex: 1,
     marginHorizontal: 10,
+  },
+  textInput: {
     backgroundColor: "white",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
   },
-
   image: {
     height: 30,
     width: 30,

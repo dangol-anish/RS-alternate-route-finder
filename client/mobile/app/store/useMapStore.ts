@@ -27,4 +27,5 @@ export const useMapStore = create<MapStore>((set, get) => ({
   setShowSettings: (val) => set({ showSettings: val }),
   selectedObstacle: null,
   setSelectedObstacle: (obstacle) => set({ selectedObstacle: obstacle }),
+  //test
 }));
