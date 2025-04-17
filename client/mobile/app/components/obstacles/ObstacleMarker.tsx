@@ -8,15 +8,24 @@ interface ObstacleMarkerProps {
 }
 
 const ObstacleMarker: React.FC<ObstacleMarkerProps> = ({ type, severity }) => {
+  const icon = getObstacleIcon(type); // Get the correct icon based on the obstacle type
+
   return (
-    <View style={{ width: 30, height: 30 }}>
+    <View
+      style={{
+        width: 40, // Adjust size for consistency
+        height: 40, // Adjust size for consistency
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <Image
-        source={getObstacleIcon(type)}
+        source={icon}
         style={{
-          width: 30,
-          height: 30,
-          resizeMode: "contain",
-          tintColor: getSeverityColor(severity),
+          width: 40, // Ensure consistent image size
+          height: 40, // Ensure consistent image size
+          resizeMode: "center",
+          tintColor: getSeverityColor(severity), // Apply tint color based on severity
         }}
       />
     </View>

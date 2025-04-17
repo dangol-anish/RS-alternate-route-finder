@@ -223,6 +223,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
             obstacle={obstacle}
             onPress={() => setSelectedObstacle(obstacle)}
           />
+          // <Marker
+          //   coordinate={{
+          //     latitude: obstacle.latitude,
+          //     longitude: obstacle.longitude,
+          //   }}
+          //   pinColor="red"
+          // />
         ))}
 
         {path.length > 0 && (
