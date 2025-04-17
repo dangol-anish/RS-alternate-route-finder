@@ -37,6 +37,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
     setDestination,
     obstacles,
     isObstacleMode,
+    selectionMode, // ← ADD THIS
+    setSelectionMode,
   } = useMapStore();
 
   const [showForm, setShowForm] = useState(false);
@@ -168,13 +170,30 @@ const MapComponent: React.FC<MapComponentProps> = ({
             return;
           }
 
-          if (isObstacleMode) {
-            setSelectedNode(closestNode);
-            setShowForm(true); // Show the form
-          } else if (!source) {
-            setSource(closestNode);
-          } else if (!destination) {
-            setDestination(closestNode);
+          // if (isObstacleMode) {
+          //   setSelectedNode(closestNode);
+          //   setShowForm(true); // Show the form
+          // } else if (!source) {
+          //   setSource(closestNode);
+          // } else if (!destination) {
+          //   setDestination(closestNode);
+          // }
+
+          switch (selectionMode) {
+            case "obstacle":
+              setSelectedNode(closestNode);
+              setShowForm(true);
+              break;
+            case "source":
+              setSource(closestNode);
+              setSelectionMode("none"); // optionally reset
+              break;
+            case "destination":
+              setDestination(closestNode);
+              setSelectionMode("none"); // optionally reset
+              break;
+            default:
+              break;
           }
         }}
       >

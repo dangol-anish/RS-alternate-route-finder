@@ -2,6 +2,9 @@ import { LatLng } from "react-native-maps";
 import { GeoJSONFeature } from "./geoJSON";
 import { Obstacle } from "./obstacle";
 
+// 👇 Move this here
+export type SelectionMode = "none" | "source" | "destination" | "obstacle";
+
 export type MapStore = {
   source: GeoJSONFeature | null;
   destination: GeoJSONFeature | null;
@@ -22,4 +25,7 @@ export type MapStore = {
   // obstacles
   selectedObstacle: Obstacle | null;
   setSelectedObstacle: (obstacle: Obstacle | null) => void;
+  //test
+  selectionMode: SelectionMode;
+  setSelectionMode: (mode: SelectionMode) => void;
 };

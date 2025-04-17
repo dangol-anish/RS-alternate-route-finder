@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { MapStore } from "../types/mapStore";
 
+type SelectionMode = "none" | "source" | "destination" | "obstacle";
+
 export const useMapStore = create<MapStore>((set, get) => ({
   source: null,
   destination: null,
@@ -8,6 +10,7 @@ export const useMapStore = create<MapStore>((set, get) => ({
   exploredEdges: [],
   obstacles: new Set(),
   isObstacleMode: false,
+  selectionMode: "none", // ← NEW
 
   setSource: (source) => set({ source }),
   setDestination: (destination) => set({ destination }),
@@ -21,11 +24,14 @@ export const useMapStore = create<MapStore>((set, get) => ({
       destination: null,
       path: [],
       exploredEdges: [],
-      obstacles: new Set(null),
+      obstacles: new Set(),
     }),
   showSettings: false,
   setShowSettings: (val) => set({ showSettings: val }),
   selectedObstacle: null,
   setSelectedObstacle: (obstacle) => set({ selectedObstacle: obstacle }),
-  //test
+
+  // ← NEW setter
+  setSelectionMode: (mode: SelectionMode) =>
+    set(() => ({ selectionMode: mode })),
 }));

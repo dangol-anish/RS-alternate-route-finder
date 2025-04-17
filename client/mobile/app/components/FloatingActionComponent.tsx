@@ -1,33 +1,39 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
-import ObstacleToggleButton from "./ObstacleToggleButton";
-import CurrentLocationButton from "./CurrentLocationButton";
 import ClearPathButton from "./ClearPathButton";
-import { useAuthStore } from "../store/useAuthStore";
+import CurrentLocationButton from "./CurrentLocationButton";
+import { useMapStore } from "../store/useMapStore";
 
-interface ObstacleToggleButtonProps {
-  isObstacleMode: boolean;
-  setIsObstacleMode: (isObstacleMode: boolean) => void;
+interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
   clearPath: () => void;
 }
 
-const FloatingActionComponent: React.FC<ObstacleToggleButtonProps> = ({
-  isObstacleMode,
-  setIsObstacleMode,
+const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
   onLocateCurrentLocation,
   clearPath,
 }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const selectionMode = useMapStore((state) => state.selectionMode);
+  const setSelectionMode = useMapStore((state) => state.setSelectionMode);
+
+  const Button = ({ title, mode }: { title: string; mode: any }) => (
+    <TouchableOpacity
+      style={[
+        styles.button,
+        selectionMode === mode && { backgroundColor: "#4682B4" },
+      ]}
+      onPress={() => setSelectionMode(selectionMode === mode ? "none" : mode)}
+    >
+      <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.floatingView}>
       <ClearPathButton clearPath={clearPath} />
-      <ObstacleToggleButton
-        isObstacleMode={isObstacleMode}
-        setIsObstacleMode={setIsObstacleMode}
-        // disabled={!isAuthenticated}
-      />
+      <Button title="Set Source" mode="source" />
+      <Button title="Set Destination" mode="destination" />
+      <Button title="Add Obstacle" mode="obstacle" />
       <CurrentLocationButton
         onLocateCurrentLocation={onLocateCurrentLocation}
       />
@@ -42,9 +48,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 10,
     right: 0,
-    // backgroundColor: "gray",
     margin: 16,
     flex: 1,
     gap: 16,
+  },
+  button: {
+    backgroundColor: "gray",
+    padding: 10,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "white",
   },
 });
