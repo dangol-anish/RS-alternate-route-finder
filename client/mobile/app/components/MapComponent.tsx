@@ -1,6 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Alert, Image } from "react-native";
-import MapView, { Marker, Polyline, MapPressEvent } from "react-native-maps";
+import MapView, {
+  Marker,
+  Polyline,
+  MapPressEvent,
+  Polygon,
+} from "react-native-maps";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { LatLng } from "react-native-maps";
 import { useMapStore } from "../store/useMapStore";
@@ -124,6 +129,29 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
 
+  const [boundary, setBoundary] = useState<LatLng[]>([]);
+
+  useEffect(() => {
+    const fetchBoundary = async () => {
+      try {
+        const res = await axios.get(
+          `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/map_boundary`
+        );
+        const coords = res.data.boundary.map(
+          ([lat, lon]: [number, number]) => ({
+            latitude: lat,
+            longitude: lon,
+          })
+        );
+        setBoundary(coords);
+      } catch (error) {
+        console.error("Failed to fetch boundary:", error);
+      }
+    };
+
+    fetchBoundary();
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
@@ -189,6 +217,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
             title="Your Location"
             pinColor="purple"
           />
+        )}
+
+        {boundary.length > 0 && (
+          <Polygon coordinates={boundary} strokeColor="black" strokeWidth={1} />
         )}
       </MapView>
       <ObstacleForm

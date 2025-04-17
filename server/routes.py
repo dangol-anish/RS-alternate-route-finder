@@ -14,6 +14,11 @@ import base64
 import io
 from PIL import Image
 
+from scipy.spatial import ConvexHull
+import numpy as np
+
+
+
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 
@@ -384,5 +389,17 @@ def delete_obstacle():
 
         return jsonify({"success": True, "message": "Obstacle deleted"}), 200
 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#map boundary
+
+@main_routes.route('/map_boundary', methods=['GET'])
+def map_boundary():
+    try:
+        coords = np.array([(data['x'], data['y']) for node, data in graph.nodes(data=True)])
+        hull = ConvexHull(coords)
+        boundary_coords = [(coords[vertex][1], coords[vertex][0]) for vertex in hull.vertices]  # lat, lon
+        return jsonify({"boundary": boundary_coords})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
