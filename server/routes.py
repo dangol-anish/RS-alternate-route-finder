@@ -41,8 +41,10 @@ main_routes = Blueprint('main', __name__)
 # Load road network graph
 import osmnx as ox
 place_names = ["Kathmandu, Nepal", "Lalitpur, Nepal"]
-graph = ox.graph_from_place(place_names, network_type="all")
 
+# we get all the values for nodes and edges here
+graph = ox.graph_from_place(place_names, network_type="all")
+# extracting nodes and edges here
 nodes, edges = ox.graph_to_gdfs(graph)
 
 # Set to store obstacle nodes
@@ -123,19 +125,25 @@ def set_obstacles():
     
 @main_routes.route('/shortest_path', methods=['POST'])
 def shortest_path():
+    # extract json data from HTTP POST
     data = request.get_json()
-    
+    # if there is no data or there is no "source" or "destination" in data
+    # then it is a bad request
     if not data or 'source' not in data or 'destination' not in data:
         return jsonify({'error': 'Invalid input data'}), 400
-
+    
     try:
+        #taking out source and detination from data in integer format
         source_node = int(data['source'])
         destination_node = int(data['destination'])
 
+        #checks whether the taken source and destination exists in graph
         if source_node not in graph.nodes or destination_node not in graph.nodes:
             return jsonify({'error': f"Invalid nodes: {source_node}, {destination_node}"}), 400
 
         try:
+            # bringing out all the obstacles stored in the database
+            #convert them into int and store them in a set
             response = supabase.table('obstacles').select('node_id').execute()
             obstacles_from_db = {int(obstacle['node_id']) for obstacle in response.data}
         except Exception as e:
@@ -144,14 +152,21 @@ def shortest_path():
         # Perform pathfinding while avoiding obstacles
         path, explored_edges = bidirectional_astar(graph, source_node, destination_node, obstacles_from_db)
         
+        #after algorithm, if no path, show no path
         if path is None:
             return jsonify({'error': 'No path found'}), 400
         
+        # empty list to store path coordinates
         path_coordinates = []
+        # path[:-1] all except last element
+        # path[1:] all except first element
+        #this gets the coordinates from path
         for u, v in zip(path[:-1], path[1:]):
+            #this gets the existing edge data in graph
             edge_data = graph.get_edge_data(u, v)
             if edge_data:
                 edge_info = edge_data[0]
+                #geometry means curved lines
                 if 'geometry' in edge_info:
                     path_coordinates.extend([(lat, lon) for lon, lat in edge_info['geometry'].coords])
                 else:

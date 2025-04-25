@@ -1,8 +1,12 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import ClearPathButton from "./ClearPathButton";
 import CurrentLocationButton from "./CurrentLocationButton";
 import { useMapStore } from "../store/useMapStore";
+
+// Assuming SelectionMode is something like this (if not, adjust accordingly):
+type SelectionMode = "source" | "destination" | "obstacle" | "none";
 
 interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
@@ -16,24 +20,38 @@ const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
   const selectionMode = useMapStore((state) => state.selectionMode);
   const setSelectionMode = useMapStore((state) => state.setSelectionMode);
 
-  const Button = ({ title, mode }: { title: string; mode: any }) => (
-    <TouchableOpacity
-      style={[
-        styles.button,
-        selectionMode === mode && { backgroundColor: "#4682B4" },
-      ]}
-      onPress={() => setSelectionMode(selectionMode === mode ? "none" : mode)}
-    >
-      <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-  );
+  // Updated Button component to ensure mode type safety
+  const Button = ({
+    iconName,
+    mode,
+  }: {
+    iconName: keyof typeof MaterialIcons.glyphMap;
+    mode: SelectionMode; // Ensure mode is of type SelectionMode
+  }) => {
+    const isActive = selectionMode === mode;
+    return (
+      <TouchableOpacity
+        style={[
+          styles.floatingButton,
+          isActive && { backgroundColor: "#4682B4" },
+        ]}
+        onPress={() => setSelectionMode(isActive ? "none" : mode)} // Only valid SelectionMode values
+      >
+        <MaterialIcons
+          name={iconName}
+          size={24}
+          color={isActive ? "white" : "black"}
+        />
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.floatingView}>
       <ClearPathButton clearPath={clearPath} />
-      <Button title="Set Source" mode="source" />
-      <Button title="Set Destination" mode="destination" />
-      <Button title="Add Obstacle" mode="obstacle" />
+      <Button iconName="place" mode="source" />
+      <Button iconName="flag" mode="destination" />
+      <Button iconName="block" mode="obstacle" />
       <CurrentLocationButton
         onLocateCurrentLocation={onLocateCurrentLocation}
       />
@@ -52,12 +70,9 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 16,
   },
-  button: {
-    backgroundColor: "gray",
-    padding: 10,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "white",
+  floatingButton: {
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 50,
   },
 });
