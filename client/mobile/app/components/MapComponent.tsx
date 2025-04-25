@@ -18,6 +18,7 @@ import { MapComponentProps } from "../types/map";
 import { getObstacleIcon, getSeverityColor } from "../utils/obstacleUtils";
 import ObstacleMarker from "./obstacles/ObstacleMarker";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
+import { darkMapStyle } from "../utils/mapStyles";
 
 const MapComponent: React.FC<MapComponentProps> = ({
   toggleObstacle,
@@ -158,6 +159,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     <View style={{ flex: 1 }}>
       <MapView
         ref={mapRef}
+        customMapStyle={darkMapStyle}
         style={{ flex: 1 }}
         initialRegion={mapRegion} // Dynamically controlled by the state
         onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it
