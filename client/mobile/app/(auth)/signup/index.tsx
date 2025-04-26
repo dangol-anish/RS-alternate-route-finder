@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
+import { themeColors } from "@/app/styles/colors";
 
 const Signup = () => {
   const router = useRouter();
@@ -153,6 +154,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     justifyContent: "center",
+    backgroundColor: themeColors.background,
   },
   signupHeader: {
     position: "absolute",

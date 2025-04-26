@@ -54,10 +54,9 @@ const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
       <View style={styles.container}>
         {/* Left Icon */}
         <TouchableOpacity onPress={isFocused ? handleUnfocus : () => {}}>
-          <Ionicons
-            name={isFocused ? "arrow-back" : "menu"}
-            size={24}
-            color="black"
+          <Image
+            source={require("../../assets/logo/logo.png")}
+            style={{ width: 40, height: 40, borderRadius: 50 }} // Customize the size
           />
         </TouchableOpacity>
 

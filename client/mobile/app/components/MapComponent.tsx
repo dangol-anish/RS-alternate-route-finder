@@ -19,6 +19,7 @@ import { getObstacleIcon, getSeverityColor } from "../utils/obstacleUtils";
 import ObstacleMarker from "./obstacles/ObstacleMarker";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
 import { darkMapStyle } from "../utils/mapStyles";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const MapComponent: React.FC<MapComponentProps> = ({
   toggleObstacle,
@@ -235,7 +236,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         ))}
 
         {path.length > 0 && (
-          <Polyline coordinates={path} strokeColor="green" strokeWidth={5} />
+          <Polyline coordinates={path} strokeColor="#800020" strokeWidth={5} />
         )}
 
         {/* User Location Marker */}
@@ -244,7 +245,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
             coordinate={userLocation}
             title="Your Location"
             pinColor="purple"
-          />
+          >
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <MaterialCommunityIcons
+                name="map-marker-circle"
+                size={30}
+                color="green"
+              />
+            </View>
+          </Marker>
         )}
 
         {boundary.length > 0 && (
