@@ -5,6 +5,7 @@ import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Button } from "react-native";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import { themeColors } from "@/app/styles/colors";
 
 const SettingsItem = () => {
   const router = useRouter();
@@ -23,7 +24,7 @@ const SettingsItem = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // if you're using cookies for auth/session
+          credentials: "include",
         }
       );
 
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: themeColors.beige,
     padding: 20,
   },
   menuOptions: {
@@ -144,13 +145,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   authMenuOptions: {
-    backgroundColor: "#f0f0f0",
     borderRadius: 12,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
     padding: 10,
+    backgroundColor: themeColors.beige,
   },
   authHeaderText: {
     fontSize: 24,

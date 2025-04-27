@@ -1,3 +1,7 @@
 export const themeColors = {
-  background: "#f0ead2",
+  beige: "#f0ead2",
+  light_green: "#dde5b6",
+  green: "#adc178",
+  light_brown: "#a98467",
+  brown: "#6c584c",
 };

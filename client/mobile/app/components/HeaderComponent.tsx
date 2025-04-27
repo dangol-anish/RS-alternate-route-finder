@@ -56,7 +56,7 @@ const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
         <TouchableOpacity onPress={isFocused ? handleUnfocus : () => {}}>
           <Image
             source={require("../../assets/logo/logo.png")}
-            style={{ width: 40, height: 40, borderRadius: 50 }} // Customize the size
+            style={{ width: 24, height: 24, borderRadius: 0 }} // Customize the size
           />
         </TouchableOpacity>
 
