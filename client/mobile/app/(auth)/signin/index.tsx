@@ -5,12 +5,15 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Image,
+  Pressable,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import { themeColors } from "@/app/styles/colors";
 
 const Signin = () => {
   const router = useRouter();
@@ -71,8 +74,15 @@ const Signin = () => {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
       </View>
-
-      <Text style={styles.headerText}>Sign In</Text>
+      <Image
+        source={require("../../../assets/logo/mainLogo.png")}
+        style={styles.logoStyle}
+        resizeMode="contain"
+      />
+      <View style={styles.loginHeader}>
+        <Text style={styles.headerText}>Welcome Back!</Text>
+        <Text style={styles.headerSubText}> Login to continue</Text>
+      </View>
 
       <TextInput
         style={styles.input}
@@ -91,9 +101,15 @@ const Signin = () => {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.button,
+          pressed && styles.buttonPressed,
+        ]}
+        onPress={handleSignIn}
+      >
         <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
+      </Pressable>
 
       <View style={styles.signupPrompt}>
         <Text style={styles.promptText}>Don't have an account?</Text>
@@ -111,18 +127,34 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: themeColors.off_white,
+    paddingTop: 110,
   },
+  logoStyle: {
+    height: 150,
+    width: 150,
+
+    alignSelf: "center",
+  },
+
   signinHeader: {
     position: "absolute",
     top: 50,
     left: 20,
   },
+  loginHeader: {
+    marginVertical: 30,
+    flexDirection: "column",
+    gap: 4,
+  },
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
+  },
+  headerSubText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    opacity: 0.5,
   },
   input: {
     borderWidth: 1,
@@ -133,7 +165,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: themeColors.green,
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
@@ -144,6 +176,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  buttonPressed: {
+    backgroundColor: themeColors.light_green,
+    transform: [{ scale: 0.98 }],
+  },
+
   signupPrompt: {
     flexDirection: "row",
     justifyContent: "center",
@@ -154,7 +191,7 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: 14,
-    color: "#007AFF",
+    color: themeColors.green,
     fontWeight: "600",
   },
 });

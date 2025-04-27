@@ -62,9 +62,10 @@ const SettingsItem = () => {
 
       <View style={styles.menuOptions}>
         {isAuthenticated && user ? (
-          <View style={styles.authMenuOptions}>
+          <View>
             {!user.photo ? (
               <MaterialCommunityIcons
+                style={styles.profileImage}
                 name="face-man"
                 size={100}
                 color="black"
@@ -83,7 +84,7 @@ const SettingsItem = () => {
           <View style={styles.authMenuOptions}>
             <View>
               <Text style={styles.authHeaderText}>Login To RoadSense!</Text>
-              <Text style={styles.authSubHeaderText}>
+              <Text style={styles.unAuthSubHeaderText}>
                 Report obstacles and rate them
               </Text>
             </View>
@@ -198,11 +199,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 4,
   },
-  authSubHeaderText: {
+  unAuthSubHeaderText: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
     fontStyle: "italic",
+    opacity: 0.8,
+  },
+  authSubHeaderText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+
     opacity: 0.8,
   },
   loginButtonContainer: {
@@ -235,6 +243,7 @@ const styles = StyleSheet.create({
     height: 170,
     borderRadius: 100,
     marginBottom: 12,
+    alignSelf: "center",
   },
   container: {
     flex: 1,

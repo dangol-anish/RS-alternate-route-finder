@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flex: 1,
     justifyContent: "center",
-    backgroundColor: themeColors.background,
+    backgroundColor: themeColors.off_white,
   },
   signupHeader: {
     position: "absolute",
