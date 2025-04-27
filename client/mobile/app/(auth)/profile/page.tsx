@@ -11,7 +11,9 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "@/app/store/useAuthStore";
-import Toast from "react-native-toast-message"; // Import toast
+import Toast from "react-native-toast-message";
+import { themeColors } from "@/app/styles/colors";
+import { useRouter } from "expo-router"; // <<< NEW
 
 const ProfileEditPage = () => {
   const { user, setUser } = useAuthStore();
@@ -20,7 +22,8 @@ const ProfileEditPage = () => {
   const [phone, setPhone] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [isPhotoChanged, setIsPhotoChanged] = useState(false);
-  const [isSaving, setIsSaving] = useState(false); // Add saving state
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter(); // <<< NEW
 
   useEffect(() => {
     if (user) {
@@ -57,7 +60,7 @@ const ProfileEditPage = () => {
   const handleSave = async () => {
     if (!user) return;
 
-    setIsSaving(true); // Set saving to true when save starts
+    setIsSaving(true);
 
     let base64Image = null;
 
@@ -120,6 +123,9 @@ const ProfileEditPage = () => {
         text1: "Success",
         text2: "Profile updated successfully!",
       });
+
+      // ✅ Navigate back to settings page
+      router.push("/settings");
     } catch (error) {
       console.error("Error updating profile:", error);
       Toast.show({
@@ -128,7 +134,7 @@ const ProfileEditPage = () => {
         text2: "Something went wrong.",
       });
     } finally {
-      setIsSaving(false); // Set saving back to false after completion
+      setIsSaving(false);
     }
   };
 
@@ -162,17 +168,19 @@ const ProfileEditPage = () => {
 
         <View style={{ marginTop: 20, width: "100%" }}>
           <Pressable
-            style={[styles.saveButton, isSaving && { opacity: 0.6 }]}
             onPress={handleSave}
-            disabled={isSaving} // Disable button while saving
+            disabled={isSaving}
+            style={({ pressed }) => [
+              styles.saveButton,
+              isSaving && { opacity: 0.6 },
+              pressed && { transform: [{ scale: 0.96 }] },
+            ]}
           >
             <Text style={styles.saveButtonText}>
-              {isSaving ? "Saving..." : "Save Changes"} {/* Show saving text */}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Text>
           </Pressable>
         </View>
-
-        {/* Toast component */}
       </ScrollView>
       <Toast />
     </>
@@ -181,9 +189,12 @@ const ProfileEditPage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    top: 30,
+    top: 0,
     padding: 20,
     alignItems: "center",
+    backgroundColor: themeColors.off_white,
+    flex: 1,
+    paddingTop: 70,
   },
   label: {
     alignSelf: "flex-start",
@@ -214,14 +225,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   saveButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: themeColors.green,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
   },
   saveButtonText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 16,
   },
   text: {
     top: 30,

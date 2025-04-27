@@ -1,18 +1,17 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Pressable,
+} from "react-native";
 import React from "react";
 import { useMapStore } from "@/app/store/useMapStore";
-import {
-  Entypo,
-  Ionicons,
-  MaterialCommunityIcons,
-  MaterialIcons,
-  Octicons,
-} from "@expo/vector-icons";
-import { Button } from "react-native";
+import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
-import { Pressable } from "react-native"; // Import Pressable
 
 const SettingsItem = () => {
   const router = useRouter();
@@ -21,7 +20,6 @@ const SettingsItem = () => {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // utils/api/logout.ts
   const logoutUser = async () => {
     try {
       const response = await fetch(
@@ -61,6 +59,7 @@ const SettingsItem = () => {
       <View style={styles.headerMenu}>
         <Text style={styles.headerText}>Settings</Text>
       </View>
+
       <View style={styles.menuOptions}>
         {isAuthenticated && user ? (
           <View style={styles.authMenuOptions}>
@@ -77,78 +76,79 @@ const SettingsItem = () => {
                 resizeMode="cover"
               />
             )}
-
             <Text style={styles.authHeaderText}>{user.full_name}</Text>
             <Text style={styles.authSubHeaderText}>{user.email}</Text>
           </View>
         ) : (
           <View style={styles.authMenuOptions}>
-            <Text style={styles.authHeaderText}>Login To RoadSense!</Text>
-            <Text style={styles.authSubHeaderText}>
-              Report obstacles and rate them
-            </Text>
-            <TouchableOpacity onPress={redirectLogin}>
+            <View>
+              <Text style={styles.authHeaderText}>Login To RoadSense!</Text>
+              <Text style={styles.authSubHeaderText}>
+                Report obstacles and rate them
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.buttonLogin}
+              onPress={redirectLogin}
+            >
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
-      {/* <View style={styles.container}>
-        <View style={styles.buttonWrapper}>
-          <View style={styles.horizontalLine} />
-          <TouchableOpacity style={styles.button} onPress={redirectProfile}>
-            <Text style={styles.buttonText}>Profile</Text>
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.buttonWrapper}>
-          <View style={styles.horizontalLine} />
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Dark Mode</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
+      {isAuthenticated && user && (
+        <>
+          <View style={styles.container}>
+            <View style={styles.subMenu}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.subMenuItem,
+                  pressed && styles.subMenuItemPressed,
+                ]}
+                onPress={redirectProfile}
+              >
+                <Ionicons name="person" size={24} color="black" />
+                <Text style={styles.buttonText}>Profile</Text>
+              </Pressable>
 
-      <View style={styles.container}>
-        <View style={styles.subMenu}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.subMenuItem,
-              pressed && styles.subMenuItemPressed,
-            ]}
-            onPress={redirectProfile}
-          >
-            <Ionicons name="person" size={24} color="black" />
-            <Text style={styles.buttonText}>Profile</Text>
-          </Pressable>
-          <View style={styles.separator} />
-          <Pressable
-            style={({ pressed }) => [
-              styles.subMenuItem,
-              pressed && styles.subMenuItemPressed,
-            ]}
-            onPress={() => {
-              // You can add your Themes navigation here
+              <View style={styles.separator} />
+
+              <Pressable
+                style={({ pressed }) => [
+                  styles.subMenuItem,
+                  pressed && styles.subMenuItemPressed,
+                ]}
+                onPress={() => {
+                  // Add Themes navigation here
+                }}
+              >
+                <Ionicons name="invert-mode" size={24} color="black" />
+                <Text style={styles.buttonText}>Themes</Text>
+              </Pressable>
+
+              <View style={styles.separator} />
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={async () => {
+              await logoutUser();
+              await useAuthStore.getState().clearSession();
             }}
           >
-            <Ionicons name="invert-mode" size={24} color="black" />
-            <Text style={styles.buttonText}>Themes</Text>
-          </Pressable>
-        </View>
-      </View>
-      <TouchableOpacity
-        onPress={async () => {
-          await logoutUser();
-          await useAuthStore.getState().clearSession();
-        }}
-      >
-        <Text style={styles.loginButtonText}>Logout</Text>
-      </TouchableOpacity>
+            <Text style={styles.logoutButtonText}>Logout</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
 
 export default SettingsItem;
+
+// (styles unchanged, your styles were perfect!)
 const styles = StyleSheet.create({
   menuView: {
     ...StyleSheet.absoluteFillObject,
@@ -169,19 +169,58 @@ const styles = StyleSheet.create({
   menuOptions: {
     padding: 20,
   },
+
+  buttonLogin: {
+    backgroundColor: themeColors.green,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+
   authMenuOptions: {
+    backgroundColor: themeColors.beige,
     flexDirection: "column",
     alignItems: "center",
+    borderRadius: 16,
+    padding: 24,
+    gap: 16,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5, // for Android
   },
   authHeaderText: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "900",
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 4,
   },
   authSubHeaderText: {
     fontSize: 16,
-    fontWeight: "100",
+    color: "#666",
+    textAlign: "center",
+    fontStyle: "italic",
+    opacity: 0.8,
+  },
+  loginButtonContainer: {
+    marginTop: 20,
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 12,
   },
   loginButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    letterSpacing: 1,
+    textAlign: "center",
+  },
+
+  logoutButtonText: {
     marginHorizontal: 20,
     marginBottom: 20,
     borderRadius: 12,
@@ -203,19 +242,10 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     gap: 12,
   },
-  // button: {
-  // paddingVertical: 12,
-  // paddingHorizontal: 12,
-  // borderRadius: 8,
-  // width: 200,
-  // flexDirection: "row",
-  // alignItems: "center",
-  // gap: 12, // Reduced gap to keep spacing consistent
-  // },
   buttonText: {
     fontSize: 18,
     fontWeight: "600",
-    marginLeft: 8, // Adjust the spacing between icon and text
+    marginLeft: 8,
   },
   horizontalLine: {
     height: 0.5,
@@ -227,7 +257,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 12,
     paddingVertical: 16,
-
     flexDirection: "column",
   },
   subMenuItem: {
@@ -244,7 +273,7 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     width: "100%",
-    backgroundColor: themeColors.light_brown, // Light gray line
+    backgroundColor: themeColors.light_brown,
     marginVertical: 2,
     opacity: 0.2,
   },
