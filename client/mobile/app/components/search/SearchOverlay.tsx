@@ -10,7 +10,8 @@ import {
   Text,
   StyleSheet,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Entypo, Ionicons } from "@expo/vector-icons";
+import { themeColors } from "@/app/styles/colors";
 
 type SearchOverlayProps = {
   visible: boolean;
@@ -76,7 +77,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
         <View style={styles.overlay}>
           <View style={styles.searchBox}>
             <TouchableOpacity onPress={onClose} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="black" />
+              <Ionicons name="arrow-back" size={24} color={themeColors.brown} />
             </TouchableOpacity>
             <TextInput
               ref={inputRef}
@@ -84,11 +85,12 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
               style={styles.fullscreenInput}
               value={searchText}
               onChangeText={onChangeText}
+              placeholderTextColor="#8a7567"
               autoFocus
             />
             {searchText !== "" && (
               <TouchableOpacity onPress={onClear}>
-                <Ionicons name="close-circle" size={24} color="black" />
+                <Entypo name="cross" size={24} color={themeColors.brown} />
               </TouchableOpacity>
             )}
           </View>
@@ -112,6 +114,13 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                 </Text>
               </TouchableOpacity>
             )}
+            ListEmptyComponent={
+              searchText.trim() !== "" ? (
+                <View style={styles.noResults}>
+                  <Text style={styles.noResultsText}>No results found</Text>
+                </View>
+              ) : null
+            }
           />
         </View>
       </TouchableWithoutFeedback>
@@ -124,23 +133,28 @@ export default SearchOverlay;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "white",
-    paddingTop: 20,
-    paddingHorizontal: 16,
+    backgroundColor: themeColors.beige,
   },
   searchBox: {
     flexDirection: "row",
+    backgroundColor: themeColors.off_white,
+    margin: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 50,
+    elevation: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.9,
+    shadowRadius: 4,
     alignItems: "center",
-    backgroundColor: "#f2f2f2",
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 10,
-    marginBottom: 10,
   },
   fullscreenInput: {
     flex: 1,
-    marginHorizontal: 10,
-    fontSize: 16,
+    backgroundColor: themeColors.off_white,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
   },
   backButton: {
     paddingRight: 4,
@@ -149,5 +163,15 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomColor: "#ccc",
     borderBottomWidth: 1,
+  },
+
+  noResults: {
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: "#888",
   },
 });

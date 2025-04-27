@@ -12,6 +12,7 @@ import { useMapStore } from "../store/useMapStore";
 import { useAuthStore } from "../store/useAuthStore";
 import SearchOverlay from "./search/SearchOverlay";
 import MapView from "react-native-maps";
+import { themeColors } from "../styles/colors";
 
 // Props now accepts the mapRef
 const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
@@ -72,6 +73,7 @@ const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
           <TextInput
             ref={inputRef}
             placeholder="Search..."
+            placeholderTextColor="#8a7567"
             style={styles.textInput}
             value={searchText}
             onChangeText={setSearchText}
@@ -89,7 +91,15 @@ const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
 
         {/* Profile */}
         {!user?.photo ? (
-          <MaterialCommunityIcons name="face-man" size={30} color="black" />
+          <Image
+            source={require("../../assets/logo/Person.png")}
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 0,
+            }} // Customize the size
+            resizeMode="contain"
+          />
         ) : (
           <Image
             source={{ uri: user.photo }}
@@ -125,15 +135,14 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: "row",
-    backgroundColor: "white",
+    backgroundColor: themeColors.off_white,
     margin: 16,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 50,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    elevation: 24,
+    shadowColor: themeColors.brown,
+    shadowOffset: { width: 0, height: 5 },
     shadowRadius: 4,
     alignItems: "center",
   },
@@ -142,7 +151,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   textInput: {
-    backgroundColor: "white",
+    backgroundColor: themeColors.off_white,
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 8,
@@ -151,7 +160,7 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
     borderColor: "black",
-    borderWidth: 0.5,
+
     borderRadius: 70,
   },
 });

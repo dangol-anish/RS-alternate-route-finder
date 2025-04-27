@@ -4,4 +4,5 @@ export const themeColors = {
   green: "#adc178",
   light_brown: "#a98467",
   brown: "#6c584c",
+  off_white: "#FAF9F6",
 };
