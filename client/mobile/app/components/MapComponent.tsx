@@ -20,6 +20,7 @@ import ObstacleMarker from "./obstacles/ObstacleMarker";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
 import { darkMapStyle } from "../utils/mapStyles";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { themeColors } from "../styles/colors";
 
 const MapComponent: React.FC<MapComponentProps> = ({
   toggleObstacle,
@@ -206,7 +207,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: source.geometry.coordinates[1],
               longitude: source.geometry.coordinates[0],
             }}
-            pinColor="blue"
+            pinColor={themeColors.light_brown}
           />
         )}
 
@@ -216,7 +217,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: destination.geometry.coordinates[1],
               longitude: destination.geometry.coordinates[0],
             }}
-            pinColor="green"
+            pinColor={themeColors.light_green}
           />
         )}
 

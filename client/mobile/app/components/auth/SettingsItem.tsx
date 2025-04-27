@@ -12,6 +12,7 @@ import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
+import Toast from "react-native-toast-message";
 
 const SettingsItem = () => {
   const router = useRouter();
@@ -135,8 +136,21 @@ const SettingsItem = () => {
 
           <TouchableOpacity
             onPress={async () => {
-              await logoutUser();
-              await useAuthStore.getState().clearSession();
+              try {
+                await logoutUser();
+                await useAuthStore.getState().clearSession();
+                Toast.show({
+                  type: "success",
+                  text1: "Logged out successfully!",
+                });
+              } catch (error) {
+                console.error("Logout error:", error);
+                Toast.show({
+                  type: "error",
+                  text1: "Logout failed",
+                  text2: "Please try again.",
+                });
+              }
             }}
           >
             <Text style={styles.logoutButtonText}>Logout</Text>

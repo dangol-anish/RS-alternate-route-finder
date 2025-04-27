@@ -18,10 +18,10 @@ const FooterComponent: React.FC = () => {
   const selectedTab = routeToTab[pathname] || "index";
 
   const getIconColor = (tab: string) =>
-    selectedTab === tab ? "blue" : "black";
+    selectedTab === tab ? themeColors.green : "black";
 
   const getTextStyle = (tab: string) => ({
-    color: selectedTab === tab ? "blue" : "black",
+    color: selectedTab === tab ? themeColors.green : "black",
     fontWeight: selectedTab === tab ? ("bold" as const) : ("normal" as const),
   });
 

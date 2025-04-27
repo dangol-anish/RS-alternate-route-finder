@@ -39,10 +39,12 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
   });
 
   const handleChange = (field: string, value: string) => {
+    console.log(`handleChange: Setting ${field} to ${value}`);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {
+    console.log("validateForm: Validating form data");
     const {
       name,
       type,
@@ -50,26 +52,38 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
       expected_duration_minutes,
       severity,
     } = formData;
+
+    console.log("Form data:", formData); // Log the form data before validation
+
     if (
-      !name ||
-      !type ||
-      !expected_duration_hours ||
-      !expected_duration_minutes ||
-      !severity
+      name.trim() === "" ||
+      type.trim() === "" ||
+      severity.trim() === "" ||
+      expected_duration_hours === "" ||
+      expected_duration_minutes === ""
     ) {
+      console.log("Validation failed. Missing required fields.");
       Alert.alert(
         "Validation Error",
         "All fields except Comments are required."
       );
       return false;
     }
+
+    console.log("Validation passed!");
     return true;
   };
 
   const handleSubmit = () => {
+    console.log("handleSubmit: Submitting form...");
     if (validateForm()) {
       const { expected_duration_hours, expected_duration_minutes } = formData;
       const totalDuration = `${expected_duration_hours}:${expected_duration_minutes}:00`; // Create the "HH:MM:SS" format
+
+      console.log("Submitting data:", {
+        ...formData,
+        expected_duration: totalDuration,
+      });
 
       onSubmit({ ...formData, expected_duration: totalDuration });
       onClose();
@@ -81,6 +95,10 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
         severity: "Low",
         comments: "",
       });
+
+      console.log("Form cleared after submission.");
+    } else {
+      console.log("Form validation failed, submission not made.");
     }
   };
 
