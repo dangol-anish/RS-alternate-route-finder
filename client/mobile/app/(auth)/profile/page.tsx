@@ -1,4 +1,3 @@
-// ProfileEditPage.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -6,13 +5,13 @@ import {
   TextInput,
   StyleSheet,
   Image,
-  Alert,
-  ScrollView,
   Pressable,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import Toast from "react-native-toast-message"; // Import toast
 
 const ProfileEditPage = () => {
   const { user, setUser } = useAuthStore();
@@ -21,6 +20,7 @@ const ProfileEditPage = () => {
   const [phone, setPhone] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [isPhotoChanged, setIsPhotoChanged] = useState(false);
+  const [isSaving, setIsSaving] = useState(false); // Add saving state
 
   useEffect(() => {
     if (user) {
@@ -34,7 +34,11 @@ const ProfileEditPage = () => {
   const handlePickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission required", "Gallery access is required.");
+      Toast.show({
+        type: "error",
+        text1: "Permission required",
+        text2: "Gallery access is required.",
+      });
       return;
     }
 
@@ -53,6 +57,8 @@ const ProfileEditPage = () => {
   const handleSave = async () => {
     if (!user) return;
 
+    setIsSaving(true); // Set saving to true when save starts
+
     let base64Image = null;
 
     if (photo && isPhotoChanged && photo.startsWith("file://")) {
@@ -64,7 +70,12 @@ const ProfileEditPage = () => {
         base64Image = `data:image/jpeg;base64,${imageBase64}`;
       } catch (error) {
         console.error("Error converting image:", error);
-        Alert.alert("Error", "Failed to process the image.");
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Failed to process the image.",
+        });
+        setIsSaving(false);
         return;
       }
     }
@@ -80,7 +91,7 @@ const ProfileEditPage = () => {
           body: JSON.stringify({
             id: user.id,
             full_name: fullName,
-            photo: base64Image, // null or data URI
+            photo: base64Image,
           }),
         }
       );
@@ -89,7 +100,12 @@ const ProfileEditPage = () => {
 
       if (!response.ok) {
         console.error("Failed to update profile:", result.error);
-        Alert.alert("Error", result.error || "Failed to update profile.");
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: result.error || "Failed to update profile.",
+        });
+        setIsSaving(false);
         return;
       }
 
@@ -99,53 +115,73 @@ const ProfileEditPage = () => {
         photo: result.photo_url || user.photo,
       });
 
-      Alert.alert("Success", "Profile updated successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Profile updated successfully!",
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
-      Alert.alert("Error", "Something went wrong.");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Something went wrong.",
+      });
+    } finally {
+      setIsSaving(false); // Set saving back to false after completion
     }
   };
 
   if (!user) {
     return (
       <View style={styles.container}>
-        <Text>No user data found.</Text>
+        <Text style={styles.text}>No user data found.</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Pressable onPress={handlePickImage}>
-        {photo ? (
-          <Image source={{ uri: photo }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Text>Tap to Add Photo</Text>
-          </View>
-        )}
-      </Pressable>
-
-      <Text style={styles.label}>Full Name</Text>
-      <TextInput
-        style={styles.input}
-        value={fullName}
-        onChangeText={setFullName}
-      />
-
-      <View style={{ marginTop: 20, width: "100%" }}>
-        <Pressable style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Changes</Text>
+    <>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Pressable onPress={handlePickImage}>
+          {photo ? (
+            <Image source={{ uri: photo }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Text>Tap to Add Photo</Text>
+            </View>
+          )}
         </Pressable>
-      </View>
-    </ScrollView>
+
+        <Text style={styles.label}>Full Name</Text>
+        <TextInput
+          style={styles.input}
+          value={fullName}
+          onChangeText={setFullName}
+        />
+
+        <View style={{ marginTop: 20, width: "100%" }}>
+          <Pressable
+            style={[styles.saveButton, isSaving && { opacity: 0.6 }]}
+            onPress={handleSave}
+            disabled={isSaving} // Disable button while saving
+          >
+            <Text style={styles.saveButtonText}>
+              {isSaving ? "Saving..." : "Save Changes"} {/* Show saving text */}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Toast component */}
+      </ScrollView>
+      <Toast />
+    </>
   );
 };
 
-export default ProfileEditPage;
-
 const styles = StyleSheet.create({
   container: {
+    top: 30,
     padding: 20,
     alignItems: "center",
   },
@@ -187,4 +223,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  text: {
+    top: 30,
+  },
 });
+
+export default ProfileEditPage;

@@ -2,6 +2,7 @@ import { usePathname, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import React from "react";
+import { themeColors } from "../styles/colors";
 
 const FooterComponent: React.FC = () => {
   const pathname = usePathname();
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
-    backgroundColor: "white",
+    backgroundColor: themeColors.off_white,
     zIndex: 999,
   },
   container: {

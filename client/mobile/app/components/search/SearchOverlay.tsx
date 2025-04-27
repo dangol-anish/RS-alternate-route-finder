@@ -133,12 +133,13 @@ export default SearchOverlay;
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: themeColors.beige,
+    backgroundColor: themeColors.off_white,
   },
   searchBox: {
     flexDirection: "row",
     backgroundColor: themeColors.off_white,
     margin: 16,
+    marginTop: 9,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 50,
@@ -164,14 +165,17 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ccc",
     borderBottomWidth: 1,
   },
-
   noResults: {
     padding: 20,
-    alignItems: "center",
     justifyContent: "center",
+    alignItems: "center",
+    marginTop: 30,
   },
   noResultsText: {
+    color: themeColors.brown, // Or choose a color that fits your theme
     fontSize: 16,
-    color: "#888",
+    fontWeight: "bold",
+    textAlign: "center",
+    opacity: 0.7,
   },
 });

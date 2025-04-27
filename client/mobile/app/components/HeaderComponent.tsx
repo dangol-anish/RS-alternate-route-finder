@@ -128,7 +128,7 @@ export default HeaderComponent;
 const styles = StyleSheet.create({
   wrapper: {
     position: "absolute",
-    top: 0,
+    top: 20,
     left: 0,
     right: 0,
     zIndex: 10,
