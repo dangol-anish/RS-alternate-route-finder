@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import React from "react";
 import { useMapStore } from "@/app/store/useMapStore";
@@ -20,6 +21,8 @@ const SettingsItem = () => {
 
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const [loading, setLoading] = React.useState(false);
 
   const logoutUser = async () => {
     try {
@@ -135,7 +138,9 @@ const SettingsItem = () => {
           </View>
 
           <TouchableOpacity
+            disabled={loading}
             onPress={async () => {
+              setLoading(true);
               try {
                 await logoutUser();
                 await useAuthStore.getState().clearSession();
@@ -150,10 +155,26 @@ const SettingsItem = () => {
                   text1: "Logout failed",
                   text2: "Please try again.",
                 });
+              } finally {
+                setLoading(false);
               }
             }}
+            style={[
+              {
+                opacity: loading ? 0.6 : 1,
+              },
+            ]}
           >
-            <Text style={styles.logoutButtonText}>Logout</Text>
+            <View style={styles.logoutButtonContainer}>
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color="red" />
+                  <Text style={styles.logoutButtonText}>Logging out...</Text>
+                </View>
+              ) : (
+                <Text style={styles.logoutButtonText}>Logout</Text>
+              )}
+            </View>
           </TouchableOpacity>
         </>
       )}
@@ -163,11 +184,11 @@ const SettingsItem = () => {
 
 export default SettingsItem;
 
-// (styles unchanged, your styles were perfect!)
+// Styles
 const styles = StyleSheet.create({
   menuView: {
     ...StyleSheet.absoluteFillObject,
-    paddingTop: 20,
+    paddingTop: 30,
     zIndex: 100,
     flexDirection: "column",
     backgroundColor: themeColors.off_white,
@@ -204,7 +225,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
-    elevation: 5, // for Android
+    elevation: 5,
   },
   authHeaderText: {
     fontSize: 28,
@@ -224,7 +245,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     textAlign: "center",
-
     opacity: 0.8,
   },
   loginButtonContainer: {
@@ -242,16 +262,30 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  logoutButtonText: {
+  logoutButtonContainer: {
     marginHorizontal: 20,
     marginBottom: 20,
     borderRadius: 12,
+    backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+  },
+
+  logoutButtonText: {
     color: "red",
     fontSize: 20,
     fontWeight: "bold",
     letterSpacing: 1,
     textAlign: "center",
   },
+
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
   profileImage: {
     width: 170,
     height: 170,
