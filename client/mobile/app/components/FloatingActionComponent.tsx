@@ -1,11 +1,12 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import ClearPathButton from "./ClearPathButton";
 import CurrentLocationButton from "./CurrentLocationButton";
 import { useMapStore } from "../store/useMapStore";
+import { useAuthStore } from "../store/useAuthStore";
+import Toast from "react-native-toast-message";
 
-// Assuming SelectionMode is something like this (if not, adjust accordingly):
 type SelectionMode = "source" | "destination" | "obstacle" | "none";
 
 interface FloatingActionComponentProps {
@@ -19,28 +20,48 @@ const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
 }) => {
   const selectionMode = useMapStore((state) => state.selectionMode);
   const setSelectionMode = useMapStore((state) => state.setSelectionMode);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // Updated Button component to ensure mode type safety
   const Button = ({
     iconName,
     mode,
   }: {
     iconName: keyof typeof MaterialIcons.glyphMap;
-    mode: SelectionMode; // Ensure mode is of type SelectionMode
+    mode: SelectionMode;
   }) => {
+    const [pressed, setPressed] = useState(false);
     const isActive = selectionMode === mode;
+    const isDisabled = mode === "obstacle" && !isAuthenticated;
+
+    const handlePress = () => {
+      if (mode === "obstacle" && !isAuthenticated) {
+        Toast.show({
+          type: "error",
+          text1: "Login Required",
+          text2: "You must be logged in to set obstacles.",
+        });
+        return;
+      }
+      setSelectionMode(isActive ? "none" : mode);
+    };
+
     return (
       <TouchableOpacity
         style={[
           styles.floatingButton,
           isActive && { backgroundColor: "#4682B4" },
+          isDisabled && { backgroundColor: "#d3d3d3" },
+          pressed && { opacity: 0.6 }, // manual feedback
         ]}
-        onPress={() => setSelectionMode(isActive ? "none" : mode)} // Only valid SelectionMode values
+        activeOpacity={0.8}
+        onPress={handlePress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
       >
         <MaterialIcons
           name={iconName}
           size={24}
-          color={isActive ? "white" : "black"}
+          color={isActive ? "white" : isDisabled ? "gray" : "black"}
         />
       </TouchableOpacity>
     );
@@ -74,5 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 16,
     borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
