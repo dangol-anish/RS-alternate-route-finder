@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
@@ -97,52 +98,65 @@ const Signup = () => {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
       </View>
-
-      <Text style={styles.headerText}>Create Account</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={fullName}
-        onChangeText={setFullName}
+      <Image
+        source={require("../../../assets/logo/mainLogo.png")}
+        style={styles.logoStyle}
+        resizeMode="contain"
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      <Text style={styles.headerText}>Create an account</Text>
+      <View style={styles.colItems}>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number"
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-        keyboardType="phone-pad"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Phone Number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleSignup}>
+          <Text style={styles.buttonText}>Sign Up</Text>
+        </TouchableOpacity>
+
+        <View style={styles.signupPrompt}>
+          <Text style={styles.promptText}>Don't have an account?</Text>
+          <TouchableOpacity onPress={() => router.push("/signin")}>
+            <Text style={styles.signupText}> Login</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
@@ -164,27 +178,51 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
+    marginBottom: 20,
+    marginTop: 20,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 12,
-    marginBottom: 20,
+
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#007AFF",
+    backgroundColor: themeColors.green,
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 10,
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  logoStyle: {
+    height: 150,
+    width: 150,
+    alignSelf: "center",
+    marginTop: 30,
+  },
+
+  signupPrompt: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  promptText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  signupText: {
+    fontSize: 14,
+    color: themeColors.green,
+    fontWeight: "600",
+  },
+
+  colItems: {
+    flexDirection: "column",
+    gap: 15,
   },
 });
