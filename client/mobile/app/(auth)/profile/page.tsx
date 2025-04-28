@@ -7,6 +7,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
@@ -14,6 +15,7 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import Toast from "react-native-toast-message";
 import { themeColors } from "@/app/styles/colors";
 import { useRouter } from "expo-router"; // <<< NEW
+import { Ionicons } from "@expo/vector-icons";
 
 const ProfileEditPage = () => {
   const { user, setUser } = useAuthStore();
@@ -149,6 +151,11 @@ const ProfileEditPage = () => {
   return (
     <>
       <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.signinHeader}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+        </View>
         <Pressable onPress={handlePickImage}>
           {photo ? (
             <Image source={{ uri: photo }} style={styles.profileImage} />
@@ -194,13 +201,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: themeColors.off_white,
     flex: 1,
-    paddingTop: 70,
+    paddingTop: 80,
   },
   label: {
     alignSelf: "flex-start",
     marginTop: 16,
     fontWeight: "bold",
   },
+  signinHeader: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+  },
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
