@@ -70,7 +70,7 @@ const Signin = () => {
   return (
     <View style={styles.container}>
       <View style={styles.signinHeader}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push("/settings")}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
       </View>

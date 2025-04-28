@@ -94,7 +94,7 @@ const Signup = () => {
   return (
     <View style={styles.container}>
       <View style={styles.signupHeader}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.push("/settings")}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -103,8 +103,10 @@ const Signup = () => {
         style={styles.logoStyle}
         resizeMode="contain"
       />
-
-      <Text style={styles.headerText}>Create an account</Text>
+      <View style={styles.loginHeader}>
+        <Text style={styles.headerText}>Get Started!</Text>
+        <Text style={styles.headerSubText}> Welcome to RoadSense!</Text>
+      </View>
       <View style={styles.colItems}>
         <TextInput
           style={styles.input}
@@ -151,7 +153,7 @@ const Signup = () => {
         </TouchableOpacity>
 
         <View style={styles.signupPrompt}>
-          <Text style={styles.promptText}>Don't have an account?</Text>
+          <Text style={styles.promptText}>Already have an account?</Text>
           <TouchableOpacity onPress={() => router.push("/signin")}>
             <Text style={styles.signupText}> Login</Text>
           </TouchableOpacity>
@@ -178,15 +180,12 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
-    marginTop: 20,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 12,
-
     fontSize: 16,
   },
   button: {
@@ -204,7 +203,7 @@ const styles = StyleSheet.create({
     height: 150,
     width: 150,
     alignSelf: "center",
-    marginTop: 30,
+    marginTop: 40,
   },
 
   signupPrompt: {
@@ -224,5 +223,16 @@ const styles = StyleSheet.create({
   colItems: {
     flexDirection: "column",
     gap: 15,
+  },
+  headerSubText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    opacity: 0.5,
+  },
+  loginHeader: {
+    marginTop: 10,
+    flexDirection: "column",
+    marginBottom: 30,
+    gap: 4,
   },
 });
