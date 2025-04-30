@@ -7,9 +7,12 @@ import {
   Button,
   StyleSheet,
   Alert,
+  ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker"; // Importing the Picker for Expo
+import { Picker } from "@react-native-picker/picker";
 import { ObstacleFormProps } from "@/app/types/obstacleForm";
+import { themeColors } from "@/app/styles/colors";
 
 const obstacleTypes: string[] = [
   "Pothole",
@@ -31,20 +34,18 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     name: "",
-    type: "Others",
-    expected_duration_hours: "0", // Default to 0 hours
-    expected_duration_minutes: "0", // Default to 0 minutes
-    severity: "Low",
+    type: "",
+    expected_duration_hours: "0",
+    expected_duration_minutes: "0",
+    severity: "", // Start with empty for placeholder
     comments: "",
   });
 
   const handleChange = (field: string, value: string) => {
-    console.log(`handleChange: Setting ${field} to ${value}`);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {
-    console.log("validateForm: Validating form data");
     const {
       name,
       type,
@@ -53,8 +54,6 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
       severity,
     } = formData;
 
-    console.log("Form data:", formData); // Log the form data before validation
-
     if (
       name.trim() === "" ||
       type.trim() === "" ||
@@ -62,7 +61,6 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
       expected_duration_hours === "" ||
       expected_duration_minutes === ""
     ) {
-      console.log("Validation failed. Missing required fields.");
       Alert.alert(
         "Validation Error",
         "All fields except Comments are required."
@@ -70,35 +68,24 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
       return false;
     }
 
-    console.log("Validation passed!");
     return true;
   };
 
   const handleSubmit = () => {
-    console.log("handleSubmit: Submitting form...");
     if (validateForm()) {
       const { expected_duration_hours, expected_duration_minutes } = formData;
-      const totalDuration = `${expected_duration_hours}:${expected_duration_minutes}:00`; // Create the "HH:MM:SS" format
-
-      console.log("Submitting data:", {
-        ...formData,
-        expected_duration: totalDuration,
-      });
+      const totalDuration = `${expected_duration_hours}:${expected_duration_minutes}:00`;
 
       onSubmit({ ...formData, expected_duration: totalDuration });
       onClose();
       setFormData({
         name: "",
-        type: "Others",
+        type: "",
         expected_duration_hours: "0",
         expected_duration_minutes: "0",
-        severity: "Low",
+        severity: "",
         comments: "",
       });
-
-      console.log("Form cleared after submission.");
-    } else {
-      console.log("Form validation failed, submission not made.");
     }
   };
 
@@ -106,84 +93,112 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.container}>
         <View style={styles.form}>
-          <Text style={styles.label}>Obstacle Name</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.name}
-            onChangeText={(text) => handleChange("name", text)}
-          />
+          <ScrollView>
+            <View style={styles.header}>
+              <Text style={styles.headerText}>Add an Obstacle</Text>
+              <TouchableOpacity onPress={onClose}>
+                <Text style={styles.closeIcon}>×</Text>
+              </TouchableOpacity>
+            </View>
 
-          <Text style={styles.label}>Type</Text>
-          <Picker
-            selectedValue={formData.type}
-            onValueChange={(itemValue) => handleChange("type", itemValue)}
-            style={styles.input}
-          >
-            {obstacleTypes.map((type) => (
-              <Picker.Item key={type} label={type} value={type} />
-            ))}
-          </Picker>
+            <TextInput
+              style={styles.input}
+              value={formData.name}
+              onChangeText={(text) => handleChange("name", text)}
+              placeholder="Enter the obstacle name..."
+            />
 
-          <Text style={styles.label}>Expected Duration</Text>
-          <View style={styles.durationRow}>
-            <Text>Hours:</Text>
-            <Picker
-              selectedValue={formData.expected_duration_hours}
-              onValueChange={(itemValue) =>
-                handleChange("expected_duration_hours", itemValue)
-              }
-              style={styles.durationInput}
-            >
-              {[...Array(24).keys()].map((i) => (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.type}
+                onValueChange={(itemValue) => handleChange("type", itemValue)}
+                style={styles.picker}
+              >
                 <Picker.Item
-                  key={i}
-                  label={i.toString()}
-                  value={i.toString()}
+                  label="Select an obstacle type"
+                  value=""
+                  style={{ color: "grey" }}
                 />
-              ))}
-            </Picker>
+                {obstacleTypes.map((type) => (
+                  <Picker.Item key={type} label={type} value={type} />
+                ))}
+              </Picker>
+            </View>
 
-            <Text>Minutes:</Text>
-            <Picker
-              selectedValue={formData.expected_duration_minutes}
-              onValueChange={(itemValue) =>
-                handleChange("expected_duration_minutes", itemValue)
-              }
-              style={styles.durationInput}
-            >
-              {[...Array(60).keys()].map((i) => (
+            <Text style={styles.label}>Expected Duration</Text>
+            <View style={styles.durationRow}>
+              <Text>Hours:</Text>
+              <View style={styles.pickerContainerSmall}>
+                <Picker
+                  selectedValue={formData.expected_duration_hours}
+                  onValueChange={(itemValue) =>
+                    handleChange("expected_duration_hours", itemValue)
+                  }
+                  style={styles.picker}
+                >
+                  {[...Array(24).keys()].map((i) => (
+                    <Picker.Item
+                      key={i}
+                      label={i.toString()}
+                      value={i.toString()}
+                    />
+                  ))}
+                </Picker>
+              </View>
+
+              <Text>Minutes:</Text>
+              <View style={styles.pickerContainerSmall}>
+                <Picker
+                  selectedValue={formData.expected_duration_minutes}
+                  onValueChange={(itemValue) =>
+                    handleChange("expected_duration_minutes", itemValue)
+                  }
+                  style={styles.picker}
+                >
+                  {[...Array(60).keys()].map((i) => (
+                    <Picker.Item
+                      key={i}
+                      label={i.toString()}
+                      value={i.toString()}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.severity}
+                onValueChange={(itemValue) =>
+                  handleChange("severity", itemValue)
+                }
+                style={styles.picker}
+              >
                 <Picker.Item
-                  key={i}
-                  label={i.toString()}
-                  value={i.toString()}
+                  label="Pick a level of severity"
+                  value=""
+                  style={{ color: "grey" }}
                 />
-              ))}
-            </Picker>
-          </View>
+                {severityLevels.map((level) => (
+                  <Picker.Item key={level} label={level} value={level} />
+                ))}
+              </Picker>
+            </View>
 
-          <Text style={styles.label}>Severity</Text>
-          <Picker
-            selectedValue={formData.severity}
-            onValueChange={(itemValue) => handleChange("severity", itemValue)}
-            style={styles.input}
-          >
-            {severityLevels.map((level) => (
-              <Picker.Item key={level} label={level} value={level} />
-            ))}
-          </Picker>
+            <TextInput
+              style={[styles.input, styles.textarea]}
+              value={formData.comments}
+              onChangeText={(text) => handleChange("comments", text)}
+              multiline
+              numberOfLines={4}
+              placeholder="Add any comments here (optional)"
+              scrollEnabled={true}
+            />
 
-          <Text style={styles.label}>Comments (optional)</Text>
-          <TextInput
-            style={[styles.input, styles.textarea]}
-            value={formData.comments}
-            onChangeText={(text) => handleChange("comments", text)}
-            multiline
-            numberOfLines={4}
-            placeholder="Add any comments here"
-          />
-
-          <Button title="Submit" onPress={handleSubmit} />
-          <Button title="Cancel" color="red" onPress={onClose} />
+            <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+              <Text style={styles.submitBtnText}>Add an Obstacle</Text>
+            </TouchableOpacity>
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -194,24 +209,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   form: {
     margin: 20,
     padding: 20,
     backgroundColor: "white",
     borderRadius: 10,
+    maxHeight: "90%",
   },
   label: {
-    marginTop: 10,
-    fontWeight: "bold",
+    fontWeight: "400",
+    marginVertical: 5,
+    opacity: 0.5,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    padding: 8,
-    marginTop: 5,
-    borderRadius: 5,
+    borderRadius: 8,
+    height: 50,
+    paddingHorizontal: 10,
+    fontSize: 16,
+    marginBottom: 10,
   },
   textarea: {
     height: 100,
@@ -221,15 +240,54 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 5,
+    marginBottom: 10,
   },
-  durationInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
+  pickerContainer: {
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: "#f2f2f2",
+    borderRadius: 8,
+  },
+  pickerContainerSmall: {
     marginHorizontal: 5,
-    borderRadius: 5,
-    width: 70,
-    textAlign: "center",
+    paddingHorizontal: 5,
+    backgroundColor: "#f2f2f2",
+    borderRadius: 8,
+    width: 100,
+  },
+  picker: {
+    height: 50,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  closeIcon: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "gray",
+    paddingHorizontal: 10,
+  },
+  submitBtn: {
+    backgroundColor: themeColors.green,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  submitBtnText: {
+    fontSize: 16,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });
 
