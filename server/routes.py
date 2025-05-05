@@ -301,12 +301,25 @@ def create_obstacle():
     required_fields = ["node_id", "latitude", "longitude", "name", "type", "expected_duration", "severity", "owner"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
-    
-    # Logging the incoming data to debug
 
+    image_url = None
 
     try:
-        # Insert into Supabase
+        # Handle image upload if provided
+        image_base64 = data.get("image")  # optional field
+        if image_base64:
+            # Only handle image upload if base64 image is provided
+            if "," in image_base64:
+                _, encoded = image_base64.split(",", 1)  # strip out the "data:image/jpeg;base64," part
+            else:
+                encoded = image_base64
+
+            # Decode base64 image to bytes
+            image_data = base64.b64decode(encoded)
+            upload_result = cloudinary.uploader.upload(io.BytesIO(image_data))  # upload to Cloudinary
+            image_url = upload_result.get("secure_url")  # Get the secure URL for the image
+
+        # Insert into Supabase with Cloudinary URL if image is uploaded
         response = supabase.table("obstacles").insert({
             "node_id": data["node_id"],
             "latitude": data["latitude"],
@@ -317,6 +330,7 @@ def create_obstacle():
             "severity": data["severity"],
             "comments": data.get("comments", ""),
             "owner": data["owner"],
+            "image_url": image_url  # Save the Cloudinary URL here
         }).execute()
 
         print("Response from Supabase:", response)
@@ -324,9 +338,9 @@ def create_obstacle():
         return jsonify({"success": True, "data": response.data}), 201
 
     except Exception as e:
-        print("Error occurred:", e)  # Log the actual error
+        print("Error occurred:", e)
         return jsonify({"error": str(e)}), 500
-    
+
 # ----------------------
 # Obstacle Report Route
 # ----------------------

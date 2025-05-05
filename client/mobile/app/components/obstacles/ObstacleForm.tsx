@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   Alert,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
 import { ObstacleFormProps } from "@/app/types/obstacleForm";
 import { themeColors } from "@/app/styles/colors";
+import * as FileSystem from "expo-file-system";
 
 const obstacleTypes: string[] = [
   "Pothole",
@@ -37,9 +38,25 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
     type: "",
     expected_duration_hours: "0",
     expected_duration_minutes: "0",
-    severity: "", // Start with empty for placeholder
+    severity: "",
     comments: "",
   });
+
+  const [image, setImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!visible) {
+      setFormData({
+        name: "",
+        type: "",
+        expected_duration_hours: "0",
+        expected_duration_minutes: "0",
+        severity: "",
+        comments: "",
+      });
+      setImage(null);
+    }
+  }, [visible]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -63,7 +80,7 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
     ) {
       Alert.alert(
         "Validation Error",
-        "All fields except Comments are required."
+        "All fields except Comments and Image are required."
       );
       return false;
     }
@@ -71,12 +88,54 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
     return true;
   };
 
+  const pickImage = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Denied", "Camera roll permission is required.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const imageUri = result.assets[0].uri;
+      setImage(imageUri);
+
+      try {
+        const base64Image = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        setImage(`data:image/jpeg;base64,${base64Image}`);
+      } catch (error) {
+        Alert.alert("Error", "Failed to process the image.");
+      }
+    }
+  };
+
+  const getFileName = (uri: string) => {
+    return uri.split("/").pop();
+  };
+
   const handleSubmit = () => {
     if (validateForm()) {
       const { expected_duration_hours, expected_duration_minutes } = formData;
       const totalDuration = `${expected_duration_hours}:${expected_duration_minutes}:00`;
 
-      onSubmit({ ...formData, expected_duration: totalDuration });
+      // Handle image as optional, convert null to undefined
+      const dataToSubmit = {
+        ...formData,
+        expected_duration: totalDuration,
+        image: image || undefined, // If image is null, set it as undefined
+      };
+
+      onSubmit(dataToSubmit);
       onClose();
       setFormData({
         name: "",
@@ -86,6 +145,7 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
         severity: "",
         comments: "",
       });
+      setImage(null);
     }
   };
 
@@ -134,7 +194,7 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
                   onValueChange={(itemValue) =>
                     handleChange("expected_duration_hours", itemValue)
                   }
-                  style={styles.picker}
+                  style={styles.pickerTime}
                 >
                   {[...Array(24).keys()].map((i) => (
                     <Picker.Item
@@ -153,7 +213,7 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
                   onValueChange={(itemValue) =>
                     handleChange("expected_duration_minutes", itemValue)
                   }
-                  style={styles.picker}
+                  style={styles.pickerTime}
                 >
                   {[...Array(60).keys()].map((i) => (
                     <Picker.Item
@@ -194,6 +254,17 @@ const ObstacleForm: React.FC<ObstacleFormProps> = ({
               placeholder="Add any comments here (optional)"
               scrollEnabled={true}
             />
+
+            <View>
+              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+                <Text style={styles.imageButtonText}>Select Image</Text>
+              </TouchableOpacity>
+              <Text style={styles.imageStatusText}>
+                {image
+                  ? `Selected Image: ${getFileName(image)}`
+                  : "No image selected"}
+              </Text>
+            </View>
 
             <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
               <Text style={styles.submitBtnText}>Add an Obstacle</Text>
@@ -259,6 +330,10 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
   },
+  pickerTime: {
+    height: 50,
+    width: 100,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -283,11 +358,32 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    marginTop: 15,
   },
   submitBtnText: {
     fontSize: 16,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+    color: "white",
+  },
+  imageButton: {
+    borderWidth: 2,
+    borderColor: themeColors.green,
+    borderStyle: "dashed",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    backgroundColor: "transparent",
+  },
+  imageButtonText: {
+    color: themeColors.green,
+    fontWeight: "600",
+    alignSelf: "center",
+  },
+  imageStatusText: {
+    marginTop: 8,
+    fontStyle: "italic",
+    color: "#555",
   },
 });
 

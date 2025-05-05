@@ -1,26 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Alert, Image } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
 import MapView, {
-  Marker,
-  Polyline,
+  LatLng,
   MapPressEvent,
+  Marker,
   Polygon,
+  Polyline,
 } from "react-native-maps";
-import { GeoJSONFeature } from "../types/geoJSON";
-import { LatLng } from "react-native-maps";
+import { useAuthStore } from "../store/useAuthStore";
 import { useMapStore } from "../store/useMapStore";
+import { themeColors } from "../styles/colors";
+import { GeoJSONFeature } from "../types/geoJSON";
+import { MapComponentProps } from "../types/map";
+import { darkMapStyle } from "../utils/mapStyles";
 import ObstacleDetailsModal from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
-import axios from "axios";
-import { useAuthStore } from "../store/useAuthStore";
-import { Obstacle } from "@/app/types/obstacle";
-import { MapComponentProps } from "../types/map";
-import { getObstacleIcon, getSeverityColor } from "../utils/obstacleUtils";
-import ObstacleMarker from "./obstacles/ObstacleMarker";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
-import { darkMapStyle } from "../utils/mapStyles";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { themeColors } from "../styles/colors";
 
 const MapComponent: React.FC<MapComponentProps> = ({
   toggleObstacle,
@@ -104,10 +101,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
     expected_duration: string;
     severity: string;
     comments?: string;
+    image?: string | null; // Update this to allow 'null'
   }) => {
     if (!selectedNode || !userLocation) return;
 
     try {
+      // Convert image `null` to `undefined`
+      const image = formData.image === null ? undefined : formData.image;
+
       const response = await axios.post(
         `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/save_obstacles`,
         {
@@ -119,7 +120,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           expected_duration: formData.expected_duration,
           severity: formData.severity,
           comments: formData.comments,
-          owner: user?.id, // Replace with actual user id (optional: from auth token)
+          owner: user?.id,
+          image: image,
         }
       );
 

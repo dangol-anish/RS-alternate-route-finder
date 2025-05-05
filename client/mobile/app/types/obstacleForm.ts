@@ -7,5 +7,6 @@ export interface ObstacleFormProps {
     expected_duration: string;
     severity: string;
     comments?: string;
+    image?: string | null;
   }) => void;
 }
