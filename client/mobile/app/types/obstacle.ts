@@ -1,4 +1,5 @@
 export type Obstacle = {
+  profiles: any;
   id: string;
   latitude: number;
   longitude: number;
@@ -9,4 +10,5 @@ export type Obstacle = {
   severity: string;
   comments: string;
   created_at: string | number;
+  image_url?: string;
 };

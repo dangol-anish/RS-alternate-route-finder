@@ -347,8 +347,10 @@ def create_obstacle():
 
 @main_routes.route('/get_obstacles', methods=['GET'])
 def get_obstacles():
-    # Assuming you're already connected to Supabase
-    response = supabase.table('obstacles').select('*').execute()
+    # This assumes you have a foreign key from obstacles.owner -> users.id
+    response = supabase.table('obstacles') \
+        .select('*, profiles(full_name)') \
+        .execute()
     return jsonify(response.data)
 
 

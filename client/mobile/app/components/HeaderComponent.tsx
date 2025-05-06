@@ -1,18 +1,16 @@
+import { Ionicons } from "@expo/vector-icons";
+import React, { useRef, useState } from "react";
 import {
+  Image,
   StyleSheet,
   TextInput,
-  View,
   TouchableOpacity,
-  Image,
-  Text,
+  View,
 } from "react-native";
-import React, { useRef, useState } from "react";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useMapStore } from "../store/useMapStore";
-import { useAuthStore } from "../store/useAuthStore";
-import SearchOverlay from "./search/SearchOverlay";
 import MapView from "react-native-maps";
+import { useAuthStore } from "../store/useAuthStore";
 import { themeColors } from "../styles/colors";
+import SearchOverlay from "./search/SearchOverlay";
 
 // Props now accepts the mapRef
 const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {

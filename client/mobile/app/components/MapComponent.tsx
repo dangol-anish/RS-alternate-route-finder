@@ -15,7 +15,7 @@ import { themeColors } from "../styles/colors";
 import { GeoJSONFeature } from "../types/geoJSON";
 import { MapComponentProps } from "../types/map";
 import { darkMapStyle } from "../utils/mapStyles";
-import ObstacleDetailsModal from "./obstacles/ObstacleDetailsModal";
+import ObstacleDetailsPanel from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
 
@@ -268,7 +268,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         onClose={() => setShowForm(false)}
         onSubmit={handleFormSubmit}
       />
-      {selectedObstacle && <ObstacleDetailsModal />}
+      {selectedObstacle && <ObstacleDetailsPanel />}
     </View>
   );
 };
