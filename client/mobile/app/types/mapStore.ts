@@ -28,4 +28,7 @@ export type MapStore = {
   //test
   selectionMode: SelectionMode;
   setSelectionMode: (mode: SelectionMode) => void;
+  // useMapStore.ts
+  selectedObstacleCoord: LatLng | null;
+  setSelectedObstacleCoord: (coord: LatLng | null) => void;
 };

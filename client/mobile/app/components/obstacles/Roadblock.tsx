@@ -15,8 +15,15 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import { getSeverityColor } from "@/app/utils/obstacleUtils";
 import { truncateText } from "@/app/utils/truncateText";
 import { AntDesign } from "@expo/vector-icons";
+import { useMapStore } from "@/app/store/useMapStore";
+import { useRouter } from "expo-router";
 
 const Roadblock: React.FC = () => {
+  const setSelectedObstacleCoord = useMapStore(
+    (state) => state.setSelectedObstacleCoord
+  );
+  const router = useRouter();
+
   const { obstaclesDb } = useObstacles();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<"all" | "mine">("all");
@@ -91,7 +98,21 @@ const Roadblock: React.FC = () => {
             </Text>
           </View>
         </View>
-        <AntDesign name="eyeo" size={24} color="black" />
+        <AntDesign
+          name="eyeo"
+          size={24}
+          color="black"
+          onPress={() => {
+            // Set map target coordinates
+            setSelectedObstacleCoord({
+              latitude: item.latitude,
+              longitude: item.longitude,
+            });
+
+            // Navigate to the home screen (index)
+            router.replace("/");
+          }}
+        />
       </View>
     );
   };

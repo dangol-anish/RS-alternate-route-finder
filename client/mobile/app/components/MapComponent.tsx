@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Alert, View } from "react-native";
 import MapView, {
   LatLng,
@@ -46,6 +46,23 @@ const MapComponent: React.FC<MapComponentProps> = ({
   const user = useAuthStore((state) => state.user);
   const selectedObstacle = useMapStore((state) => state.selectedObstacle);
   const setSelectedObstacle = useMapStore((state) => state.setSelectedObstacle);
+
+  const selectedObstacleCoord = useMapStore(
+    (state) => state.selectedObstacleCoord
+  );
+
+  useEffect(() => {
+    if (selectedObstacleCoord && mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          ...selectedObstacleCoord,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000
+      );
+    }
+  }, [selectedObstacleCoord]);
 
   const findNearestNode = (
     latitude: number,

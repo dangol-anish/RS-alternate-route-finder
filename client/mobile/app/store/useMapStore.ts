@@ -34,4 +34,7 @@ export const useMapStore = create<MapStore>((set, get) => ({
   // ← NEW setter
   setSelectionMode: (mode: SelectionMode) =>
     set(() => ({ selectionMode: mode })),
+
+  selectedObstacleCoord: null,
+  setSelectedObstacleCoord: (coord) => set({ selectedObstacleCoord: coord }),
 }));
