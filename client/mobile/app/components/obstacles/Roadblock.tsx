@@ -4,7 +4,6 @@ import {
   Text,
   View,
   FlatList,
-  Image,
   SafeAreaView,
   TouchableOpacity,
   ListRenderItem,
@@ -13,11 +12,39 @@ import { themeColors } from "@/app/styles/colors";
 import { useObstacles } from "@/app/hooks/useObstacles";
 import { Obstacle } from "@/app/types/obstacle";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import { getSeverityColor } from "@/app/utils/obstacleUtils";
+import { truncateText } from "@/app/utils/truncateText";
+import { AntDesign } from "@expo/vector-icons";
 
 const Roadblock: React.FC = () => {
   const { obstaclesDb } = useObstacles();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<"all" | "mine">("all");
+
+  const getRemainingTime = (
+    createdAtRaw: string | number,
+    expectedDuration: string
+  ): string => {
+    const createdAt = new Date(createdAtRaw);
+    const [hoursStr, minutesStr, secondsStr] = expectedDuration.split(":");
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+    const seconds = parseInt(secondsStr, 10);
+
+    const expectedEnd = new Date(createdAt);
+    expectedEnd.setHours(createdAt.getHours() + hours);
+    expectedEnd.setMinutes(createdAt.getMinutes() + minutes);
+    expectedEnd.setSeconds(createdAt.getSeconds() + seconds);
+
+    const now = new Date();
+    const diffMs = expectedEnd.getTime() - now.getTime();
+    if (diffMs <= 0) return "Expired";
+
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${diffHours}h ${diffMinutes}m remaining`;
+  };
 
   const filteredObstacles =
     activeTab === "all"
@@ -26,23 +53,48 @@ const Roadblock: React.FC = () => {
       ? obstaclesDb.filter((item) => item.owner === user.id)
       : [];
 
-  const renderItem: ListRenderItem<Obstacle> = ({ item }) => (
-    <View style={styles.card}>
-      <Image source={{ uri: item.image_url }} style={styles.image} />
-      <View style={styles.cardContent}>
-        <Text style={styles.title}>{item.name}</Text>
-        <Text style={styles.subtitle}>{item.type.toUpperCase()}</Text>
-        <Text style={styles.description}>{item.comments}</Text>
-        <Text style={styles.info}>
-          Severity: {item.severity} | Duration: {item.expected_duration}
-        </Text>
-        <Text>{item.owner}</Text>
-        <Text style={styles.location}>
-          Location: ({item.latitude}, {item.longitude})
-        </Text>
+  const renderItem: ListRenderItem<Obstacle> = ({ item }) => {
+    const remainingTime = getRemainingTime(
+      item.created_at,
+      item.expected_duration
+    );
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardContent}>
+          <Text style={styles.subtitle}>{item.type}</Text>
+          <Text style={styles.title}>{truncateText(item.name, 20)}</Text>
+          <View style={styles.tagView}>
+            <Text
+              style={{
+                backgroundColor: getSeverityColor(item.severity),
+                paddingVertical: 1,
+                paddingHorizontal: 6,
+                borderRadius: 12,
+                alignSelf: "flex-start",
+                opacity: 0.7,
+              }}
+            >
+              {item.severity}
+            </Text>
+            <Text
+              style={{
+                backgroundColor: themeColors.light_green,
+                paddingVertical: 1,
+                paddingHorizontal: 6,
+                borderRadius: 12,
+                alignSelf: "flex-start",
+                opacity: 0.8,
+              }}
+            >
+              {remainingTime && <Text>{remainingTime}</Text>}
+            </Text>
+          </View>
+        </View>
+        <AntDesign name="eyeo" size={24} color="black" />
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,17 +133,15 @@ const Roadblock: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* No user message */}
       {activeTab === "mine" && !user && (
         <Text style={styles.loginMessage}>
           Please log in to view your obstacles.
         </Text>
       )}
 
-      {/* Obstacle List */}
       <FlatList
         data={filteredObstacles}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
@@ -114,44 +164,47 @@ const styles = StyleSheet.create({
     backgroundColor: themeColors.off_white,
     paddingTop: 30,
     zIndex: 100,
+    paddingHorizontal: 20,
   },
   headerMenu: {
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
+    paddingHorizontal: 0,
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
   },
   tabContainer: {
+    backgroundColor: themeColors.gray,
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    borderRadius: 50,
+    marginBottom: 15,
   },
   tab: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 2,
-    borderColor: "transparent",
+    paddingHorizontal: 30,
     marginHorizontal: 10,
   },
   activeTab: {
-    borderColor: themeColors.red,
+    backgroundColor: themeColors.off_white,
+    borderRadius: 50,
+    marginVertical: 5,
   },
   tabText: {
     fontSize: 16,
-    color: themeColors.gray,
   },
   activeTabText: {
     fontWeight: "bold",
-    color: themeColors.gray,
   },
   loginMessage: {
     textAlign: "center",
     marginVertical: 10,
-    color: "red",
-    fontSize: 14,
+    color: themeColors.brown,
+    fontSize: 16,
   },
   emptyMessage: {
     textAlign: "center",
@@ -160,44 +213,49 @@ const styles = StyleSheet.create({
     color: themeColors.gray,
   },
   listContent: {
-    paddingHorizontal: 20,
     paddingBottom: 100,
   },
   card: {
-    backgroundColor: themeColors.gray,
-    borderRadius: 10,
     marginBottom: 15,
-    overflow: "hidden",
     flexDirection: "row",
-  },
-  image: {
-    width: 100,
-    height: 100,
+    borderBottomWidth: 1,
+    borderBottomColor: themeColors.gray,
+    paddingBottom: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
   },
   cardContent: {
     flex: 1,
-    padding: 10,
+    flexDirection: "column",
+    gap: 3,
   },
   title: {
     fontSize: 18,
     fontWeight: "600",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: themeColors.gray,
-  },
-  description: {
-    marginTop: 4,
-    fontSize: 14,
   },
   info: {
     fontSize: 12,
     color: themeColors.gray,
     marginTop: 4,
   },
-  location: {
-    fontSize: 12,
-    color: themeColors.gray,
-    marginTop: 2,
+  remainingTime: {
+    fontStyle: "italic",
+    color: themeColors.green || "#007700",
+  },
+  tagView: {
+    flexDirection: "row",
+    gap: 6,
+    paddingHorizontal: 2,
+  },
+  titleTextView: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 1,
+    justifyContent: "space-between",
   },
 });

@@ -187,7 +187,7 @@ const ObstacleDetailsPanel = () => {
                       backgroundColor: getSeverityColor(
                         selectedObstacle.severity
                       ),
-                      paddingVertical: 3,
+                      paddingVertical: 1,
                       paddingHorizontal: 6,
                       borderRadius: 12,
                       alignSelf: "flex-start",
@@ -199,7 +199,7 @@ const ObstacleDetailsPanel = () => {
                   <Text
                     style={{
                       backgroundColor: themeColors.light_green,
-                      paddingVertical: 3,
+                      paddingVertical: 1,
                       paddingHorizontal: 6,
                       borderRadius: 12,
                       alignSelf: "flex-start",

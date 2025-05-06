@@ -53,7 +53,7 @@ export const useObstacles = () => {
         },
         (payload) => {
           console.log("🔄 Realtime obstacle update:", payload);
-          fetchObstacles(); // Re-fetch on any insert/update/delete
+          fetchObstacles();
         }
       )
       .subscribe();
