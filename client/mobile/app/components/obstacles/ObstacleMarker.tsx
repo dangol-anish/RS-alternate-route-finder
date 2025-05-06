@@ -13,8 +13,8 @@ const ObstacleMarker: React.FC<ObstacleMarkerProps> = ({ type, severity }) => {
   return (
     <View
       style={{
-        width: 40, // Adjust size for consistency
-        height: 40, // Adjust size for consistency
+        width: 30,
+        height: 30,
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -22,8 +22,8 @@ const ObstacleMarker: React.FC<ObstacleMarkerProps> = ({ type, severity }) => {
       <Image
         source={icon}
         style={{
-          width: 40, // Ensure consistent image size
-          height: 40, // Ensure consistent image size
+          width: 30,
+          height: 30,
           resizeMode: "center",
           tintColor: getSeverityColor(severity), // Apply tint color based on severity
         }}

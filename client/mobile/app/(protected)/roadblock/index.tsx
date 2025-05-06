@@ -1,14 +1,11 @@
 // roadblock.js
 
+import Roadblock from "@/app/components/obstacles/Roadblock";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 const roadblock = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>roadblock</Text>
-    </View>
-  );
+  return <Roadblock />;
 };
 
 const styles = StyleSheet.create({

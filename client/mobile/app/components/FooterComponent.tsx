@@ -1,5 +1,5 @@
 import { usePathname, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 import React from "react";
 import { themeColors } from "../styles/colors";
@@ -37,19 +37,6 @@ const FooterComponent: React.FC = () => {
       </Pressable>
       <Pressable
         style={styles.container}
-        onPress={() => router.push("/settings")}
-      >
-        <Ionicons
-          name="bookmark-outline"
-          size={20}
-          color={getIconColor("settings")}
-        />
-        <Text style={[styles.iconText, getTextStyle("settings")]}>
-          Settings
-        </Text>
-      </Pressable>
-      <Pressable
-        style={styles.container}
         onPress={() => router.push("/roadblock")}
       >
         <Ionicons
@@ -59,6 +46,15 @@ const FooterComponent: React.FC = () => {
         />
         <Text style={[styles.iconText, getTextStyle("roadblock")]}>
           Roadblock
+        </Text>
+      </Pressable>
+      <Pressable
+        style={styles.container}
+        onPress={() => router.push("/settings")}
+      >
+        <Feather name="settings" size={20} color={getIconColor("settings")} />
+        <Text style={[styles.iconText, getTextStyle("settings")]}>
+          Settings
         </Text>
       </Pressable>
     </View>

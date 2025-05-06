@@ -192,7 +192,6 @@ const ObstacleDetailsPanel = () => {
                       borderRadius: 12,
                       alignSelf: "flex-start",
                       opacity: 0.8,
-                      color: "white",
                     }}
                   >
                     {selectedObstacle.severity}
@@ -260,6 +259,8 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 16,
     marginBottom: 15,
+    borderColor: themeColors.gray,
+    borderWidth: 1,
   },
   noImage: {
     width: "100%",
