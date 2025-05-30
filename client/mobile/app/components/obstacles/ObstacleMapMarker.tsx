@@ -2,6 +2,7 @@ import React from "react";
 import { Marker } from "react-native-maps";
 import { Obstacle } from "@/app/types/obstacle";
 import { LatLng } from "react-native-maps";
+import { themeColors } from "@/app/styles/colors";
 
 interface Props {
   obstacle: Obstacle;
@@ -18,7 +19,7 @@ const ObstacleMapMarker: React.FC<Props> = ({ obstacle, onPress }) => {
     <Marker
       coordinate={coordinate}
       onPress={() => onPress(obstacle)}
-      pinColor="orange"
+      pinColor={themeColors.red}
     />
   );
 };

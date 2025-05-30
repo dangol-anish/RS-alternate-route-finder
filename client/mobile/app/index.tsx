@@ -315,8 +315,8 @@ export default function App() {
         place.street,
         place.district,
         place.city,
-        place.region,
-        place.country,
+        // place.region,
+        // place.country,
       ].filter(Boolean);
 
       // Remove duplicates and generic names

@@ -7,4 +7,5 @@ export const themeColors = {
   off_white: "#FAF9F6",
   red: "#b85c5c",
   gray: "#b0aca5",
+  blue: "#4A90E2",
 };

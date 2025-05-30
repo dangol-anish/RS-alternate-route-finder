@@ -214,7 +214,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: source.geometry.coordinates[1],
               longitude: source.geometry.coordinates[0],
             }}
-            pinColor="green"
+            pinColor={themeColors.green}
           />
         )}
 
@@ -224,7 +224,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: destination.geometry.coordinates[1],
               longitude: destination.geometry.coordinates[0],
             }}
-            pinColor="red"
+            pinColor={themeColors.brown}
           />
         )}
 
@@ -244,11 +244,17 @@ const MapComponent: React.FC<MapComponentProps> = ({
         ))}
 
         {path.length > 0 && (
-          <Polyline coordinates={path} strokeColor="#800020" strokeWidth={5} />
+          <Polyline
+            coordinates={path}
+            strokeColor={themeColors.red}
+            strokeWidth={5}
+          />
         )}
 
         {/* User Location Marker */}
-        {userLocation && <Marker coordinate={userLocation} pinColor="blue" />}
+        {userLocation && (
+          <Marker coordinate={userLocation} pinColor={themeColors.blue} />
+        )}
 
         {boundary.length > 0 && (
           <Polygon coordinates={boundary} strokeColor="black" strokeWidth={1} />

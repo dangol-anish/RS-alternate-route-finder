@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
+import { themeColors } from "../styles/colors";
 
 type Props = {
   sourceName: string;
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "white",
+    backgroundColor: themeColors.off_white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -117,6 +118,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: -2 },
+    borderBottomColor: themeColors.gray,
+    borderBottomWidth: 0.8,
   },
   closeButton: {
     position: "absolute",
