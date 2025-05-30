@@ -421,19 +421,33 @@ export default function App() {
     firstPathAcknowledged,
   ]);
 
-  // Helper to check if user has moved significantly from the original source
-  function hasUserMovedFromSource(
-    userLocation: LatLng | null,
-    source: GeoJSONFeature | null,
-    threshold: number = 0.0002
-  ): boolean {
-    if (!userLocation || !source || !source.geometry) return false;
-    const [lon, lat] = source.geometry.coordinates;
-    return (
-      Math.abs(userLocation.latitude - lat) > threshold ||
-      Math.abs(userLocation.longitude - lon) > threshold
-    );
+  function resetObstaclePromptState() {
+    setPromptedObstacles(new Set());
+    setFirstPathAcknowledged(false);
+    setInitialPathObstaclesSnapshot(new Set());
   }
+
+  useEffect(() => {
+    resetObstaclePromptState();
+    if (source && destination && path.length > 1) {
+      setShowRouteInfo(true);
+      // Take the snapshot of obstacles currently on the path
+      const snapshot = new Set(
+        obstaclesDb
+          .filter((obstacle) =>
+            isPointNearPath(
+              {
+                latitude: obstacle.latitude,
+                longitude: obstacle.longitude,
+              },
+              path
+            )
+          )
+          .map((obstacle) => obstacle.id)
+      );
+      setInitialPathObstaclesSnapshot(snapshot);
+    }
+  }, [source, destination, path]);
 
   // Handle reroute
   const handleReroute = () => {
@@ -441,9 +455,8 @@ export default function App() {
     if (!obstaclePrompt) return;
     setPromptedObstacles((prev) => new Set(prev).add(obstaclePrompt.id));
     if (!destination) return;
-    // Force rerender by cloning the source object
+    resetObstaclePromptState();
     setSource(source ? { ...source } : null);
-    // This will trigger path recalculation
   };
 
   // Handle ignore
@@ -500,24 +513,7 @@ export default function App() {
           distanceKm={pathDistance(path)}
           onClose={() => {
             setShowRouteInfo(false);
-            if (!firstPathAcknowledged) {
-              setFirstPathAcknowledged(true);
-              // Take a snapshot of obstacles on the path at this moment
-              const snapshot = new Set(
-                obstaclesDb
-                  .filter((obstacle) =>
-                    isPointNearPath(
-                      {
-                        latitude: obstacle.latitude,
-                        longitude: obstacle.longitude,
-                      },
-                      path
-                    )
-                  )
-                  .map((obstacle) => obstacle.id)
-              );
-              setInitialPathObstaclesSnapshot(snapshot);
-            }
+            setFirstPathAcknowledged(true);
           }}
         />
       )}
