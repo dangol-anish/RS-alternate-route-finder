@@ -22,4 +22,5 @@ export interface MapComponentProps {
       longitudeDelta: number;
     }>
   >;
+  onRoutePress?: () => void;
 }

@@ -27,6 +27,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   setMapRegion,
   obstaclesDb,
   mapRef,
+  onRoutePress,
 }) => {
   const {
     source,
@@ -164,6 +165,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
     fetchBoundary();
   }, []);
 
+  // Utility: Check if a point is near a path (within threshold meters)
+  function isPointNearPath(
+    point: { latitude: number; longitude: number },
+    path: { latitude: number; longitude: number }[],
+    threshold = 0.0005 // smaller threshold for more precise tap
+  ) {
+    return path.some(
+      (p: { latitude: number; longitude: number }) =>
+        Math.abs(p.latitude - point.latitude) < threshold &&
+        Math.abs(p.longitude - point.longitude) < threshold
+    );
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <MapView
@@ -174,6 +188,14 @@ const MapComponent: React.FC<MapComponentProps> = ({
         onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it
         onPress={(event: MapPressEvent) => {
           const { latitude, longitude } = event.nativeEvent.coordinate;
+          // If a route exists and the tap is near the route, show route info
+          if (
+            path.length > 0 &&
+            isPointNearPath({ latitude, longitude }, path)
+          ) {
+            if (onRoutePress) onRoutePress();
+            return;
+          }
           const closestNode = findNearestNode(latitude, longitude);
 
           if (!closestNode) {

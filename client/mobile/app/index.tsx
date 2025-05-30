@@ -97,6 +97,8 @@ export default function App() {
   // Track the last path to robustly reset initialPathObstacles
   const lastPathRef = useRef<LatLng[]>([]);
 
+  const mapZoomedToUser = useRef(false);
+
   //clear path
   const clearPath = () => {
     setSource(null);
@@ -450,6 +452,18 @@ export default function App() {
     setPromptedObstacles((prev) => new Set(prev).add(obstaclePrompt.id));
   };
 
+  useEffect(() => {
+    if (userLocation && mapRef.current && !mapZoomedToUser.current) {
+      mapRef.current.animateToRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+      mapZoomedToUser.current = true;
+    }
+  }, [userLocation]);
+
   return (
     <View style={{ flex: 1 }}>
       <HeaderComponent mapRef={mapRef} />
@@ -461,6 +475,7 @@ export default function App() {
         setMapRegion={setMapRegion}
         obstaclesDb={obstaclesDb}
         mapRef={mapRef}
+        onRoutePress={() => setShowRouteInfo(true)}
       />
       <FloatingActionComponent
         onLocateCurrentLocation={locateCurrentLocation}

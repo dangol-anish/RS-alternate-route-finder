@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: themeColors.off_white,
     margin: 16,
-    marginTop: 9,
+    marginTop: 15,
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 50,

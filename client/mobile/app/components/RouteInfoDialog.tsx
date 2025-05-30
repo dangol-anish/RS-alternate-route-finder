@@ -7,7 +7,7 @@ import {
   Animated,
 } from "react-native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
-import { MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { themeColors } from "../styles/colors";
 
 type Props = {
@@ -26,7 +26,7 @@ const speeds = {
 function formatTime(hours: number) {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
-  return `${h > 0 ? h + "h " : ""}${m}m`;
+  return `${h > 0 ? h + "h " : ""}${m} mins`;
 }
 
 const RouteInfoDialog: React.FC<Props> = ({
@@ -73,31 +73,57 @@ const RouteInfoDialog: React.FC<Props> = ({
       <Animated.View
         style={[styles.container, { transform: [{ translateY }] }]}
       >
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <View style={styles.dragHandle} />
+        {/* <TouchableOpacity style={styles.closeButton} onPress={onClose}>
           <MaterialIcons name="close" size={28} color="#333" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <Text style={styles.title}>Route Information</Text>
-        <Text style={styles.label}>
-          <Text style={styles.bold}>From:</Text> {sourceName}
-        </Text>
-        <Text style={styles.label}>
-          <Text style={styles.bold}>To:</Text> {destinationName}
-        </Text>
+
+        <View style={styles.row}>
+          <MaterialIcons
+            name="location-on"
+            size={18}
+            color={themeColors.green}
+          />
+          <Text style={styles.label}>
+            <Text style={styles.bold}></Text> {sourceName}
+          </Text>
+        </View>
+
+        <View style={styles.row}>
+          <MaterialIcons name="place" size={18} color={themeColors.brown} />
+          <Text style={styles.label}>
+            <Text style={styles.bold}></Text> {destinationName}
+          </Text>
+        </View>
+
         <Text style={styles.label}>
           <Text style={styles.bold}>Distance:</Text> {distanceKm.toFixed(2)} km
         </Text>
         <Text style={styles.label}>
           <Text style={styles.bold}>Estimated Time:</Text>
         </Text>
-        <Text style={styles.time}>
-          🚶 Foot: {formatTime(distanceKm / speeds.foot)}
-        </Text>
-        <Text style={styles.time}>
-          🏍️ Motorcycle: {formatTime(distanceKm / speeds.motorcycle)}
-        </Text>
-        <Text style={styles.time}>
-          🚗 Car: {formatTime(distanceKm / speeds.car)}
-        </Text>
+
+        <View style={styles.estimatedTimeView}>
+          <View style={styles.timeItem}>
+            <FontAwesome5 name="walking" size={20} color="black" />
+            <Text style={styles.timeText}>
+              {formatTime(distanceKm / speeds.foot)}
+            </Text>
+          </View>
+          <View style={styles.timeItem}>
+            <MaterialIcons name="motorcycle" size={24} color="black" />
+            <Text style={styles.timeText}>
+              {formatTime(distanceKm / speeds.motorcycle)}
+            </Text>
+          </View>
+          <View style={styles.timeItem}>
+            <FontAwesome5 name="car" size={24} color="black" />
+            <Text style={styles.timeText}>
+              {formatTime(distanceKm / speeds.car)}
+            </Text>
+          </View>
+        </View>
       </Animated.View>
     </PanGestureHandler>
   );
@@ -121,6 +147,14 @@ const styles = StyleSheet.create({
     borderBottomColor: themeColors.gray,
     borderBottomWidth: 0.8,
   },
+  dragHandle: {
+    width: 40,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: "#ccc",
+    alignSelf: "center",
+    marginBottom: 12,
+  },
   closeButton: {
     position: "absolute",
     top: 10,
@@ -134,17 +168,33 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: "center",
   },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   label: {
     fontSize: 16,
-    marginBottom: 2,
+    marginLeft: 6,
   },
   bold: {
     fontWeight: "bold",
   },
-  time: {
+  timeItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 8,
+  },
+  timeText: {
     fontSize: 15,
-    marginLeft: 10,
-    marginBottom: 2,
+    marginLeft: 6,
+  },
+
+  estimatedTimeView: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });
 
