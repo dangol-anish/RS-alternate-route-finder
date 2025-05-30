@@ -54,14 +54,19 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   useEffect(() => {
     if (selectedObstacleCoord && mapRef.current) {
+      console.log("Animating to obstacle:", selectedObstacleCoord);
       mapRef.current.animateToRegion(
         {
           ...selectedObstacleCoord,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
+          latitudeDelta: 0.002,
+          longitudeDelta: 0.002,
         },
         1000
       );
+      // Clear after short delay to allow repeated selection
+      setTimeout(() => {
+        useMapStore.getState().setSelectedObstacleCoord(null);
+      }, 1200);
     }
   }, [selectedObstacleCoord]);
 
@@ -280,6 +285,15 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
         {boundary.length > 0 && (
           <Polygon coordinates={boundary} strokeColor="black" strokeWidth={1} />
+        )}
+
+        {/* Always render selectedObstacleCoord marker last so it appears on top */}
+        {selectedObstacleCoord && (
+          <Marker
+            coordinate={selectedObstacleCoord}
+            pinColor={themeColors.red}
+            zIndex={999}
+          />
         )}
       </MapView>
       <ObstacleForm

@@ -15,7 +15,7 @@ import { LatLng } from "react-native-maps";
 import HeaderComponent from "@/app/components/HeaderComponent";
 import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 import { useMapStore } from "./store/useMapStore";
 import { useObstacles } from "./hooks/useObstacles";
 // import Menu from "./components/auth/Menu";
@@ -46,6 +46,7 @@ const latLngToGeoJSONFeature = (latlng: {
 
 export default function App() {
   const router = useRouter();
+  const pathname = usePathname();
   const { nodes } = useNodes();
   const { obstaclesDb } = useObstacles();
   const mapRef = useRef<MapView | null>(null);
@@ -359,7 +360,7 @@ export default function App() {
   function isPointNearPath(
     point: { latitude: number; longitude: number },
     path: { latitude: number; longitude: number }[],
-    threshold = 0.01
+    threshold = 0.005
   ) {
     return path.some(
       (p: { latitude: number; longitude: number }) =>
@@ -430,7 +431,10 @@ export default function App() {
   useEffect(() => {
     resetObstaclePromptState();
     if (source && destination && path.length > 1) {
-      setShowRouteInfo(true);
+      // Only show RouteInfoDialog if it hasn't been acknowledged yet
+      if (!firstPathAcknowledged) {
+        setShowRouteInfo(true);
+      }
       // Take the snapshot of obstacles currently on the path
       const snapshot = new Set(
         obstaclesDb
@@ -466,17 +470,12 @@ export default function App() {
     setPromptedObstacles((prev) => new Set(prev).add(obstaclePrompt.id));
   };
 
+  // Hide RouteInfoDialog when not on the Explore tab
   useEffect(() => {
-    if (userLocation && mapRef.current && !mapZoomedToUser.current) {
-      mapRef.current.animateToRegion({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-      mapZoomedToUser.current = true;
+    if (pathname !== "/") {
+      setShowRouteInfo(false);
     }
-  }, [userLocation]);
+  }, [pathname]);
 
   return (
     <View style={{ flex: 1 }}>

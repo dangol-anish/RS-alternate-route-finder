@@ -53,12 +53,16 @@ const Roadblock: React.FC = () => {
     return `${diffHours}h ${diffMinutes}m remaining`;
   };
 
-  const filteredObstacles =
+  const filteredObstacles = (
     activeTab === "all"
       ? obstaclesDb
       : user
       ? obstaclesDb.filter((item) => item.owner === user.id)
-      : [];
+      : []
+  ).sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
   const renderItem: ListRenderItem<Obstacle> = ({ item }) => {
     const remainingTime = getRemainingTime(
@@ -103,14 +107,15 @@ const Roadblock: React.FC = () => {
           size={24}
           color="black"
           onPress={() => {
-            // Set map target coordinates
-            setSelectedObstacleCoord({
-              latitude: item.latitude,
-              longitude: item.longitude,
-            });
-
-            // Navigate to the home screen (index)
-            router.replace("/");
+            // Force state change to always trigger map pan
+            setSelectedObstacleCoord(null);
+            setTimeout(() => {
+              setSelectedObstacleCoord({
+                latitude: item.latitude,
+                longitude: item.longitude,
+              });
+              router.replace("/");
+            }, 0);
           }}
         />
       </View>
