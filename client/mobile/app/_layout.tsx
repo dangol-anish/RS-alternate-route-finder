@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "./store/useAuthStore";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -14,23 +15,25 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* StatusBar with translucent enabled to allow the overlay to cover it */}
-      <StatusBar style="light" translucent={true} />
-      <View style={styles.stackContainer}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="index" options={{ title: "Home" }} />
-          <Stack.Screen name="roadblock" options={{ title: "RoadBlock" }} />
-          <Stack.Screen name="settings" options={{ title: "Settings" }} />
-        </Stack>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        {/* StatusBar with translucent enabled to allow the overlay to cover it */}
+        <StatusBar style="light" translucent={true} />
+        <View style={styles.stackContainer}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="index" options={{ title: "Home" }} />
+            <Stack.Screen name="roadblock" options={{ title: "RoadBlock" }} />
+            <Stack.Screen name="settings" options={{ title: "Settings" }} />
+          </Stack>
+        </View>
+        <FooterComponent />
+        <Toast />
       </View>
-      <FooterComponent />
-      <Toast />
-    </View>
+    </GestureHandlerRootView>
   );
 }
 

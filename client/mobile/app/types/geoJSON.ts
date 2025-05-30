@@ -4,4 +4,8 @@ export interface GeoJSONFeature {
     type: "Point";
     coordinates: [number, number];
   };
+  properties?: {
+    name?: string;
+    [key: string]: any;
+  };
 }

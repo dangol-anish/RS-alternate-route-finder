@@ -89,18 +89,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
     return nearestNode;
   };
 
-  useEffect(() => {
-    if (userLocation && mapRef.current) {
-      // Animate map to the current user location
-      mapRef.current.animateToRegion({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
-    }
-  }, [userLocation]);
-
   const locateCurrentLocation = () => {
     if (userLocation) {
       setMapRegion({
@@ -226,7 +214,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: source.geometry.coordinates[1],
               longitude: source.geometry.coordinates[0],
             }}
-            pinColor={themeColors.light_brown}
+            pinColor="green"
           />
         )}
 
@@ -236,7 +224,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               latitude: destination.geometry.coordinates[1],
               longitude: destination.geometry.coordinates[0],
             }}
-            pinColor={themeColors.light_green}
+            pinColor="red"
           />
         )}
 
@@ -260,21 +248,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         )}
 
         {/* User Location Marker */}
-        {userLocation && (
-          <Marker
-            coordinate={userLocation}
-            title="Your Location"
-            pinColor="purple"
-          >
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <MaterialCommunityIcons
-                name="map-marker-circle"
-                size={30}
-                color="green"
-              />
-            </View>
-          </Marker>
-        )}
+        {userLocation && <Marker coordinate={userLocation} pinColor="blue" />}
 
         {boundary.length > 0 && (
           <Polygon coordinates={boundary} strokeColor="black" strokeWidth={1} />

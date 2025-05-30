@@ -11,6 +11,8 @@ export const useMapStore = create<MapStore>((set, get) => ({
   obstacles: new Set(),
   isObstacleMode: false,
   selectionMode: "none", // ← NEW
+  userLocation: null,
+  setUserLocation: (location) => set({ userLocation: location }),
 
   setSource: (source) => set({ source }),
   setDestination: (destination) => set({ destination }),

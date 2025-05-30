@@ -12,11 +12,13 @@ type SelectionMode = "source" | "destination" | "obstacle" | "none";
 interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
   clearPath: () => void;
+  onUseMyLocation: () => void;
 }
 
 const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
   onLocateCurrentLocation,
   clearPath,
+  onUseMyLocation,
 }) => {
   const selectionMode = useMapStore((state) => state.selectionMode);
   const setSelectionMode = useMapStore((state) => state.setSelectionMode);
@@ -73,6 +75,14 @@ const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
       <Button iconName="place" mode="source" />
       <Button iconName="flag" mode="destination" />
       <Button iconName="block" mode="obstacle" />
+      {(selectionMode === "source" || selectionMode === "destination") && (
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={onUseMyLocation}
+        >
+          <MaterialIcons name="gps-fixed" size={24} color="#4682B4" />
+        </TouchableOpacity>
+      )}
       <CurrentLocationButton
         onLocateCurrentLocation={onLocateCurrentLocation}
       />

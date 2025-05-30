@@ -31,4 +31,7 @@ export type MapStore = {
   // useMapStore.ts
   selectedObstacleCoord: LatLng | null;
   setSelectedObstacleCoord: (coord: LatLng | null) => void;
+  // user location
+  userLocation: LatLng | null;
+  setUserLocation: (location: LatLng) => void;
 };

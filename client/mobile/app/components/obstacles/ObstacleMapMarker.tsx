@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Marker } from "react-native-maps";
-import ObstacleMarker from "./ObstacleMarker";
 import { Obstacle } from "@/app/types/obstacle";
 import { LatLng } from "react-native-maps";
 
@@ -10,13 +9,6 @@ interface Props {
 }
 
 const ObstacleMapMarker: React.FC<Props> = ({ obstacle, onPress }) => {
-  const [tracksChanges, setTracksChanges] = useState(true);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setTracksChanges(false), 500);
-    return () => clearTimeout(timeout);
-  }, [obstacle.type, obstacle.severity]);
-
   const coordinate: LatLng = {
     latitude: obstacle.latitude,
     longitude: obstacle.longitude,
@@ -26,10 +18,8 @@ const ObstacleMapMarker: React.FC<Props> = ({ obstacle, onPress }) => {
     <Marker
       coordinate={coordinate}
       onPress={() => onPress(obstacle)}
-      tracksViewChanges={tracksChanges}
-    >
-      <ObstacleMarker type={obstacle.type} severity={obstacle.severity} />
-    </Marker>
+      pinColor="orange"
+    />
   );
 };
 
