@@ -26,7 +26,7 @@ const speeds = {
 function formatTime(hours: number) {
   const h = Math.floor(hours);
   const m = Math.round((hours - h) * 60);
-  return `${h > 0 ? h + "h " : ""}${m} mins`;
+  return `${h > 0 ? h + "h " : ""}${m} min`;
 }
 
 const RouteInfoDialog: React.FC<Props> = ({
@@ -82,7 +82,7 @@ const RouteInfoDialog: React.FC<Props> = ({
         <View style={styles.row}>
           <MaterialIcons
             name="location-on"
-            size={18}
+            size={22}
             color={themeColors.green}
           />
           <Text style={styles.label}>
@@ -91,7 +91,7 @@ const RouteInfoDialog: React.FC<Props> = ({
         </View>
 
         <View style={styles.row}>
-          <MaterialIcons name="place" size={18} color={themeColors.brown} />
+          <MaterialIcons name="place" size={22} color={themeColors.brown} />
           <Text style={styles.label}>
             <Text style={styles.bold}></Text> {destinationName}
           </Text>
@@ -100,28 +100,31 @@ const RouteInfoDialog: React.FC<Props> = ({
         <Text style={styles.label}>
           <Text style={styles.bold}>Distance:</Text> {distanceKm.toFixed(2)} km
         </Text>
-        <Text style={styles.label}>
-          <Text style={styles.bold}>Estimated Time:</Text>
-        </Text>
 
-        <View style={styles.estimatedTimeView}>
-          <View style={styles.timeItem}>
-            <FontAwesome5 name="walking" size={20} color="black" />
-            <Text style={styles.timeText}>
-              {formatTime(distanceKm / speeds.foot)}
-            </Text>
-          </View>
-          <View style={styles.timeItem}>
-            <MaterialIcons name="motorcycle" size={24} color="black" />
-            <Text style={styles.timeText}>
-              {formatTime(distanceKm / speeds.motorcycle)}
-            </Text>
-          </View>
-          <View style={styles.timeItem}>
-            <FontAwesome5 name="car" size={24} color="black" />
-            <Text style={styles.timeText}>
-              {formatTime(distanceKm / speeds.car)}
-            </Text>
+        <View>
+          <Text style={styles.label}>
+            <Text style={styles.bold}>Estimated Time:</Text>
+          </Text>
+
+          <View style={styles.estimatedTimeView}>
+            <View style={styles.timeItem}>
+              <FontAwesome5 name="walking" size={20} color="black" />
+              <Text style={styles.timeText}>
+                {formatTime(distanceKm / speeds.foot)}
+              </Text>
+            </View>
+            <View style={styles.timeItem}>
+              <MaterialIcons name="motorcycle" size={24} color="black" />
+              <Text style={styles.timeText}>
+                {formatTime(distanceKm / speeds.motorcycle)}
+              </Text>
+            </View>
+            <View style={styles.timeItem}>
+              <FontAwesome5 name="car" size={24} color="black" />
+              <Text style={styles.timeText}>
+                {formatTime(distanceKm / speeds.car)}
+              </Text>
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -146,6 +149,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     borderBottomColor: themeColors.gray,
     borderBottomWidth: 0.8,
+    display: "flex",
+    flexDirection: "column",
+
+    justifyContent: "center",
+    gap: 10,
   },
   dragHandle: {
     width: 40,
@@ -187,7 +195,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 15,
-    marginLeft: 6,
+    marginLeft: 10,
   },
 
   estimatedTimeView: {
@@ -195,6 +203,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: 5,
   },
 });
 

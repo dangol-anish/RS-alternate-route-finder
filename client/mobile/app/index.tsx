@@ -25,6 +25,7 @@ import { GeoJSONFeature } from "./types/geoJSON";
 import Toast from "react-native-toast-message";
 import RouteInfoDialog from "./components/RouteInfoDialog";
 import { pathDistance } from "./utils/distance";
+import { themeColors } from "./styles/colors";
 
 interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
@@ -535,11 +536,11 @@ export default function App() {
         >
           <View
             style={{
-              backgroundColor: "white",
+              backgroundColor: themeColors.off_white,
               padding: 24,
               borderRadius: 16,
               alignItems: "center",
-              width: 300,
+              width: 330,
             }}
           >
             <Text
@@ -547,15 +548,24 @@ export default function App() {
             >
               Obstacle Detected!
             </Text>
-            <Text
-              style={{ fontSize: 16, marginBottom: 20, textAlign: "center" }}
-            >
+            <Text style={{ fontSize: 16, marginBottom: 20 }}>
               An obstacle has been detected on your route to the destination.
               Would you like to reroute?
             </Text>
-            <View style={{ flexDirection: "row", gap: 16 }}>
-              <Button title="Show New Route" onPress={handleReroute} />
-              <Button title="Ignore" onPress={handleIgnore} color="#888" />
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.primaryButton}
+                onPress={handleReroute}
+              >
+                <Text style={styles.buttonText}>Redirect</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                onPress={handleIgnore}
+              >
+                <Text style={styles.buttonText}>Ignore</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -591,5 +601,31 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+  },
+
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+    gap: 16, // if your React Native version supports it
+  },
+  primaryButton: {
+    flex: 1,
+    backgroundColor: themeColors.green,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  secondaryButton: {
+    flex: 1,
+    backgroundColor: "#ccc",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
