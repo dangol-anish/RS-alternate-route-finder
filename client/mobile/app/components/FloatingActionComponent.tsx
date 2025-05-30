@@ -75,14 +75,6 @@ const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
       <Button iconName="place" mode="source" />
       <Button iconName="flag" mode="destination" />
       <Button iconName="block" mode="obstacle" />
-      {(selectionMode === "source" || selectionMode === "destination") && (
-        <TouchableOpacity
-          style={styles.floatingButton}
-          onPress={onUseMyLocation}
-        >
-          <MaterialIcons name="gps-fixed" size={24} color="#4682B4" />
-        </TouchableOpacity>
-      )}
       <CurrentLocationButton
         onLocateCurrentLocation={onLocateCurrentLocation}
       />
@@ -107,5 +99,20 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
+  },
+  bottomLeftButton: {
+    position: "absolute",
+    left: 16,
+    bottom: 70, // adjust as needed to sit above the menu bar
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
 });
