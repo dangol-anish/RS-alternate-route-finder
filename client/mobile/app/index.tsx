@@ -324,7 +324,8 @@ export default function App() {
         (part) =>
           part &&
           !["Unnamed Road", "Unnamed Street", "Unnamed"].includes(part) &&
-          !/^[0-9]+$/.test(part)
+          !/^[0-9]+$/.test(part) &&
+          !/^[23456789CFGHJMPQRVWX]+(\+[23456789CFGHJMPQRVWX]+)?$/.test(part) // Filter Plus Codes
       );
 
       return uniqueParts.length > 0 ? uniqueParts.join(", ") : `${lat}, ${lon}`;
