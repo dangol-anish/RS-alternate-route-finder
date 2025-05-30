@@ -387,7 +387,23 @@ def update_profile():
 
         supabase.table("profiles").update(update_data).eq("id", user_id).execute()
 
-        return jsonify({"success": True, "photo_url": photo_url})
+        # Fetch the updated profile
+        profile_response = supabase.table("profiles").select("*").eq("id", user_id).single().execute()
+        if not profile_response or not profile_response.data:
+            return jsonify({"error": "Failed to fetch updated profile"}), 500
+
+        profile = profile_response.data
+
+        return jsonify({
+            "success": True,
+            "profile": {
+                "id": user_id,
+                "full_name": profile.get("full_name"),
+                "photo": profile.get("photo"),
+                "phone": profile.get("phone"),
+                "email": profile.get("email")
+            }
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

@@ -114,11 +114,17 @@ const ProfileEditPage = () => {
         return;
       }
 
-      setUser({
-        ...user,
-        full_name: fullName,
-        photo: result.photo_url || user.photo,
-      });
+      // Fetch the latest user info from the backend
+      const userResponse = await fetch(
+        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/get_user`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: user.id }),
+        }
+      );
+      const updatedUser = await userResponse.json();
+      setUser(updatedUser);
 
       Toast.show({
         type: "success",

@@ -44,6 +44,76 @@ const latLngToGeoJSONFeature = (latlng: {
   },
 });
 
+// Place name cache
+const placeNameCache: Record<string, string> = {};
+
+async function fetchPlaceName(
+  lat: number,
+  lon: number,
+  retries = 2
+): Promise<string> {
+  const key = `${lat},${lon}`;
+  if (placeNameCache[key]) {
+    return placeNameCache[key];
+  }
+  try {
+    console.log("fetchPlaceName called with:", lat, lon);
+    const places = await Location.reverseGeocodeAsync({
+      latitude: lat,
+      longitude: lon,
+    });
+    const place = places[0];
+    if (!place) {
+      console.log("No place found for:", lat, lon);
+      if (retries > 0) {
+        // Retry after a short delay
+        await new Promise((res) => setTimeout(res, 300));
+        return fetchPlaceName(lat, lon, retries - 1);
+      }
+      // Use cache if available
+      if (placeNameCache[key]) {
+        return placeNameCache[key];
+      }
+      return `${lat}, ${lon}`;
+    }
+
+    // Compose a readable address
+    const parts = [
+      place.name,
+      place.street,
+      place.district,
+      place.city,
+      // place.region,
+      // place.country,
+    ].filter(Boolean);
+
+    // Remove duplicates and generic names
+    const uniqueParts = Array.from(new Set(parts)).filter(
+      (part) =>
+        part &&
+        !["Unnamed Road", "Unnamed Street", "Unnamed"].includes(part) &&
+        !/^[0-9]+$/.test(part) &&
+        !/^[23456789CFGHJMPQRVWX]+(\+[23456789CFGHJMPQRVWX]+)?$/.test(part) // Filter Plus Codes
+    );
+
+    const name =
+      uniqueParts.length > 0 ? uniqueParts.join(", ") : `${lat}, ${lon}`;
+    placeNameCache[key] = name;
+    console.log("fetchPlaceName result:", name);
+    return name;
+  } catch (e) {
+    console.log("fetchPlaceName error for:", lat, lon, e);
+    if (retries > 0) {
+      await new Promise((res) => setTimeout(res, 300));
+      return fetchPlaceName(lat, lon, retries - 1);
+    }
+    if (placeNameCache[key]) {
+      return placeNameCache[key];
+    }
+    return `${lat}, ${lon}`;
+  }
+}
+
 export default function App() {
   const router = useRouter();
   const pathname = usePathname();
@@ -304,57 +374,30 @@ export default function App() {
     }
   }, [source, destination, path]);
 
-  async function fetchPlaceName(lat: number, lon: number): Promise<string> {
-    try {
-      const places = await Location.reverseGeocodeAsync({
-        latitude: lat,
-        longitude: lon,
-      });
-      const place = places[0];
-      if (!place) return `${lat}, ${lon}`;
-
-      // Compose a readable address
-      const parts = [
-        place.name,
-        place.street,
-        place.district,
-        place.city,
-        // place.region,
-        // place.country,
-      ].filter(Boolean);
-
-      // Remove duplicates and generic names
-      const uniqueParts = Array.from(new Set(parts)).filter(
-        (part) =>
-          part &&
-          !["Unnamed Road", "Unnamed Street", "Unnamed"].includes(part) &&
-          !/^[0-9]+$/.test(part) &&
-          !/^[23456789CFGHJMPQRVWX]+(\+[23456789CFGHJMPQRVWX]+)?$/.test(part) // Filter Plus Codes
-      );
-
-      return uniqueParts.length > 0 ? uniqueParts.join(", ") : `${lat}, ${lon}`;
-    } catch {
-      return `${lat}, ${lon}`;
-    }
-  }
-
   useEffect(() => {
+    let isActive = true;
     if (source && source.geometry) {
       const [lon, lat] = source.geometry.coordinates;
-      fetchPlaceName(lat, lon).then(setSourceName);
+      console.log("Setting sourceName for:", lat, lon, source);
+      fetchPlaceName(lat, lon).then((name) => {
+        if (isActive) setSourceName(name);
+      });
     } else {
       setSourceName(null);
     }
-  }, [source]);
-
-  useEffect(() => {
     if (destination && destination.geometry) {
       const [lon, lat] = destination.geometry.coordinates;
-      fetchPlaceName(lat, lon).then(setDestinationName);
+      console.log("Setting destinationName for:", lat, lon, destination);
+      fetchPlaceName(lat, lon).then((name) => {
+        if (isActive) setDestinationName(name);
+      });
     } else {
       setDestinationName(null);
     }
-  }, [destination]);
+    return () => {
+      isActive = false;
+    };
+  }, [source, destination, path]);
 
   // Utility: Check if a point is near a path (within threshold meters)
   function isPointNearPath(
