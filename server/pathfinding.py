@@ -1,10 +1,19 @@
 # pathfinding.py
 import heapq
 from utils import heuristic
+from cache_utils import get_cache_key, get_cached_path, cache_path
 
 def bidirectional_astar(graph, source, destination, obstacles):
-    """Bidirectional A* Algorithm with obstacle avoidance."""
+    """Bidirectional A* Algorithm with obstacle avoidance and caching."""
 
+    # 1. Check cache first
+    cache_key = get_cache_key(source, destination, obstacles)
+    cached_result = get_cached_path(cache_key)
+    if cached_result:
+        print(f"Cache hit for {source}-{destination}")
+        return cached_result.get('path'), cached_result.get('explored_edges')
+
+    print(f"Cache miss for {source}-{destination}")
     # first check if the source or destination nodes lies in the obstacle
     if source in obstacles or destination in obstacles:
         return None, []
@@ -97,5 +106,9 @@ def bidirectional_astar(graph, source, destination, obstacles):
     while node in came_from['backward']:
         node = came_from['backward'][node]
         path.append(node)
+    
+    # 4. Cache the successful result before returning
+    result_to_cache = {'path': path, 'explored_edges': explored_edges}
+    cache_path(cache_key, result_to_cache)
     
     return path, explored_edges

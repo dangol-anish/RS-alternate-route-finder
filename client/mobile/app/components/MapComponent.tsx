@@ -183,6 +183,12 @@ const MapComponent: React.FC<MapComponentProps> = ({
     );
   }
 
+  // Debug: log obstacles being rendered on the map
+  console.log(
+    "MapComponent obstaclesDb",
+    obstaclesDb.map((o) => ({ id: o.id, status: o.status }))
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <MapView

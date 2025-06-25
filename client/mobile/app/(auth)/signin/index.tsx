@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
+import { signInUser } from "@/app/utils/api";
 
 const Signin = () => {
   const router = useRouter();
@@ -22,22 +23,9 @@ const Signin = () => {
 
   const handleSignIn = async () => {
     try {
-      const res = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signin`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const data = await signInUser(email, password);
 
-      const data = await res.json();
-
-      console.log(data);
-
-      if (res.ok) {
+      if (data) {
         const session = data.session;
         const user = data?.user;
 
@@ -48,6 +36,8 @@ const Signin = () => {
             full_name: user.full_name,
             phone: user.phone,
             photo: user.photo || null,
+            role: user.role,
+            reputation: user.reputation,
           },
           accessToken: session.access_token,
           refreshToken: session.refresh_token,
@@ -59,8 +49,6 @@ const Signin = () => {
         });
 
         router.replace("/"); // Redirect to home
-      } else {
-        Alert.alert("Sign in failed", data?.error || "Unknown error");
       }
     } catch (error: any) {
       Alert.alert("Sign In Error", error.message);

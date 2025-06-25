@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { themeColors } from "@/app/styles/colors";
+import SkeletonPlaceholder from "../ui/SkeletonPlaceholder";
 
 type SearchOverlayProps = {
   visible: boolean;
@@ -39,13 +40,17 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
   onResultPress,
 }) => {
   const [results, setResults] = useState<PlaceResult[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchSearchResults = async () => {
       if (searchText.trim() === "") {
         setResults([]);
+        setLoading(false);
         return;
       }
+
+      setLoading(true); // Start loading
 
       try {
         const response = await fetch(
@@ -64,10 +69,12 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
         setResults(parsedResults);
       } catch (error) {
         console.error("Search error:", error);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
 
-    const debounce = setTimeout(fetchSearchResults, 300); // debounced API call
+    const debounce = setTimeout(fetchSearchResults, 300);
     return () => clearTimeout(debounce);
   }, [searchText]);
 
@@ -115,7 +122,14 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              searchText.trim() !== "" ? (
+              loading ? (
+                <View style={{ padding: 16 }}>
+                  <SkeletonPlaceholder height={40} />
+                  <SkeletonPlaceholder height={40} />
+                  <SkeletonPlaceholder height={40} />
+                  <SkeletonPlaceholder height={40} />
+                </View>
+              ) : searchText.trim() !== "" ? (
                 <View style={styles.noResults}>
                   <Text style={styles.noResultsText}>No results found</Text>
                 </View>

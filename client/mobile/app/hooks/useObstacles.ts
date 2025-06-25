@@ -7,11 +7,14 @@ import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 import { Obstacle } from "@/app/types/obstacle";
 
 export const useObstacles = () => {
+  console.log("useObstacles hook initialized");
   const [obstaclesDb, setObstaclesDb] = useState<Obstacle[]>([]);
+  const [loading, setLoading] = useState(true);
   const obstaclesRef = useRef<Obstacle[]>([]);
   const { setObstacles } = useMapStore();
 
   const fetchObstacles = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(
         `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/get_obstacles`
@@ -24,11 +27,32 @@ export const useObstacles = () => {
 
       if (!Array.isArray(parsedData)) throw new Error("Invalid obstacle data");
 
-      obstaclesRef.current = parsedData;
-      setObstaclesDb(parsedData);
+      // Fetch verification/dispute counts for each obstacle
+      const obstaclesWithCounts = await Promise.all(
+        parsedData.map(async (obstacle: Obstacle) => {
+          try {
+            const countsRes = await axios.get(
+              `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle.id}`
+            );
+            return {
+              ...obstacle,
+              verify_count: countsRes.data.verify_count,
+              dispute_count: countsRes.data.dispute_count,
+              status: countsRes.data.status,
+            };
+          } catch (e) {
+            return { ...obstacle };
+          }
+        })
+      );
+
+      obstaclesRef.current = obstaclesWithCounts;
+      setObstaclesDb(obstaclesWithCounts);
 
       // Also update store with obstacle IDs (as Set<string>)
-      const obstacleIds = new Set(parsedData.map((o: Obstacle) => o.id));
+      const obstacleIds = new Set(
+        obstaclesWithCounts.map((o: Obstacle) => o.id)
+      );
       setObstacles(obstacleIds);
     } catch (error: any) {
       console.log(error);
@@ -36,6 +60,8 @@ export const useObstacles = () => {
         "Error",
         `Failed to load obstacles: ${error.message || "Unknown error"}`
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,5 +89,5 @@ export const useObstacles = () => {
     };
   }, []);
 
-  return { obstaclesDb, obstaclesRef };
+  return { obstaclesDb, obstaclesRef, loading };
 };

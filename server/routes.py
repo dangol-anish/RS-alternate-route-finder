@@ -17,6 +17,8 @@ from PIL import Image
 
 from scipy.spatial import ConvexHull
 import numpy as np
+import traceback
+from datetime import datetime, timedelta, timezone
 
 
 
@@ -266,7 +268,8 @@ def signin():
                 "email": user.email,
                 "full_name": profile.get("full_name"),
                 "phone": profile.get("phone"),
-                "photo": profile.get("photo")
+                "photo": profile.get("photo"),
+                "role": profile.get("role")
             },
             "session": {
                 "access_token": session.access_token,
@@ -296,7 +299,6 @@ def logout():
 def create_obstacle():
     data = request.json
 
-    print("Received Data:", data)
 
     required_fields = ["node_id", "latitude", "longitude", "name", "type", "expected_duration", "severity", "owner"]
     if not all(field in data for field in required_fields):
@@ -333,12 +335,11 @@ def create_obstacle():
             "image_url": image_url  # Save the Cloudinary URL here
         }).execute()
 
-        print("Response from Supabase:", response)
 
         return jsonify({"success": True, "data": response.data}), 201
 
     except Exception as e:
-        print("Error occurred:", e)
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 # ----------------------
@@ -347,11 +348,44 @@ def create_obstacle():
 
 @main_routes.route('/get_obstacles', methods=['GET'])
 def get_obstacles():
-    # This assumes you have a foreign key from obstacles.owner -> users.id
+    # Fetch all obstacles with profile info
     response = supabase.table('obstacles') \
         .select('*, profiles(full_name)') \
         .execute()
-    return jsonify(response.data)
+    obstacles = response.data
+
+    for obstacle in obstacles:
+        # Calculate expected end time
+        created_at = obstacle.get('created_at')
+        expected_duration = obstacle.get('expected_duration')  # format: "HH:MM:SS"
+        try:
+            if created_at and expected_duration:
+                created_dt = datetime.fromisoformat(str(created_at).replace('Z', '+00:00'))
+                h, m, s = map(int, expected_duration.split(':'))
+                expected_end = created_dt + timedelta(hours=h, minutes=m, seconds=s)
+                # Debug print
+                print("DEBUG:", obstacle['id'], "created_at:", created_at, "expected_duration:", expected_duration, "expected_end:", expected_end, "now:", datetime.utcnow().replace(tzinfo=timezone.utc), "status:", obstacle.get('status'))
+                if datetime.utcnow().replace(tzinfo=timezone.utc) > expected_end:
+                    obstacle['status'] = 'expired'
+        except Exception as e:
+            print("DEBUG EXCEPTION:", e)
+            pass  # If parsing fails, skip expiry
+
+        obstacle_id = obstacle['id']
+        # Fetch all verifications for this obstacle
+        verifications = supabase.table('obstacle_verifications') \
+            .select('action, weight') \
+            .eq('obstacle_id', obstacle_id) \
+            .execute()
+        verify_count = sum(v.get('weight', 1) for v in verifications.data if v['action'] == 'verify')
+        dispute_count = sum(v.get('weight', 1) for v in verifications.data if v['action'] == 'dispute')
+        # Status is already present in obstacle['status']
+        obstacle['verify_count'] = verify_count
+        obstacle['dispute_count'] = dispute_count
+        # Optionally, include status explicitly
+        obstacle['verification_status'] = obstacle.get('status', 'unverified')
+
+    return jsonify(obstacles)
 
 
 # ----------------------
@@ -416,9 +450,6 @@ def delete_obstacle():
     obstacle_id = data.get("id")
     requester_id = data.get("owner")
 
-    print("Received request to delete:", obstacle_id, "from user:", requester_id)
-
-
     if not obstacle_id or not requester_id:
         return jsonify({"error": "Missing obstacle ID or owner ID"}), 400
 
@@ -438,6 +469,8 @@ def delete_obstacle():
         return jsonify({"success": True, "message": "Obstacle deleted"}), 200
 
     except Exception as e:
+        traceback.print_exc()
+        print("DELETE_OBSTACLE ERROR:", e)
         return jsonify({"error": str(e)}), 500
 
 #map boundary
@@ -487,4 +520,218 @@ def search_place():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@main_routes.route('/obstacle/verify', methods=['POST'])
+def verify_obstacle():
+    data = request.json
+    obstacle_id = data.get('obstacle_id')
+    user_id = data.get('user_id')
+    action = data.get('action')  # 'verify' or 'dispute'
+
+    if not all([obstacle_id, user_id, action]) or action not in ['verify', 'dispute']:
+        return jsonify({'error': 'Missing or invalid fields'}), 400
+
+    try:
+        # Check if user is on cooldown
+        cooldown_check = supabase.rpc('is_user_on_cooldown', {
+            'p_user_id': user_id,
+            'p_obstacle_id': obstacle_id
+        }).execute()
+
+        if cooldown_check.data:
+            return jsonify({
+                'error': 'Please wait before verifying/disputing again',
+                'on_cooldown': True
+            }), 429
+
+        # First, check if this obstacle was admin-verified
+        obstacle = supabase.table('obstacles').select('status', 'admin_verified').eq('id', obstacle_id).single().execute()
+        if not obstacle.data:
+            return jsonify({'error': 'Obstacle not found'}), 404
+        
+        is_admin_verified = obstacle.data.get('admin_verified', False)
+
+        # Get user's reputation
+        user_data = supabase.table('profiles').select('reputation').eq('id', user_id).single().execute()
+        if not user_data.data:
+            return jsonify({'error': 'User not found'}), 404
+
+        user_reputation = user_data.data.get('reputation', 0)
+        reputation_weight = max(1, min(3, user_reputation // 10))  # 1 vote per 10 reputation, max 3
+
+        # Record the verification action and start cooldown
+        supabase.table('verification_cooldowns').upsert({
+            'user_id': user_id,
+            'obstacle_id': obstacle_id,
+            'action_type': action,
+        }).execute()
+
+        # Update last verification time
+        supabase.table('profiles').update({
+            'last_verification': 'NOW()'
+        }).eq('id', user_id).execute()
+
+        # 1. Insert or update the user's verification/dispute with reputation weight
+        existing = supabase.table('obstacle_verifications') \
+            .select('id') \
+            .eq('obstacle_id', obstacle_id) \
+            .eq('user_id', user_id) \
+            .maybe_single().execute()
+
+        if existing and existing.data:
+            supabase.table('obstacle_verifications') \
+                .update({
+                    'action': action,
+                    'weight': reputation_weight
+                }) \
+                .eq('id', existing.data['id']) \
+                .execute()
+        else:
+            supabase.table('obstacle_verifications') \
+                .insert({
+                    'obstacle_id': obstacle_id,
+                    'user_id': user_id,
+                    'action': action,
+                    'weight': reputation_weight
+                }).execute()
+
+        # 2. Count weighted verifications/disputes for this obstacle
+        verifications = supabase.table('obstacle_verifications') \
+            .select('action, weight') \
+            .eq('obstacle_id', obstacle_id) \
+            .execute()
+        
+        verify_count = sum(v['weight'] for v in verifications.data if v['action'] == 'verify')
+        dispute_count = sum(v['weight'] for v in verifications.data if v['action'] == 'dispute')
+
+        # 3. Update obstacle status based on thresholds, but only if not admin-verified
+        if not is_admin_verified:
+            if verify_count >= 5:  # Increased threshold for weighted votes
+                new_status = 'verified'
+            elif dispute_count >= 5:
+                new_status = 'flagged'
+            else:
+                new_status = 'unverified'
+
+            supabase.table('obstacles').update({'status': new_status}) \
+                .eq('id', obstacle_id).execute()
+        else:
+            # If admin-verified, only update if disputes exceed verifications significantly
+            if dispute_count > verify_count + 10:  # Higher threshold for weighted votes
+                new_status = 'flagged'
+                supabase.table('obstacles').update({
+                    'status': new_status,
+                    'admin_verified': False
+                }).eq('id', obstacle_id).execute()
+            else:
+                new_status = obstacle.data['status']
+
+        # 4. Update user reputation based on consensus
+        if new_status in ['verified', 'flagged']:
+            for v in verifications.data:
+                try:
+                    reputation_change = 2 if (
+                        (new_status == 'verified' and v['action'] == 'verify') or
+                        (new_status == 'flagged' and v['action'] == 'dispute')
+                    ) else -1
+
+                    supabase.table('profiles').update({
+                        'reputation': f"reputation + {reputation_change}"
+                    }).eq('id', v['user_id']).execute()
+                except Exception as rep_e:
+                    traceback.print_exc()
+
+        return jsonify({
+            'success': True,
+            'verify_count': verify_count,
+            'dispute_count': dispute_count,
+            'status': new_status,
+            'admin_verified': is_admin_verified,
+            'reputation_weight': reputation_weight
+        }), 200
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+@main_routes.route('/obstacle/verifications/<obstacle_id>', methods=['GET'])
+def get_obstacle_verifications(obstacle_id):
+    try:
+        # Fetch all verifications for this obstacle
+        verifications = supabase.table('obstacle_verifications') \
+            .select('action') \
+            .eq('obstacle_id', obstacle_id) \
+            .execute()
+        verify_count = sum(1 for v in verifications.data if v['action'] == 'verify')
+        dispute_count = sum(1 for v in verifications.data if v['action'] == 'dispute')
+
+        # Fetch obstacle status
+        obstacle_resp = supabase.table('obstacles').select('status').eq('id', obstacle_id).single().execute()
+        if not obstacle_resp.data:
+            return jsonify({
+                'verify_count': verify_count,
+                'dispute_count': dispute_count,
+                'status': 'not_found'
+            }), 200
+        status = obstacle_resp.data['status']
+
+        return jsonify({
+            'verify_count': verify_count,
+            'dispute_count': dispute_count,
+            'status': status
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@main_routes.route('/admin/obstacles', methods=['GET'])
+def admin_list_obstacles():
+    admin_id = request.args.get('admin_id')
+    if not admin_id:
+        return jsonify({'error': 'Missing admin_id'}), 400
+    # Check if user is admin
+    admin_check = supabase.table('profiles').select('role').eq('id', admin_id).single().execute()
+    if not admin_check.data or admin_check.data.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized: Admins only'}), 403
+    # Fetch flagged or unverified obstacles
+    obstacles_resp = supabase.table('obstacles') \
+        .select('*, profiles(full_name)') \
+        .in_('status', ['flagged', 'unverified']) \
+        .execute()
+    return jsonify(obstacles_resp.data), 200
+
+@main_routes.route('/admin/obstacle_action', methods=['POST'])
+def admin_obstacle_action():
+    data = request.json
+    admin_id = data.get('admin_id')
+    obstacle_id = data.get('obstacle_id')
+    action = data.get('action')  # 'approve', 'remove', 'reset'
+
+    if not all([admin_id, obstacle_id, action]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Check if user is admin
+    admin_check = supabase.table('profiles').select('role').eq('id', admin_id).single().execute()
+    if not admin_check.data or admin_check.data.get('role') != 'admin':
+        return jsonify({'error': 'Unauthorized: Admins only'}), 403
+
+    if action == 'approve':
+        # Set status to 'verified' and mark as admin-verified
+        supabase.table('obstacles').update({
+            'status': 'verified',
+            'admin_verified': True
+        }).eq('id', obstacle_id).execute()
+        return jsonify({'success': True, 'message': 'Obstacle approved (verified)'}), 200
+    elif action == 'remove':
+        # Delete the obstacle
+        supabase.table('obstacles').delete().eq('id', obstacle_id).execute()
+        return jsonify({'success': True, 'message': 'Obstacle removed'}), 200
+    elif action == 'reset':
+        # Set status to 'unverified' and remove admin verification
+        supabase.table('obstacles').update({
+            'status': 'unverified',
+            'admin_verified': False
+        }).eq('id', obstacle_id).execute()
+        return jsonify({'success': True, 'message': 'Obstacle status reset to unverified'}), 200
+    else:
+        return jsonify({'error': 'Invalid action'}), 400
 

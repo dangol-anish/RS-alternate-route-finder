@@ -16,6 +16,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  deleteObstacle,
+  getObstacleVerifications,
+  verifyObstacle,
+} from "@/app/utils/api";
+import Toast from "react-native-toast-message";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const PANEL_WIDTH = SCREEN_WIDTH;
@@ -27,6 +33,15 @@ const ObstacleDetailsPanel = () => {
 
   const slideAnim = useRef(new Animated.Value(SCREEN_WIDTH)).current;
   const [visible, setVisible] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyCount, setVerifyCount] = useState<number | undefined>(undefined);
+  const [disputeCount, setDisputeCount] = useState<number | undefined>(
+    undefined
+  );
+  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [userVote, setUserVote] = useState<"verify" | "dispute" | null>(null);
+  const [onCooldown, setOnCooldown] = useState(false);
+  const [reputationWeight, setReputationWeight] = useState(1);
 
   const isOwner = selectedObstacle?.owner === user?.id;
 
@@ -38,8 +53,28 @@ const ObstacleDetailsPanel = () => {
         duration: 300,
         useNativeDriver: false,
       }).start();
+      setVerifyCount(selectedObstacle.verify_count);
+      setDisputeCount(selectedObstacle.dispute_count);
+      setStatus(selectedObstacle.status);
+      // Fetch user's current vote for this obstacle
+      (async () => {
+        if (user && selectedObstacle.id) {
+          try {
+            const data = await getObstacleVerifications(selectedObstacle.id);
+            if (data && data.user_action) {
+              setUserVote(data.user_action);
+            } else {
+              setUserVote(null);
+            }
+          } catch {
+            setUserVote(null);
+          }
+        } else {
+          setUserVote(null);
+        }
+      })();
     }
-  }, [selectedObstacle]);
+  }, [selectedObstacle, user]);
 
   const handleClose = () => {
     Animated.timing(slideAnim, {
@@ -88,32 +123,51 @@ const ObstacleDetailsPanel = () => {
     if (!selectedObstacle || !user?.id) return;
 
     try {
-      const response = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/delete_obstacle`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: selectedObstacle.id,
-            owner: user.id,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        handleClose();
-        Alert.alert("Success", "Obstacle deleted.");
-      } else {
-        console.warn("Delete failed:", result);
-        Alert.alert("Error", result.error || "Failed to delete obstacle.");
-      }
+      await deleteObstacle(selectedObstacle.id, user.id);
+      handleClose();
+      Alert.alert("Success", "Obstacle deleted.");
     } catch (error: any) {
       console.error("Unexpected error:", error);
       Alert.alert("Error", error.message || "Something went wrong.");
+    }
+  };
+
+  const handleVerification = async (action: "verify" | "dispute") => {
+    if (!selectedObstacle || !user?.id || verifying || isOwner) return;
+
+    setVerifying(true);
+    try {
+      const data = await verifyObstacle(selectedObstacle.id, user.id, action);
+
+      if (data.success) {
+        setVerifyCount(data.verify_count);
+        setDisputeCount(data.dispute_count);
+        setStatus(data.status);
+        setUserVote(action);
+        setReputationWeight(data.reputation_weight);
+        Toast.show({
+          type: "success",
+          text1: `Successfully ${action}d obstacle`,
+          text2: `Your vote counts as ${data.reputation_weight} based on your reputation!`,
+        });
+      }
+    } catch (error: any) {
+      if (error.response?.status === 429) {
+        setOnCooldown(true);
+        Toast.show({
+          type: "error",
+          text1: "On cooldown",
+          text2: "Please wait before verifying/disputing again",
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: error.response?.data?.error || "Failed to verify obstacle",
+        });
+      }
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -208,11 +262,126 @@ const ObstacleDetailsPanel = () => {
                   >
                     {getRemainingTime()}
                   </Text>
+                  {/* Status badge */}
+                  <Text
+                    style={{
+                      backgroundColor:
+                        status === "verified"
+                          ? themeColors.green
+                          : status === "flagged"
+                          ? themeColors.red
+                          : themeColors.gray,
+                      color: "white",
+                      paddingVertical: 1,
+                      paddingHorizontal: 8,
+                      borderRadius: 12,
+                      alignSelf: "flex-start",
+                      opacity: 0.8,
+                      fontWeight: "bold",
+                      marginLeft: 4,
+                    }}
+                  >
+                    {status === "verified"
+                      ? "Verified"
+                      : status === "flagged"
+                      ? "Flagged"
+                      : "Unverified"}
+                  </Text>
                 </View>
                 <Text style={styles.textOwner}>
                   Added by: {selectedObstacle.profiles.full_name} at{" "}
                   {new Date(selectedObstacle.created_at).toLocaleString()}
                 </Text>
+                {/* Verification/Dispute counts for all users */}
+                <View style={styles.countBadgeRowAll}>
+                  <View style={styles.countBadgeRow}>
+                    <MaterialIcons
+                      name="check"
+                      size={20}
+                      color={themeColors.green}
+                      style={{ marginRight: 2 }}
+                    />
+                    <View style={styles.countBadge}>
+                      <Text style={styles.countBadgeText}>
+                        {verifyCount ?? 0}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.countBadgeRow}>
+                    <MaterialIcons
+                      name="close"
+                      size={20}
+                      color={themeColors.red}
+                      style={{ marginRight: 2 }}
+                    />
+                    <View style={styles.countBadge}>
+                      <Text style={styles.countBadgeText}>
+                        {disputeCount ?? 0}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                {/* Verification/Dispute UI - only for authenticated non-owners */}
+                {!isOwner && user && (
+                  <View style={styles.verificationContainer}>
+                    <Text style={styles.verificationTitle}>
+                      Verify this obstacle:
+                    </Text>
+                    <View style={styles.verificationButtons}>
+                      <TouchableOpacity
+                        style={[
+                          styles.verifyButton,
+                          userVote === "verify" && styles.activeButton,
+                          (verifying || onCooldown) && styles.disabledButton,
+                        ]}
+                        onPress={() => handleVerification("verify")}
+                        disabled={
+                          verifying || onCooldown || userVote === "verify"
+                        }
+                      >
+                        <MaterialIcons
+                          name="check-circle"
+                          size={24}
+                          color={
+                            userVote === "verify" ? "white" : themeColors.green
+                          }
+                        />
+                        <Text style={styles.verifyButtonText}>
+                          Verify ({verifyCount || 0})
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={[
+                          styles.disputeButton,
+                          userVote === "dispute" && styles.activeButton,
+                          (verifying || onCooldown) && styles.disabledButton,
+                        ]}
+                        onPress={() => handleVerification("dispute")}
+                        disabled={
+                          verifying || onCooldown || userVote === "dispute"
+                        }
+                      >
+                        <MaterialIcons
+                          name="dangerous"
+                          size={24}
+                          color={
+                            userVote === "dispute" ? "white" : themeColors.red
+                          }
+                        />
+                        <Text style={styles.disputeButtonText}>
+                          Dispute ({disputeCount || 0})
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    {reputationWeight > 1 && (
+                      <Text style={styles.reputationText}>
+                        Your votes count as {reputationWeight} based on your
+                        reputation!
+                      </Text>
+                    )}
+                  </View>
+                )}
                 <ScrollView
                   style={styles.commentsContainer}
                   contentContainerStyle={styles.commentsContent}
@@ -326,6 +495,101 @@ const styles = StyleSheet.create({
 
   deleteBtnView: {},
   deleteBtn: {},
+  verificationContainer: {
+    marginVertical: 12,
+  },
+  verificationTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  verificationButtons: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  verifyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 4,
+    minWidth: 110,
+    justifyContent: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  activeButton: {
+    backgroundColor: themeColors.green,
+  },
+  disabledButton: {
+    opacity: 0.5,
+  },
+  verifyButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginRight: 8,
+  },
+  disputeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginHorizontal: 4,
+    minWidth: 110,
+    justifyContent: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  disputeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginRight: 8,
+  },
+  reputationText: {
+    color: themeColors.green,
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 4,
+    fontWeight: "bold",
+  },
+  countBadge: {
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginLeft: 2,
+    minWidth: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  countBadgeText: {
+    color: themeColors.gray,
+    fontWeight: "bold",
+    fontSize: 15,
+    textAlign: "center",
+  },
+  countBadgeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  countBadgeRowAll: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 4,
+    gap: 16,
+  },
 });
 
 export default ObstacleDetailsPanel;

@@ -114,7 +114,7 @@ const Roadblock: React.FC = () => {
                 latitude: item.latitude,
                 longitude: item.longitude,
               });
-              router.replace("/");
+              router.replace("/"); // Restored to previous behavior
             }, 0);
           }}
         />

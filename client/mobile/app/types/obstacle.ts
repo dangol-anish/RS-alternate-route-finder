@@ -11,4 +11,7 @@ export type Obstacle = {
   comments: string;
   created_at: string | number;
   image_url?: string;
+  verify_count?: number;
+  dispute_count?: number;
+  status?: string;
 };

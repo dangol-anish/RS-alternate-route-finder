@@ -171,6 +171,22 @@ export default function App() {
 
   const mapZoomedToUser = useRef(false);
 
+  // Debug: log obstacle statuses
+  console.log(
+    "obstaclesDb",
+    obstaclesDb.map((o) => ({ id: o.id, status: o.status }))
+  );
+
+  // Filter out expired obstacles
+  const activeObstacles = obstaclesDb.filter(
+    (obstacle) => obstacle.status !== "expired"
+  );
+  // Debug: log filtered active obstacles
+  console.log(
+    "activeObstacles",
+    activeObstacles.map((o) => ({ id: o.id, status: o.status }))
+  );
+
   //clear path
   const clearPath = () => {
     setSource(null);
@@ -521,7 +537,7 @@ export default function App() {
   }, [pathname]);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: themeColors.off_white }}>
       <HeaderComponent mapRef={mapRef} />
       <MapComponent
         toggleObstacle={toggleObstacle}
@@ -529,7 +545,7 @@ export default function App() {
         userLocation={userLocation}
         mapRegion={mapRegion}
         setMapRegion={setMapRegion}
-        obstaclesDb={obstaclesDb}
+        obstaclesDb={activeObstacles}
         mapRef={mapRef}
         onRoutePress={() => setShowRouteInfo(true)}
       />

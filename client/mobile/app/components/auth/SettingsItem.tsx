@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
 import Toast from "react-native-toast-message";
+import { signOutUser } from "@/app/utils/api";
 
 const SettingsItem = () => {
   const router = useRouter();
@@ -23,32 +24,6 @@ const SettingsItem = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const [loading, setLoading] = React.useState(false);
-
-  const logoutUser = async () => {
-    try {
-      const response = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signout`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Logout failed");
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Logout error:", error);
-      throw error;
-    }
-  };
 
   const redirectLogin = () => {
     router.push({ pathname: "/(auth)/signin" });
@@ -134,6 +109,46 @@ const SettingsItem = () => {
               </Pressable>
 
               <View style={styles.separator} />
+
+              {user?.role === "admin" && (
+                <>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.subMenuItem,
+                      pressed && styles.subMenuItemPressed,
+                    ]}
+                    onPress={() =>
+                      router.push("/(protected)/admin/ModerateObstacles")
+                    }
+                  >
+                    <MaterialCommunityIcons
+                      name="shield-crown-outline"
+                      size={24}
+                      color="black"
+                    />
+                    <Text style={styles.buttonText}>Moderate Obstacles</Text>
+                  </Pressable>
+                  <View style={styles.separator} />
+                </>
+              )}
+
+              <View style={styles.separator} />
+
+              <Pressable
+                style={[styles.subMenuItem, { opacity: 0.7 }]}
+                disabled={true}
+              >
+                <MaterialCommunityIcons
+                  name="star-circle"
+                  size={24}
+                  color="#FFD700"
+                />
+                <Text style={styles.buttonText}>
+                  Reputation: {user.reputation ?? 0}
+                </Text>
+              </Pressable>
+
+              <View style={styles.separator} />
             </View>
           </View>
 
@@ -142,18 +157,18 @@ const SettingsItem = () => {
             onPress={async () => {
               setLoading(true);
               try {
-                await logoutUser();
+                await signOutUser();
                 await useAuthStore.getState().clearSession();
                 Toast.show({
                   type: "success",
                   text1: "Logged out successfully!",
                 });
-              } catch (error) {
+              } catch (error: any) {
                 console.error("Logout error:", error);
                 Toast.show({
                   type: "error",
                   text1: "Logout failed",
-                  text2: "Please try again.",
+                  text2: error.message || "Please try again.",
                 });
               } finally {
                 setLoading(false);
