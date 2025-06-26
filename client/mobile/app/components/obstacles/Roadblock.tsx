@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ListRenderItem,
+  ActivityIndicator,
 } from "react-native";
 import { themeColors } from "@/app/styles/colors";
 import { useObstacles } from "@/app/hooks/useObstacles";
@@ -24,7 +25,7 @@ const Roadblock: React.FC = () => {
   );
   const router = useRouter();
 
-  const { obstaclesDb } = useObstacles();
+  const { obstaclesDb, loading } = useObstacles();
   const user = useAuthStore((state) => state.user);
   const [activeTab, setActiveTab] = useState<"all" | "mine">("all");
 
@@ -69,55 +70,77 @@ const Roadblock: React.FC = () => {
       item.created_at,
       item.expected_duration
     );
-
+    const status = item.status;
     return (
       <View style={styles.card}>
-        <View style={styles.cardContent}>
-          <Text style={styles.subtitle}>{item.type}</Text>
-          <Text style={styles.title}>{truncateText(item.name, 20)}</Text>
-          <View style={styles.tagView}>
+        <View style={styles.cardHeaderRow}>
+          <Text style={styles.cardTitle}>{truncateText(item.name, 20)}</Text>
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => {
+              setSelectedObstacleCoord(null);
+              setTimeout(() => {
+                setSelectedObstacleCoord({
+                  latitude: item.latitude,
+                  longitude: item.longitude,
+                });
+                router.replace("/");
+              }, 0);
+            }}
+          >
+            <AntDesign name="eyeo" size={22} color={themeColors.brown} />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.cardSubtitle}>{item.type}</Text>
+        <View style={styles.badgeRow}>
+          <View
+            style={[
+              styles.badge,
+              { backgroundColor: getSeverityColor(item.severity) },
+            ]}
+          >
             <Text
-              style={{
-                backgroundColor: getSeverityColor(item.severity),
-                paddingVertical: 1,
-                paddingHorizontal: 6,
-                borderRadius: 12,
-                alignSelf: "flex-start",
-                opacity: 0.7,
-              }}
+              style={[
+                styles.badgeText,
+                {
+                  color: ["Low", "Moderate"].includes(item.severity)
+                    ? "black"
+                    : "white",
+                },
+              ]}
             >
               {item.severity}
             </Text>
-            <Text
-              style={{
-                backgroundColor: themeColors.light_green,
-                paddingVertical: 1,
-                paddingHorizontal: 6,
-                borderRadius: 12,
-                alignSelf: "flex-start",
-                opacity: 0.8,
-              }}
-            >
-              {remainingTime && <Text>{remainingTime}</Text>}
+          </View>
+          <View
+            style={[styles.badge, { backgroundColor: themeColors.light_green }]}
+          >
+            <Text style={[styles.badgeText, { color: "black" }]}>
+              {remainingTime}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor:
+                  status === "verified"
+                    ? themeColors.green
+                    : status === "flagged"
+                    ? themeColors.red
+                    : themeColors.brown,
+              },
+            ]}
+          >
+            <Text style={[styles.badgeText, { color: "white" }]}>
+              {status === "verified"
+                ? "Verified"
+                : status === "flagged"
+                ? "Flagged"
+                : "Unverified"}
             </Text>
           </View>
         </View>
-        <AntDesign
-          name="eyeo"
-          size={24}
-          color="black"
-          onPress={() => {
-            // Force state change to always trigger map pan
-            setSelectedObstacleCoord(null);
-            setTimeout(() => {
-              setSelectedObstacleCoord({
-                latitude: item.latitude,
-                longitude: item.longitude,
-              });
-              router.replace("/"); // Restored to previous behavior
-            }, 0);
-          }}
-        />
       </View>
     );
   };
@@ -129,29 +152,28 @@ const Roadblock: React.FC = () => {
       </View>
 
       {/* Toggle Tabs */}
-      <View style={styles.tabContainer}>
+      <View style={styles.tabBar}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === "all" && styles.activeTab]}
+          style={[styles.tabBtn, activeTab === "all" && styles.tabBtnActive]}
           onPress={() => setActiveTab("all")}
         >
           <Text
             style={[
-              styles.tabText,
-              activeTab === "all" && styles.activeTabText,
+              styles.tabBtnText,
+              activeTab === "all" && styles.tabBtnTextActive,
             ]}
           >
             All Obstacles
           </Text>
         </TouchableOpacity>
-
         <TouchableOpacity
-          style={[styles.tab, activeTab === "mine" && styles.activeTab]}
+          style={[styles.tabBtn, activeTab === "mine" && styles.tabBtnActive]}
           onPress={() => setActiveTab("mine")}
         >
           <Text
             style={[
-              styles.tabText,
-              activeTab === "mine" && styles.activeTabText,
+              styles.tabBtnText,
+              activeTab === "mine" && styles.tabBtnTextActive,
             ]}
           >
             My Obstacles
@@ -165,19 +187,28 @@ const Roadblock: React.FC = () => {
         </Text>
       )}
 
-      <FlatList
-        data={filteredObstacles}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          activeTab === "mine" && user ? (
-            <Text style={styles.emptyMessage}>
-              No obstacles created by you.
-            </Text>
-          ) : null
-        }
-      />
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={themeColors.green} />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredObstacles}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            activeTab === "mine" && user ? (
+              <Text style={styles.emptyMessage}>
+                No obstacles created by you.
+              </Text>
+            ) : null
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -202,28 +233,41 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
-  tabContainer: {
-    backgroundColor: themeColors.gray,
+  tabBar: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 50,
-    marginBottom: 15,
-  },
-  tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    marginHorizontal: 10,
-  },
-  activeTab: {
     backgroundColor: themeColors.off_white,
     borderRadius: 50,
-    marginVertical: 5,
+    marginBottom: 18,
+    marginHorizontal: 0,
+    alignSelf: "center",
+    padding: 4,
+    gap: 8,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
   },
-  tabText: {
-    fontSize: 16,
+  tabBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 50,
+    backgroundColor: "transparent",
   },
-  activeTabText: {
+  tabBtnActive: {
+    backgroundColor: themeColors.green,
+    shadowColor: themeColors.green,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  tabBtnText: {
+    fontSize: 15,
+    color: themeColors.brown,
+    fontWeight: "500",
+  },
+  tabBtnTextActive: {
+    color: "white",
     fontWeight: "bold",
   },
   loginMessage: {
@@ -242,46 +286,58 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   card: {
-    marginBottom: 15,
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: themeColors.gray,
-    paddingBottom: 15,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 5,
+    backgroundColor: "white",
+    borderRadius: 14,
+    marginBottom: 18,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  cardContent: {
-    flex: 1,
-    flexDirection: "column",
-    gap: 3,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  subtitle: {
-    fontSize: 12,
-    color: themeColors.gray,
-  },
-  info: {
-    fontSize: 12,
-    color: themeColors.gray,
-    marginTop: 4,
-  },
-  remainingTime: {
-    fontStyle: "italic",
-    color: themeColors.green || "#007700",
-  },
-  tagView: {
-    flexDirection: "row",
-    gap: 6,
-    paddingHorizontal: 2,
-  },
-  titleTextView: {
+  cardHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 1,
     justifyContent: "space-between",
+    marginBottom: 2,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: themeColors.brown,
+    flex: 1,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: themeColors.gray,
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  eyeButton: {
+    padding: 6,
+    borderRadius: 20,
+    backgroundColor: themeColors.off_white,
+    marginLeft: 8,
+  },
+  badgeRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 2,
+  },
+  badge: {
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    alignSelf: "flex-start",
+    marginRight: 6,
+    minWidth: 60,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: {
+    fontWeight: "bold",
+    fontSize: 12,
+    textAlign: "center",
   },
 });

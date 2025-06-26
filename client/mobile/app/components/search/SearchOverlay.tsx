@@ -9,6 +9,7 @@ import {
   FlatList,
   Text,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { themeColors } from "@/app/styles/colors";
@@ -79,9 +80,17 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
   }, [searchText]);
 
   return (
-    <Modal visible={visible} animationType="fade" transparent>
+    <Modal visible={visible} animationType="fade">
+      {visible && <StatusBar hidden={true} animated />}
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
+        <View style={[StyleSheet.absoluteFillObject, styles.overlay]}>
+          <View
+            style={[
+              StyleSheet.absoluteFillObject,
+              { backgroundColor: themeColors.off_white },
+            ]}
+            pointerEvents="none"
+          />
           <View style={styles.searchBox}>
             <TouchableOpacity onPress={onClose} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={themeColors.brown} />

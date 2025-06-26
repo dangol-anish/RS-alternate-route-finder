@@ -12,7 +12,6 @@ import MapComponent from "@/app/components/MapComponent";
 import { useNodes } from "@/app/hooks/useNodes";
 import { updateObstacles, fetchShortestPath } from "./utils/api";
 import { LatLng } from "react-native-maps";
-import HeaderComponent from "@/app/components/HeaderComponent";
 import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter, usePathname } from "expo-router";
@@ -26,11 +25,15 @@ import Toast from "react-native-toast-message";
 import RouteInfoDialog from "./components/RouteInfoDialog";
 import { pathDistance } from "./utils/distance";
 import { themeColors } from "./styles/colors";
+import SearchOverlay from "@/app/components/search/SearchOverlay";
+import { Ionicons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 
 interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
   clearPath: () => void;
   handleUseMyLocation: () => void;
+  onSearchPress: () => void;
 }
 
 const latLngToGeoJSONFeature = (latlng: {
@@ -139,6 +142,7 @@ export default function App() {
     userLocation,
     setUserLocation,
     selectionMode,
+    selectedObstacleCoord,
   } = useMapStore();
 
   const [mapRegion, setMapRegion] = useState({
@@ -148,26 +152,17 @@ export default function App() {
     longitudeDelta: 0.005,
   });
 
-  const [showRouteInfo, setShowRouteInfo] = useState(true);
+  const [showRouteInfo, setShowRouteInfo] = useState(false);
   const [sourceName, setSourceName] = useState<string | null>(null);
   const [destinationName, setDestinationName] = useState<string | null>(null);
+  const [promptedObstacles, setPromptedObstacles] = useState(new Set<string>());
   const [obstaclePrompt, setObstaclePrompt] = useState<{
     id: string;
     visible: boolean;
   } | null>(null);
-  const [promptedObstacles, setPromptedObstacles] = useState<Set<string>>(
-    new Set()
-  );
   const [initialPathObstacles, setInitialPathObstacles] = useState<Set<string>>(
     new Set()
   );
-  const [initialRouteCalculated, setInitialRouteCalculated] = useState(false);
-  const [firstPathAcknowledged, setFirstPathAcknowledged] = useState(false);
-  const [initialPathObstaclesSnapshot, setInitialPathObstaclesSnapshot] =
-    useState<Set<string>>(new Set());
-
-  // Track the last path to robustly reset initialPathObstacles
-  const lastPathRef = useRef<LatLng[]>([]);
 
   const mapZoomedToUser = useRef(false);
 
@@ -195,8 +190,6 @@ export default function App() {
     setExploredEdges([]);
     setObstacles(new Set());
     setInitialPathObstacles(new Set());
-    setFirstPathAcknowledged(false);
-    setInitialPathObstaclesSnapshot(new Set());
   };
 
   // Get user location
@@ -238,7 +231,6 @@ export default function App() {
         return;
       }
       findShortestPath();
-      if (!initialRouteCalculated) setInitialRouteCalculated(true);
     }
   }, [source, destination]);
 
@@ -419,7 +411,7 @@ export default function App() {
   function isPointNearPath(
     point: { latitude: number; longitude: number },
     path: { latitude: number; longitude: number }[],
-    threshold = 0.005
+    threshold = 0.0001 // Approx 11 meters
   ) {
     return path.some(
       (p: { latitude: number; longitude: number }) =>
@@ -428,42 +420,13 @@ export default function App() {
     );
   }
 
-  // When a new path is set, always record the set of obstacles on the path
-  useEffect(() => {
-    if (!path.length || !obstaclesDb) return;
-    // If the path has changed, reset initialPathObstacles
-    if (
-      path.length !== lastPathRef.current.length ||
-      path.some(
-        (p, i) =>
-          !lastPathRef.current[i] ||
-          p.latitude !== lastPathRef.current[i].latitude ||
-          p.longitude !== lastPathRef.current[i].longitude
-      )
-    ) {
-      const currentObstacles = new Set(
-        obstaclesDb
-          .filter((obstacle) =>
-            isPointNearPath(
-              { latitude: obstacle.latitude, longitude: obstacle.longitude },
-              path
-            )
-          )
-          .map((obstacle) => obstacle.id)
-      );
-      setInitialPathObstacles(currentObstacles);
-      lastPathRef.current = path;
-    }
-  }, [path, obstaclesDb]);
-
   // Detect new obstacles on path (not present in initialPathObstacles)
   useEffect(() => {
-    if (!firstPathAcknowledged) return;
     if (!path.length || !obstaclesDb) return;
     for (const obstacle of obstaclesDb) {
       if (
         !promptedObstacles.has(obstacle.id) &&
-        !initialPathObstaclesSnapshot.has(obstacle.id) &&
+        !initialPathObstacles.has(obstacle.id) &&
         isPointNearPath(
           { latitude: obstacle.latitude, longitude: obstacle.longitude },
           path
@@ -473,44 +436,30 @@ export default function App() {
         break;
       }
     }
-  }, [
-    obstaclesDb,
-    path,
-    promptedObstacles,
-    initialPathObstaclesSnapshot,
-    firstPathAcknowledged,
-  ]);
+  }, [obstaclesDb, path, promptedObstacles, initialPathObstacles]);
 
   function resetObstaclePromptState() {
     setPromptedObstacles(new Set());
-    setFirstPathAcknowledged(false);
-    setInitialPathObstaclesSnapshot(new Set());
   }
 
   useEffect(() => {
     resetObstaclePromptState();
     if (source && destination && path.length > 1) {
-      // Only show RouteInfoDialog if it hasn't been acknowledged yet
-      if (!firstPathAcknowledged) {
-        setShowRouteInfo(true);
-      }
-      // Take the snapshot of obstacles currently on the path
-      const snapshot = new Set(
+      setShowRouteInfo(true);
+      // When a new route is set, record the obstacles currently on it.
+      const initialObstacles = new Set(
         obstaclesDb
           .filter((obstacle) =>
             isPointNearPath(
-              {
-                latitude: obstacle.latitude,
-                longitude: obstacle.longitude,
-              },
+              { latitude: obstacle.latitude, longitude: obstacle.longitude },
               path
             )
           )
           .map((obstacle) => obstacle.id)
       );
-      setInitialPathObstaclesSnapshot(snapshot);
+      setInitialPathObstacles(initialObstacles);
     }
-  }, [source, destination, path]);
+  }, [source, destination, path, obstaclesDb]);
 
   // Handle reroute
   const handleReroute = () => {
@@ -518,7 +467,6 @@ export default function App() {
     if (!obstaclePrompt) return;
     setPromptedObstacles((prev) => new Set(prev).add(obstaclePrompt.id));
     if (!destination) return;
-    resetObstaclePromptState();
     setSource(source ? { ...source } : null);
   };
 
@@ -536,9 +484,32 @@ export default function App() {
     }
   }, [pathname]);
 
+  // Pan to user location on first load, unless an obstacle is selected
+  useEffect(() => {
+    if (
+      userLocation &&
+      mapRef.current &&
+      !mapZoomedToUser.current &&
+      !selectedObstacleCoord
+    ) {
+      mapRef.current.animateToRegion({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+      mapZoomedToUser.current = true;
+    }
+  }, [userLocation, selectedObstacleCoord]);
+
+  // Search overlay state
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const searchInputRef = useRef(null);
+
   return (
     <View style={{ flex: 1, backgroundColor: themeColors.off_white }}>
-      <HeaderComponent mapRef={mapRef} />
+      <StatusBar hidden={showSearchOverlay} />
       <MapComponent
         toggleObstacle={toggleObstacle}
         nodes={nodes}
@@ -548,11 +519,13 @@ export default function App() {
         obstaclesDb={activeObstacles}
         mapRef={mapRef}
         onRoutePress={() => setShowRouteInfo(true)}
+        mapZoomedToUser={mapZoomedToUser}
       />
       <FloatingActionComponent
         onLocateCurrentLocation={locateCurrentLocation}
         clearPath={clearPath}
         onUseMyLocation={handleUseMyLocation}
+        onSearchPress={() => setShowSearchOverlay(true)}
       />
       {(selectionMode === "source" || selectionMode === "destination") && (
         <TouchableOpacity
@@ -571,7 +544,6 @@ export default function App() {
           distanceKm={pathDistance(path)}
           onClose={() => {
             setShowRouteInfo(false);
-            setFirstPathAcknowledged(true);
           }}
         />
       )}
@@ -624,6 +596,27 @@ export default function App() {
           </View>
         </View>
       </Modal>
+      {/* Search Overlay Modal */}
+      <SearchOverlay
+        visible={showSearchOverlay}
+        searchText={searchText}
+        onChangeText={setSearchText}
+        onClear={() => setSearchText("")}
+        onClose={() => setShowSearchOverlay(false)}
+        inputRef={searchInputRef}
+        onResultPress={({ latitude, longitude }) => {
+          setShowSearchOverlay(false);
+          setSearchText("");
+          if (mapRef.current) {
+            mapRef.current.animateToRegion({
+              latitude,
+              longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            });
+          }
+        }}
+      />
     </View>
   );
 }

@@ -1,6 +1,7 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Ionicons } from "@expo/vector-icons";
 import ClearPathButton from "./ClearPathButton";
 import CurrentLocationButton from "./CurrentLocationButton";
 import { useMapStore } from "../store/useMapStore";
@@ -13,12 +14,14 @@ interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
   clearPath: () => void;
   onUseMyLocation: () => void;
+  onSearchPress: () => void;
 }
 
 const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
   onLocateCurrentLocation,
   clearPath,
   onUseMyLocation,
+  onSearchPress,
 }) => {
   const selectionMode = useMapStore((state) => state.selectionMode);
   const setSelectionMode = useMapStore((state) => state.setSelectionMode);
@@ -72,6 +75,13 @@ const FloatingActionComponent: React.FC<FloatingActionComponentProps> = ({
   return (
     <View style={styles.floatingView}>
       <ClearPathButton clearPath={clearPath} />
+      <TouchableOpacity
+        style={styles.floatingButton}
+        activeOpacity={0.8}
+        onPress={onSearchPress}
+      >
+        <Ionicons name="search" size={24} color="black" />
+      </TouchableOpacity>
       <Button iconName="place" mode="source" />
       <Button iconName="flag" mode="destination" />
       <Button iconName="block" mode="obstacle" />

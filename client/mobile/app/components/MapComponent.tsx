@@ -1,7 +1,17 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, View } from "react-native";
+import {
+  Alert,
+  View,
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from "react-native";
 import MapView, {
   LatLng,
   MapPressEvent,
@@ -19,6 +29,12 @@ import ObstacleDetailsPanel from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
 
+type PlaceResult = {
+  name: string;
+  latitude: number;
+  longitude: number;
+};
+
 const MapComponent: React.FC<MapComponentProps> = ({
   toggleObstacle,
   nodes,
@@ -28,6 +44,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   obstaclesDb,
   mapRef,
   onRoutePress,
+  mapZoomedToUser,
 }) => {
   const {
     source,
@@ -40,6 +57,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     isObstacleMode,
     selectionMode, // ← ADD THIS
     setSelectionMode,
+    clearPath,
   } = useMapStore();
 
   const [showForm, setShowForm] = useState(false);
@@ -54,6 +72,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
   useEffect(() => {
     if (selectedObstacleCoord && mapRef.current) {
+      mapZoomedToUser.current = true;
       console.log("Animating to obstacle:", selectedObstacleCoord);
       mapRef.current.animateToRegion(
         {
@@ -65,10 +84,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
       );
       // Clear after short delay to allow repeated selection
       setTimeout(() => {
-        useMapStore.getState().setSelectedObstacleCoord(null);
+        const { setSelectedObstacleCoord } = useMapStore.getState();
+        setSelectedObstacleCoord(null);
       }, 1200);
     }
-  }, [selectedObstacleCoord]);
+  }, [selectedObstacleCoord, mapZoomedToUser]);
 
   const findNearestNode = (
     latitude: number,

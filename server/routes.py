@@ -384,6 +384,8 @@ def get_obstacles():
         obstacle['dispute_count'] = dispute_count
         # Optionally, include status explicitly
         obstacle['verification_status'] = obstacle.get('status', 'unverified')
+        # Ensure admin_verified field is included (default to False if not present)
+        obstacle['admin_verified'] = obstacle.get('admin_verified', False)
 
     return jsonify(obstacles)
 

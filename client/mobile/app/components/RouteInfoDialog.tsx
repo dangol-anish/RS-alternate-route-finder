@@ -38,10 +38,14 @@ const RouteInfoDialog: React.FC<Props> = ({
   const translateY = useRef(new Animated.Value(0)).current;
   const closing = useRef(false);
 
-  const handleGestureEvent = Animated.event(
-    [{ nativeEvent: { translationY: translateY } }],
-    { useNativeDriver: true }
-  );
+  const handleGestureEvent = (event: any) => {
+    const y = event.nativeEvent.translationY;
+    if (y < 0) {
+      translateY.setValue(0);
+    } else {
+      translateY.setValue(y);
+    }
+  };
 
   const handleStateChange = (event: any) => {
     if (

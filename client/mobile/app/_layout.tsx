@@ -6,6 +6,7 @@ import Toast from "react-native-toast-message";
 import { useAuthStore } from "./store/useAuthStore";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
         {/* StatusBar with translucent enabled to allow the overlay to cover it */}
-        <StatusBar style="light" translucent={true} />
+        <StatusBar hidden={true} />
         <View style={styles.stackContainer}>
           <Stack
             screenOptions={{
@@ -30,7 +31,9 @@ export default function RootLayout() {
             <Stack.Screen name="settings" options={{ title: "Settings" }} />
           </Stack>
         </View>
-        <FooterComponent />
+        <SafeAreaView style={{ flex: 0 }} edges={["bottom"]}>
+          <FooterComponent />
+        </SafeAreaView>
         <Toast />
       </View>
     </GestureHandlerRootView>

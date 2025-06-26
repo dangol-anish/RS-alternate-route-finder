@@ -14,4 +14,5 @@ export type Obstacle = {
   verify_count?: number;
   dispute_count?: number;
   status?: string;
+  admin_verified?: boolean;
 };

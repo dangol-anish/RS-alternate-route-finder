@@ -17,4 +17,5 @@ export interface MapComponentProps {
   obstaclesDb: Obstacle[];
   mapRef: React.RefObject<MapView>;
   onRoutePress: () => void;
+  mapZoomedToUser: React.MutableRefObject<boolean>;
 }
