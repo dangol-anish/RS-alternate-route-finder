@@ -4,6 +4,7 @@ export type AuthStore = {
   user: User | null;
   isAuthenticated: boolean;
   setUser: (user: User | null) => void;
+  setUserReputation: (reputation: number) => void;
   setIsAuthenticated: (status: boolean) => void;
   saveSession: (session: {
     user: User;

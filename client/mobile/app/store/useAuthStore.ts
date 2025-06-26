@@ -7,6 +7,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
 
   setUser: (user) => set({ user }),
+  setUserReputation: (reputation: number) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, reputation } : null,
+    })),
   setIsAuthenticated: (status) => set({ isAuthenticated: status }),
 
   saveSession: async ({ user, accessToken, refreshToken }) => {
