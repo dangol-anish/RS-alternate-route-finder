@@ -135,11 +135,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   headerText: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
   },
   headerSubText: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: "bold",
     opacity: 0.5,
   },

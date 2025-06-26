@@ -16,6 +16,8 @@ import { themeColors } from "@/app/styles/colors";
 import Toast from "react-native-toast-message";
 import { signOutUser } from "@/app/utils/api";
 
+const appLogo = require("../../../assets/logo/mainLogo.png");
+
 const SettingsItem = () => {
   const router = useRouter();
   const setShowSettings = useMapStore((state) => state.setShowSettings);
@@ -60,19 +62,23 @@ const SettingsItem = () => {
             <Text style={styles.authSubHeaderText}>{user.email}</Text>
           </View>
         ) : (
-          <View style={styles.authMenuOptions}>
-            <View>
-              <Text style={styles.authHeaderText}>Login To RoadSense!</Text>
-              <Text style={styles.unAuthSubHeaderText}>
-                Report obstacles and rate them
-              </Text>
-            </View>
-
+          <View style={styles.unAuthCard}>
+            <Image
+              source={appLogo}
+              style={styles.unAuthLogo}
+              resizeMode="contain"
+            />
+            <Text style={styles.unAuthTitle}>Welcome to RoadSense</Text>
+            <Text style={styles.unAuthDesc}>
+              Login to report obstacles, rate them, and personalize your
+              experience.
+            </Text>
             <TouchableOpacity
-              style={styles.buttonLogin}
+              style={styles.unAuthLoginButton}
               onPress={redirectLogin}
+              activeOpacity={0.85}
             >
-              <Text style={styles.loginButtonText}>Login</Text>
+              <Text style={styles.unAuthLoginButtonText}>Login</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -89,29 +95,27 @@ const SettingsItem = () => {
                 ]}
                 onPress={redirectProfile}
               >
-                <Ionicons name="person" size={24} color="black" />
+                <Ionicons name="person" size={24} color={themeColors.brown} />
                 <Text style={styles.buttonText}>Profile</Text>
               </Pressable>
-
               <View style={styles.separator} />
-
               <Pressable
                 style={({ pressed }) => [
                   styles.subMenuItem,
                   pressed && styles.subMenuItemPressed,
                 ]}
-                onPress={() => {
-                  // Add Themes navigation here
-                }}
+                onPress={() => {}}
               >
-                <Ionicons name="invert-mode" size={24} color="black" />
+                <Ionicons
+                  name="invert-mode"
+                  size={24}
+                  color={themeColors.brown}
+                />
                 <Text style={styles.buttonText}>Themes</Text>
               </Pressable>
-
-              <View style={styles.separator} />
-
               {user?.role === "admin" && (
                 <>
+                  <View style={styles.separator} />
                   <Pressable
                     style={({ pressed }) => [
                       styles.subMenuItem,
@@ -124,16 +128,13 @@ const SettingsItem = () => {
                     <MaterialCommunityIcons
                       name="shield-crown-outline"
                       size={24}
-                      color="black"
+                      color={themeColors.brown}
                     />
                     <Text style={styles.buttonText}>Moderate Obstacles</Text>
                   </Pressable>
-                  <View style={styles.separator} />
                 </>
               )}
-
               <View style={styles.separator} />
-
               <Pressable
                 style={[styles.subMenuItem, { opacity: 0.7 }]}
                 disabled={true}
@@ -141,13 +142,12 @@ const SettingsItem = () => {
                 <MaterialCommunityIcons
                   name="star-circle"
                   size={24}
-                  color="#FFD700"
+                  color={themeColors.gray}
                 />
                 <Text style={styles.buttonText}>
                   Reputation: {user.reputation ?? 0}
                 </Text>
               </Pressable>
-
               <View style={styles.separator} />
             </View>
           </View>
@@ -243,11 +243,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   authHeaderText: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "600",
+    color: themeColors.brown,
     textAlign: "center",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   unAuthSubHeaderText: {
     fontSize: 16,
@@ -257,8 +257,8 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   authSubHeaderText: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 13,
+    color: themeColors.gray,
     textAlign: "center",
     opacity: 0.8,
   },
@@ -288,10 +288,10 @@ const styles = StyleSheet.create({
   },
 
   logoutButtonText: {
-    color: "red",
-    fontSize: 20,
-    fontWeight: "bold",
-    letterSpacing: 1,
+    color: themeColors.red,
+    fontSize: 15,
+    fontWeight: "500",
+    letterSpacing: 0.5,
     textAlign: "center",
   },
 
@@ -302,10 +302,10 @@ const styles = StyleSheet.create({
   },
 
   profileImage: {
-    width: 170,
-    height: 170,
-    borderRadius: 100,
-    marginBottom: 12,
+    width: 110,
+    height: 110,
+    borderRadius: 60,
+    marginBottom: 8,
     alignSelf: "center",
   },
   container: {
@@ -315,21 +315,27 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "400",
     marginLeft: 8,
+    color: themeColors.brown,
   },
   horizontalLine: {
     height: 0.5,
     width: "100%",
   },
   subMenu: {
-    backgroundColor: themeColors.beige,
+    backgroundColor: themeColors.off_white,
     flex: 1,
-    borderRadius: 20,
-    padding: 12,
-    paddingVertical: 16,
+    borderRadius: 16,
+    padding: 8,
+    paddingVertical: 10,
     flexDirection: "column",
+    shadowColor: undefined,
+    shadowOffset: undefined,
+    shadowOpacity: undefined,
+    shadowRadius: undefined,
+    elevation: 0,
   },
   subMenuItem: {
     flexDirection: "row",
@@ -339,14 +345,199 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   subMenuItemPressed: {
-    backgroundColor: themeColors.light_green,
+    backgroundColor: themeColors.beige,
     opacity: 0.8,
   },
   separator: {
     height: 1,
     width: "100%",
+    backgroundColor: themeColors.gray,
+    marginVertical: 1,
+    opacity: 0.15,
+  },
+  unAuthCard: {
+    backgroundColor: themeColors.off_white,
+    borderRadius: 20,
+    padding: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: themeColors.gray,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
+    marginTop: 24,
+    marginBottom: 24,
+    marginHorizontal: 8,
+    minHeight: 220,
+  },
+  unAuthTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: themeColors.brown,
+    marginBottom: 6,
+    textAlign: "center",
+    letterSpacing: 0.2,
+  },
+  unAuthDesc: {
+    fontSize: 13,
+    color: themeColors.gray,
+    textAlign: "center",
+    marginBottom: 18,
+    lineHeight: 18,
+    opacity: 0.9,
+  },
+  unAuthLoginButton: {
+    backgroundColor: themeColors.green,
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 36,
+    shadowColor: themeColors.green,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 8,
+    elevation: 2,
+    marginTop: 2,
+  },
+  unAuthLoginButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    textAlign: "center",
+  },
+  unAuthLogo: {
+    width: 100,
+    height: 100,
+    marginBottom: 14,
+  },
+  profileMinimal: {
+    alignItems: "center",
+    marginTop: 12,
+    marginBottom: 18,
+  },
+  profileAvatarMinimal: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: themeColors.off_white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: themeColors.green,
+  },
+  profileNameMinimal: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: themeColors.brown,
+    textAlign: "center",
+    marginBottom: 0,
+  },
+  profileEmailMinimal: {
+    fontSize: 11,
+    color: themeColors.gray,
+    textAlign: "center",
+    opacity: 0.7,
+    marginTop: 0,
+  },
+  profileDivider: {
+    height: 1,
+    width: "80%",
     backgroundColor: themeColors.light_brown,
-    marginVertical: 2,
-    opacity: 0.2,
+    opacity: 0.08,
+    alignSelf: "center",
+    marginBottom: 10,
+  },
+  actionMinimalList: {
+    marginHorizontal: 0,
+    marginBottom: 18,
+  },
+  actionMinimalItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 2,
+    borderRadius: 8,
+    minHeight: 36,
+  },
+  actionMinimalItemPressed: {
+    backgroundColor: themeColors.light_green,
+    opacity: 0.9,
+  },
+  actionMinimalText: {
+    fontSize: 13,
+    color: themeColors.brown,
+    fontWeight: "500",
+  },
+  actionMinimalDivider: {
+    height: 1,
+    width: "90%",
+    backgroundColor: themeColors.light_brown,
+    opacity: 0.08,
+    alignSelf: "center",
+  },
+  logoutMinimal: {
+    marginTop: 24,
+    marginBottom: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoutMinimalText: {
+    color: themeColors.red,
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+    textDecorationLine: "underline",
+    letterSpacing: 0.2,
+  },
+  profileMinimalContainer: {
+    alignItems: "center",
+    marginTop: 18,
+    marginBottom: 18,
+  },
+  profileMinimalAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: themeColors.off_white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: themeColors.green,
+    marginBottom: 8,
+  },
+  profileMinimalAvatarFallback: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: themeColors.off_white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: themeColors.green,
+    marginBottom: 8,
+  },
+  profileMinimalName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: themeColors.brown,
+    textAlign: "center",
+    marginBottom: 0,
+  },
+  profileMinimalEmail: {
+    fontSize: 11,
+    color: themeColors.gray,
+    textAlign: "center",
+    opacity: 0.7,
+    marginTop: 0,
+  },
+  profileMinimalDivider: {
+    height: 1,
+    width: "80%",
+    backgroundColor: themeColors.light_brown,
+    opacity: 0.08,
+    alignSelf: "center",
+    marginBottom: 10,
   },
 });

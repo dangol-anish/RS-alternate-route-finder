@@ -70,7 +70,9 @@ const ModerateObstacles = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Moderate Obstacles</Text>
+      <View style={styles.headerMenu}>
+        <Text style={styles.headerText}>Moderate Obstacles</Text>
+      </View>
       {loading ? (
         <View>
           {[...Array(3)].map((_, i) => (
@@ -106,11 +108,17 @@ const ModerateObstacles = () => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.obstacleCard}>
-              <Text style={styles.title}>{item.name}</Text>
-              <Text style={styles.type}>
+              <Text
+                style={styles.cardTitle}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item.name}
+              </Text>
+              <Text style={styles.cardType}>
                 {item.type} | Status: {item.status}
               </Text>
-              <Text style={styles.owner}>
+              <Text style={styles.cardOwner}>
                 By: {item.profiles?.full_name || "Unknown"}
               </Text>
               <View style={styles.actionRow}>
@@ -122,7 +130,7 @@ const ModerateObstacles = () => {
                   onPress={() => handleAction(item.id, "approve")}
                   disabled={actionLoading === item.id + "approve"}
                 >
-                  <MaterialIcons name="check" size={20} color="white" />
+                  <MaterialIcons name="check" size={18} color="white" />
                   <Text style={styles.actionText}>Approve</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -133,7 +141,7 @@ const ModerateObstacles = () => {
                   onPress={() => handleAction(item.id, "remove")}
                   disabled={actionLoading === item.id + "remove"}
                 >
-                  <MaterialIcons name="delete" size={20} color="white" />
+                  <MaterialIcons name="delete" size={18} color="white" />
                   <Text style={styles.actionText}>Remove</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -144,12 +152,13 @@ const ModerateObstacles = () => {
                   onPress={() => handleAction(item.id, "reset")}
                   disabled={actionLoading === item.id + "reset"}
                 >
-                  <MaterialIcons name="refresh" size={20} color="white" />
+                  <MaterialIcons name="refresh" size={18} color="white" />
                   <Text style={styles.actionText}>Reset</Text>
                 </TouchableOpacity>
               </View>
             </View>
           )}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <Text style={styles.emptyText}>No obstacles to moderate.</Text>
           }
@@ -160,33 +169,62 @@ const ModerateObstacles = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
-  header: {
+  container: {
+    flex: 1,
+    backgroundColor: themeColors.off_white,
+    paddingTop: 30,
+    paddingHorizontal: 20,
+    zIndex: 100,
+  },
+  headerMenu: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    paddingHorizontal: 0,
+  },
+  headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
-    color: themeColors.blue,
   },
   obstacleCard: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 2,
+    backgroundColor: "white",
+    borderRadius: 14,
+    marginBottom: 18,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  title: { fontSize: 18, fontWeight: "bold" },
-  type: { fontSize: 14, color: themeColors.gray, marginBottom: 4 },
-  owner: { fontSize: 13, color: themeColors.gray, marginBottom: 8 },
-  actionRow: { flexDirection: "row", justifyContent: "space-between" },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: themeColors.brown,
+    flex: 1,
+  },
+  cardType: { fontSize: 14, color: themeColors.gray, marginBottom: 4 },
+  cardOwner: { fontSize: 13, color: themeColors.gray, marginBottom: 8 },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+  },
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     marginHorizontal: 4,
   },
-  actionText: { color: "white", fontWeight: "bold", marginLeft: 6 },
+  actionText: {
+    color: "white",
+    fontWeight: "bold",
+    marginLeft: 6,
+    fontSize: 14,
+  },
   emptyText: { textAlign: "center", color: themeColors.gray, marginTop: 32 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

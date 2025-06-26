@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     left: 20,
   },
   headerText: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
   },
   input: {
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   headerSubText: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: "bold",
     opacity: 0.5,
   },
