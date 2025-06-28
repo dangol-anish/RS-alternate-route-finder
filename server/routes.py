@@ -21,13 +21,18 @@ import traceback
 from datetime import datetime, timedelta, timezone
 import threading
 import time
+import pickle
+import osmnx as ox
 
 # Load road network graph
-import osmnx as ox
 place_names = ["Kathmandu, Nepal", "Lalitpur, Nepal"]
 
-# we get all the values for nodes and edges here
-graph = ox.graph_from_place(place_names, network_type="all")
+print("Loading preprocessed graph from gpickle...")
+start = time.time()
+with open("kathmandu_lalitpur_graph.gpickle", "rb") as f:
+    graph = pickle.load(f)
+print(f"Graph loaded in {time.time() - start:.2f} seconds.")
+
 # extracting nodes and edges here
 nodes, edges = ox.graph_to_gdfs(graph)
 
