@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase"; // adjust path as needed
 import { useMapStore } from "../store/useMapStore";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
 import { Obstacle } from "@/app/types/obstacle";
+import { getObstacleVerificationsBatch } from "../utils/api";
 
 export const useObstacles = () => {
   console.log("useObstacles hook initialized");
@@ -27,33 +28,54 @@ export const useObstacles = () => {
 
       if (!Array.isArray(parsedData)) throw new Error("Invalid obstacle data");
 
-      // Fetch verification/dispute counts for each obstacle
-      const obstaclesWithCounts = await Promise.all(
-        parsedData.map(async (obstacle: Obstacle) => {
-          try {
-            const countsRes = await axios.get(
-              `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle.id}`
-            );
-            return {
-              ...obstacle,
-              verify_count: countsRes.data.verify_count,
-              dispute_count: countsRes.data.dispute_count,
-              status: countsRes.data.status,
+      // Extract obstacle IDs for batch verification fetch
+      const obstacleIds = parsedData.map((obstacle: Obstacle) => obstacle.id);
+
+      // Fetch verification counts for all obstacles in a single batch request
+      let verificationCounts: Record<
+        string,
+        { verify_count: number; dispute_count: number; status: string }
+      > = {};
+      if (obstacleIds.length > 0) {
+        try {
+          verificationCounts = await getObstacleVerificationsBatch(obstacleIds);
+        } catch (e) {
+          console.error("Failed to fetch verification counts:", e);
+          // Fallback: create empty counts for all obstacles
+          verificationCounts = obstacleIds.reduce((acc, id) => {
+            acc[id] = {
+              verify_count: 0,
+              dispute_count: 0,
+              status: "unverified",
             };
-          } catch (e) {
-            return { ...obstacle };
-          }
-        })
-      );
+            return acc;
+          }, {} as Record<string, { verify_count: number; dispute_count: number; status: string }>);
+        }
+      }
+
+      // Merge obstacle data with verification counts
+      const obstaclesWithCounts = parsedData.map((obstacle: Obstacle) => {
+        const counts = verificationCounts[obstacle.id] || {
+          verify_count: 0,
+          dispute_count: 0,
+          status: "unverified",
+        };
+        return {
+          ...obstacle,
+          verify_count: counts.verify_count,
+          dispute_count: counts.dispute_count,
+          status: counts.status,
+        };
+      });
 
       obstaclesRef.current = obstaclesWithCounts;
       setObstaclesDb(obstaclesWithCounts);
 
       // Also update store with obstacle IDs (as Set<string>)
-      const obstacleIds = new Set(
+      const obstacleIdSet = new Set(
         obstaclesWithCounts.map((o: Obstacle) => o.id)
       );
-      setObstacles(obstacleIds);
+      setObstacles(obstacleIdSet);
     } catch (error: any) {
       console.log(error);
       Alert.alert(

@@ -38,9 +38,22 @@ export const verifyObstacle = async (
   return response.data;
 };
 
-export const getObstacleVerifications = async (obstacle_id: string) => {
-  const response = await axios.get(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle_id}`
+export const getObstacleVerifications = async (
+  obstacle_id: string,
+  user_id?: string
+) => {
+  const url = user_id
+    ? `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle_id}?user_id=${user_id}`
+    : `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle_id}`;
+
+  const response = await axios.get(url);
+  return response.data;
+};
+
+export const getObstacleVerificationsBatch = async (obstacle_ids: string[]) => {
+  const response = await axios.post(
+    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/batch`,
+    { obstacle_ids }
   );
   return response.data;
 };

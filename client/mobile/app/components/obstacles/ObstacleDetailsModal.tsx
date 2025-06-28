@@ -67,7 +67,10 @@ const ObstacleDetailsPanel = () => {
       (async () => {
         if (user && selectedObstacle.id) {
           try {
-            const data = await getObstacleVerifications(selectedObstacle.id);
+            const data = await getObstacleVerifications(
+              selectedObstacle.id,
+              user.id
+            );
             if (data && data.user_action) {
               setUserVote(data.user_action);
             } else {

@@ -722,6 +722,9 @@ def verify_obstacle():
 @main_routes.route('/obstacle/verifications/<obstacle_id>', methods=['GET'])
 def get_obstacle_verifications(obstacle_id):
     try:
+        # Get user_id from query parameter if provided
+        user_id = request.args.get('user_id')
+        
         # Fetch all verifications for this obstacle
         verifications = supabase.table('obstacle_verifications') \
             .select('action') \
@@ -740,11 +743,72 @@ def get_obstacle_verifications(obstacle_id):
             }), 200
         status = obstacle_resp.data['status']
 
+        # Check if current user has voted on this obstacle
+        user_action = None
+        if user_id:
+            user_verification = supabase.table('obstacle_verifications') \
+                .select('action') \
+                .eq('obstacle_id', obstacle_id) \
+                .eq('user_id', user_id) \
+                .maybe_single().execute()
+            
+            if user_verification.data:
+                user_action = user_verification.data['action']
+
         return jsonify({
             'verify_count': verify_count,
             'dispute_count': dispute_count,
-            'status': status
+            'status': status,
+            'user_action': user_action
         }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@main_routes.route('/obstacle/verifications/batch', methods=['POST'])
+def get_obstacle_verifications_batch():
+    try:
+        data = request.json
+        obstacle_ids = data.get('obstacle_ids', [])
+        
+        if not obstacle_ids:
+            return jsonify({'error': 'No obstacle IDs provided'}), 400
+        
+        # Fetch all verifications for the given obstacles in one query
+        verifications = supabase.table('obstacle_verifications') \
+            .select('obstacle_id, action') \
+            .in_('obstacle_id', obstacle_ids) \
+            .execute()
+        
+        # Fetch all obstacle statuses in one query
+        obstacles = supabase.table('obstacles') \
+            .select('id, status') \
+            .in_('id', obstacle_ids) \
+            .execute()
+        
+        # Create a map of obstacle statuses
+        obstacle_status_map = {obs['id']: obs['status'] for obs in obstacles.data}
+        
+        # Process verifications and count them per obstacle
+        verification_counts = {}
+        for obstacle_id in obstacle_ids:
+            verification_counts[obstacle_id] = {
+                'verify_count': 0,
+                'dispute_count': 0,
+                'status': obstacle_status_map.get(obstacle_id, 'not_found')
+            }
+        
+        # Count verifications and disputes for each obstacle
+        for verification in verifications.data:
+            obstacle_id = verification['obstacle_id']
+            action = verification['action']
+            
+            if obstacle_id in verification_counts:
+                if action == 'verify':
+                    verification_counts[obstacle_id]['verify_count'] += 1
+                elif action == 'dispute':
+                    verification_counts[obstacle_id]['dispute_count'] += 1
+        
+        return jsonify(verification_counts), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
