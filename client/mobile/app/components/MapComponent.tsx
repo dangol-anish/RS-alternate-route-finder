@@ -270,6 +270,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               longitude: source.geometry.coordinates[0],
             }}
             pinColor={themeColors.green}
+            tracksViewChanges={false}
           />
         )}
 
@@ -280,6 +281,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
               longitude: destination.geometry.coordinates[0],
             }}
             pinColor={themeColors.brown}
+            tracksViewChanges={false}
           />
         )}
 
@@ -302,7 +304,11 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
         {/* User Location Marker */}
         {userLocation && (
-          <Marker coordinate={userLocation} pinColor={themeColors.blue} />
+          <Marker
+            coordinate={userLocation}
+            pinColor={themeColors.blue}
+            tracksViewChanges={false}
+          />
         )}
 
         {boundary.length > 0 && (
@@ -315,6 +321,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
             coordinate={selectedObstacleCoord}
             pinColor={themeColors.red}
             zIndex={999}
+            tracksViewChanges={false}
           />
         )}
       </MapView>

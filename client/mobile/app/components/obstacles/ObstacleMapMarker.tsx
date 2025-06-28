@@ -20,6 +20,7 @@ const ObstacleMapMarker: React.FC<Props> = ({ obstacle, onPress }) => {
       coordinate={coordinate}
       onPress={() => onPress(obstacle)}
       pinColor={themeColors.red}
+      tracksViewChanges={false}
     />
   );
 };
