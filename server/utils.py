@@ -15,22 +15,10 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * c  # Distance in kilometers
 
 def heuristic(node1, node2, graph, obstacles):
-    """Haversine heuristic for GPS-based A* search, with obstacle penalty."""
+    """Optimized Haversine heuristic for GPS-based A* search."""
     lat1, lon1 = graph.nodes[node1]['y'], graph.nodes[node1]['x']
     lat2, lon2 = graph.nodes[node2]['y'], graph.nodes[node2]['x']
     
-    base_heuristic = haversine(lat1, lon1, lat2, lon2)
-    
-    # Add penalty for nearby obstacles
-    penalty = 0
-    for obs in obstacles:
-        if obs not in graph.nodes:
-            continue  # Skip missing obstacle nodes
-
-        obs_lat, obs_lon = graph.nodes[obs]['y'], graph.nodes[obs]['x']
-        dist_to_obstacle = haversine(lat1, lon1, obs_lat, obs_lon)
-
-        if dist_to_obstacle < 0.1:  # If within 100 meters, add penalty
-            penalty += 10 / dist_to_obstacle  # Higher penalty for closer obstacles
-
-    return base_heuristic + penalty
+    # Use simple haversine distance without obstacle penalty
+    # Obstacle avoidance is handled by the main algorithm, not the heuristic
+    return haversine(lat1, lon1, lat2, lon2)
