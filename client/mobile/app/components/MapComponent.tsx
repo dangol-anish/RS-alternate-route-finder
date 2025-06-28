@@ -28,6 +28,9 @@ import { darkMapStyle } from "../utils/mapStyles";
 import ObstacleDetailsPanel from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
+import { Obstacle } from "@/app/types/obstacle";
+// @ts-ignore: Could not find a declaration file for module 'uuid'. This is safe for runtime usage.
+import { v4 as uuidv4 } from "uuid";
 
 type PlaceResult = {
   name: string;
@@ -132,7 +135,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     expected_duration: string;
     severity: string;
     comments?: string;
-    image?: string | null; // Update this to allow 'null'
+    image?: string | null;
   }) => {
     if (!selectedNode || !userLocation) return;
 
@@ -155,11 +158,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
           image: image,
         }
       );
-
       console.log("Obstacle saved:", response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error("Error saving obstacle:", error.response?.data); // Log the response from the server
+        console.error("Error saving obstacle:", error.response?.data);
         Alert.alert("Error", error.response?.data?.error || "Unknown error");
       } else {
         console.error("Unexpected error:", error);
@@ -281,19 +283,13 @@ const MapComponent: React.FC<MapComponentProps> = ({
           />
         )}
 
+        {/* Render confirmed obstacles only */}
         {obstaclesDb.map((obstacle, index) => (
           <ObstacleMapMarker
             key={`db-obstacle-${obstacle.id}`}
             obstacle={obstacle}
             onPress={() => setSelectedObstacle(obstacle)}
           />
-          // <Marker
-          //   coordinate={{
-          //     latitude: obstacle.latitude,
-          //     longitude: obstacle.longitude,
-          //   }}
-          //   pinColor="red"
-          // />
         ))}
 
         {path.length > 0 && (
