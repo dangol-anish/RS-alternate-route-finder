@@ -125,3 +125,11 @@ export const signOutUser = async () => {
   }
   return data;
 };
+
+export const fetchUserProfile = async (userId: string) => {
+  const response = await fetch(
+    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/profile/${userId}`
+  );
+  if (!response.ok) throw new Error("Failed to fetch user profile");
+  return response.json();
+};

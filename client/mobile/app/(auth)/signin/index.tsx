@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
-import { signInUser } from "@/app/utils/api";
+import { signInUser, fetchUserProfile } from "@/app/utils/api";
 
 const Signin = () => {
   const router = useRouter();

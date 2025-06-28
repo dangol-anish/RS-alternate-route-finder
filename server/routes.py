@@ -269,7 +269,8 @@ def signin():
                 "full_name": profile.get("full_name"),
                 "phone": profile.get("phone"),
                 "photo": profile.get("photo"),
-                "role": profile.get("role")
+                "role": profile.get("role"),
+                "reputation": profile.get("reputation", 0)
             },
             "session": {
                 "access_token": session.access_token,
