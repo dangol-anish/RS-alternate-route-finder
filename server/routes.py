@@ -19,8 +19,31 @@ from scipy.spatial import ConvexHull
 import numpy as np
 import traceback
 from datetime import datetime, timedelta, timezone
+import threading
+import time
 
+# Load road network graph
+import osmnx as ox
+place_names = ["Kathmandu, Nepal", "Lalitpur, Nepal"]
 
+# we get all the values for nodes and edges here
+graph = ox.graph_from_place(place_names, network_type="all")
+# extracting nodes and edges here
+nodes, edges = ox.graph_to_gdfs(graph)
+
+# Initialize spatial indexing system
+from spatial_index import initialize_spatial_index
+from config import validate_obstacle_radius, get_obstacle_radius_preset, OBSTACLE_RADIUS_DEFAULT
+spatial_index, optimized_pathfinding = initialize_spatial_index(graph)
+
+# Set to store obstacle nodes
+obstacles = set()
+
+# In-memory obstacle cache
+obstacle_cache = set()
+obstacle_cache_last_updated = None
+obstacle_cache_lock = threading.Lock()
+OBSTACLE_CACHE_TTL = 300  # 5 minutes in seconds
 
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
@@ -40,17 +63,34 @@ cloudinary.config(
 # Define a Blueprint to keep routes separate
 main_routes = Blueprint('main', __name__)
 
-# Load road network graph
-import osmnx as ox
-place_names = ["Kathmandu, Nepal", "Lalitpur, Nepal"]
+def refresh_obstacle_cache():
+    """Refresh the obstacle cache from the database."""
+    global obstacle_cache, obstacle_cache_last_updated
+    try:
+        response = supabase.table('obstacles').select('node_id').execute()
+        new_obstacles = {int(obstacle['node_id']) for obstacle in response.data}
+        
+        with obstacle_cache_lock:
+            obstacle_cache = new_obstacles
+            obstacle_cache_last_updated = time.time()
+        
+        print(f"Obstacle cache refreshed: {len(obstacle_cache)} obstacles")
+    except Exception as e:
+        print(f"Error refreshing obstacle cache: {str(e)}")
 
-# we get all the values for nodes and edges here
-graph = ox.graph_from_place(place_names, network_type="all")
-# extracting nodes and edges here
-nodes, edges = ox.graph_to_gdfs(graph)
-
-# Set to store obstacle nodes
-obstacles = set()
+def get_obstacles_from_cache():
+    """Get obstacles from cache, refreshing if necessary."""
+    global obstacle_cache_last_updated
+    
+    current_time = time.time()
+    
+    # Check if cache needs refresh
+    if (obstacle_cache_last_updated is None or 
+        current_time - obstacle_cache_last_updated > OBSTACLE_CACHE_TTL):
+        refresh_obstacle_cache()
+    
+    with obstacle_cache_lock:
+        return obstacle_cache.copy()
 
 @main_routes.route('/')
 def index():
@@ -138,21 +178,31 @@ def shortest_path():
         #taking out source and detination from data in integer format
         source_node = int(data['source'])
         destination_node = int(data['destination'])
+        
+        # Get obstacle radius from request (default 0.1 km)
+        obstacle_radius_input = data.get('obstacle_radius', OBSTACLE_RADIUS_DEFAULT)
+        
+        # Handle both numeric values and preset names
+        if isinstance(obstacle_radius_input, str):
+            try:
+                obstacle_radius = get_obstacle_radius_preset(obstacle_radius_input)
+            except ValueError:
+                return jsonify({'error': f'Invalid obstacle radius preset: {obstacle_radius_input}. Available: tight, standard, wide, very_wide'}), 400
+        else:
+            try:
+                obstacle_radius = validate_obstacle_radius(obstacle_radius_input)
+            except ValueError as e:
+                return jsonify({'error': str(e)}), 400
 
-        #checks whether the taken source and destination exists in graph
-        if source_node not in graph.nodes or destination_node not in graph.nodes:
+        # Use spatial index for O(1) node validation instead of linear search
+        if not spatial_index.node_exists(source_node) or not spatial_index.node_exists(destination_node):
             return jsonify({'error': f"Invalid nodes: {source_node}, {destination_node}"}), 400
 
-        try:
-            # bringing out all the obstacles stored in the database
-            #convert them into int and store them in a set
-            response = supabase.table('obstacles').select('node_id').execute()
-            obstacles_from_db = {int(obstacle['node_id']) for obstacle in response.data}
-        except Exception as e:
-            return jsonify({'error': f"Error fetching obstacles: {str(e)}"}), 500
+        # Get obstacles from cache instead of database
+        obstacles_from_db = get_obstacles_from_cache()
 
-        # Perform pathfinding while avoiding obstacles
-        path, explored_edges = bidirectional_astar(graph, source_node, destination_node, obstacles_from_db)
+        # Perform pathfinding while avoiding obstacles using spatial indexing
+        path, explored_edges = bidirectional_astar(graph, source_node, destination_node, obstacles_from_db, obstacle_radius)
         
         #after algorithm, if no path, show no path
         if path is None:
@@ -164,27 +214,34 @@ def shortest_path():
         # path[1:] all except first element
         #this gets the coordinates from path
         for u, v in zip(path[:-1], path[1:]):
-            #this gets the existing edge data in graph
-            edge_data = graph.get_edge_data(u, v)
+            #this gets the existing edge data in graph using spatial index (O(1))
+            edge_data = spatial_index.get_edge_data(u, v)
             if edge_data:
-                edge_info = edge_data[0]
                 #geometry means curved lines
-                if 'geometry' in edge_info:
-                    path_coordinates.extend([(lat, lon) for lon, lat in edge_info['geometry'].coords])
+                if 'geometry' in edge_data:
+                    path_coordinates.extend([(lat, lon) for lon, lat in edge_data['geometry'].coords])
                 else:
-                    path_coordinates.append((graph.nodes[u]['y'], graph.nodes[u]['x']))
-                    path_coordinates.append((graph.nodes[v]['y'], graph.nodes[v]['x']))
+                    # Use spatial index for O(1) coordinate lookup
+                    u_coords = spatial_index.get_node_coordinates(u)
+                    v_coords = spatial_index.get_node_coordinates(v)
+                    if u_coords and v_coords:
+                        path_coordinates.append((u_coords[0], u_coords[1]))
+                        path_coordinates.append((v_coords[0], v_coords[1]))
         
         explored_coordinates = []   
         for u, v in explored_edges:
-            edge_data = graph.get_edge_data(u, v)
+            # Use spatial index for O(1) edge data access
+            edge_data = spatial_index.get_edge_data(u, v)
             if edge_data:
-                edge_info = edge_data[0]
-                if 'geometry' in edge_info:
-                    explored_coordinates.append([(lat, lon) for lon, lat in edge_info['geometry'].coords])
+                if 'geometry' in edge_data:
+                    explored_coordinates.append([(lat, lon) for lon, lat in edge_data['geometry'].coords])
                 else:
-                    explored_coordinates.append([(graph.nodes[u]['y'], graph.nodes[u]['x']),
-                                                 (graph.nodes[v]['y'], graph.nodes[v]['x'])])
+                    # Use spatial index for O(1) coordinate lookup
+                    u_coords = spatial_index.get_node_coordinates(u)
+                    v_coords = spatial_index.get_node_coordinates(v)
+                    if u_coords and v_coords:
+                        explored_coordinates.append([(u_coords[0], u_coords[1]),
+                                                   (v_coords[0], v_coords[1])])
         
         return jsonify({'path': path_coordinates, 'explored': explored_coordinates})
     
