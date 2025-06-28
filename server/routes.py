@@ -398,6 +398,8 @@ def create_obstacle():
             "image_url": image_url  # Save the Cloudinary URL here
         }).execute()
 
+        # Refresh obstacle cache to include the new obstacle
+        refresh_obstacle_cache()
 
         return jsonify({"success": True, "data": response.data}), 201
 
@@ -530,6 +532,9 @@ def delete_obstacle():
 
         # Perform the deletion
         delete_response = supabase.table("obstacles").delete().eq("id", obstacle_id).execute()
+
+        # Refresh obstacle cache to remove the deleted obstacle
+        refresh_obstacle_cache()
 
         return jsonify({"success": True, "message": "Obstacle deleted"}), 200
 

@@ -260,12 +260,20 @@ export default function App() {
       Alert.alert("Error", "Source or Destination is missing!");
       return;
     }
+    console.log(
+      "🔍 Finding shortest path from",
+      source.id,
+      "to",
+      destination.id
+    );
     try {
       const response = await fetchShortestPath(source.id, destination.id);
 
       if (response.error) {
+        console.log("❌ Pathfinding error:", response.error);
         Alert.alert("Error", response.error);
       } else {
+        console.log("✅ Path found with", response.path.length, "coordinates");
         setPath(
           response.path.map(([lat, lon]: [number, number]) => ({
             latitude: lat,
@@ -283,6 +291,7 @@ export default function App() {
         );
       }
     } catch (error) {
+      console.log("❌ Pathfinding exception:", error);
       Alert.alert("Error", "Failed to find shortest path");
     }
   };
@@ -463,11 +472,29 @@ export default function App() {
 
   // Handle reroute
   const handleReroute = () => {
+    console.log("🔄 Reroute triggered for obstacle:", obstaclePrompt?.id);
     setObstaclePrompt(null);
-    if (!obstaclePrompt) return;
+    if (!obstaclePrompt) {
+      console.log("❌ No obstacle prompt found");
+      return;
+    }
     setPromptedObstacles((prev) => new Set(prev).add(obstaclePrompt.id));
-    if (!destination) return;
-    setSource(source ? { ...source } : null);
+    if (!source || !destination) {
+      console.log("❌ Source or destination missing:", {
+        source: !!source,
+        destination: !!destination,
+      });
+      return;
+    }
+
+    console.log("🗺️ Finding new path from", source.id, "to", destination.id);
+
+    // Clear current path to trigger new route calculation
+    setPath([]);
+    setExploredEdges([]);
+
+    // Find new path that avoids the obstacle
+    findShortestPath();
   };
 
   // Handle ignore
