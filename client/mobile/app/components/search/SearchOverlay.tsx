@@ -75,7 +75,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
       }
     };
 
-    const debounce = setTimeout(fetchSearchResults, 500);
+    const debounce = setTimeout(fetchSearchResults, 300);
     return () => clearTimeout(debounce);
   }, [searchText]);
 
