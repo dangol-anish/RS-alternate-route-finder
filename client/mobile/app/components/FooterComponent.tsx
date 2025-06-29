@@ -11,7 +11,7 @@ const FooterComponent: React.FC = () => {
   // Map route paths to tab identifiers
   const routeToTab: Record<string, string> = {
     "/": "index",
-    "/settings": "settings",
+    "/settings": "profile",
     "/roadblock": "roadblock",
   };
 
@@ -52,10 +52,12 @@ const FooterComponent: React.FC = () => {
         style={styles.container}
         onPress={() => router.push("/settings")}
       >
-        <Feather name="settings" size={20} color={getIconColor("settings")} />
-        <Text style={[styles.iconText, getTextStyle("settings")]}>
-          Settings
-        </Text>
+        <Ionicons
+          name="person-outline"
+          size={20}
+          color={getIconColor("profile")}
+        />
+        <Text style={[styles.iconText, getTextStyle("profile")]}>Profile</Text>
       </Pressable>
     </View>
   );

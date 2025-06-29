@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Easing,
 } from "react-native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import {
@@ -35,6 +36,7 @@ const ObstacleDetailsPanel = () => {
   const user = useAuthStore((state) => state.user);
 
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
   const [visible, setVisible] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verifyCount, setVerifyCount] = useState<number | undefined>(undefined);
@@ -58,11 +60,23 @@ const ObstacleDetailsPanel = () => {
   useEffect(() => {
     if (selectedObstacle) {
       setVisible(true);
+
+      // Animate backdrop fade in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+
+      // Animate panel slide up
       Animated.timing(slideAnim, {
         toValue: SCREEN_HEIGHT - PANEL_HEIGHT,
-        duration: 300,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: false,
       }).start();
+
       setVerifyCount(selectedObstacle.verify_count);
       setDisputeCount(selectedObstacle.dispute_count);
       setStatus(selectedObstacle.status);
@@ -90,9 +104,19 @@ const ObstacleDetailsPanel = () => {
   }, [selectedObstacle, user]);
 
   const handleClose = () => {
+    // Animate backdrop fade out
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 250,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
+    // Animate panel slide down
     Animated.timing(slideAnim, {
       toValue: SCREEN_HEIGHT,
-      duration: 300,
+      duration: 350,
+      easing: Easing.in(Easing.cubic),
       useNativeDriver: false,
     }).start(() => {
       setVisible(false);
@@ -116,10 +140,12 @@ const ObstacleDetailsPanel = () => {
         // Swipe down more than 100px - close the modal
         handleClose();
       } else {
-        // Snap back to original position
+        // Snap back to original position with spring animation
         Animated.spring(dragY, {
           toValue: 0,
           useNativeDriver: false,
+          tension: 100,
+          friction: 8,
         }).start();
       }
     }
@@ -221,7 +247,12 @@ const ObstacleDetailsPanel = () => {
 
   return (
     <View style={styles.overlay}>
-      <TouchableOpacity style={styles.backdrop} onPress={handleClose} />
+      <Animated.View style={[styles.backdrop, { opacity: fadeAnim }]}>
+        <TouchableOpacity
+          style={styles.backdropTouchable}
+          onPress={handleClose}
+        />
+      </Animated.View>
       <Animated.View style={[styles.panel, animatedStyle]}>
         <PanGestureHandler
           onGestureEvent={onGestureEvent}
@@ -311,12 +342,6 @@ const ObstacleDetailsPanel = () => {
                   </View>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleClose}
-              >
-                <Entypo name="cross" size={24} color={themeColors.gray} />
-              </TouchableOpacity>
             </View>
 
             <ScrollView
@@ -626,6 +651,13 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  backdropTouchable: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   panel: {
     position: "absolute",
