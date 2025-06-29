@@ -98,21 +98,6 @@ const SettingsItem = () => {
                 <Ionicons name="person" size={24} color={themeColors.brown} />
                 <Text style={styles.buttonText}>Profile</Text>
               </Pressable>
-              <View style={styles.separator} />
-              <Pressable
-                style={({ pressed }) => [
-                  styles.subMenuItem,
-                  pressed && styles.subMenuItemPressed,
-                ]}
-                onPress={() => {}}
-              >
-                <Ionicons
-                  name="invert-mode"
-                  size={24}
-                  color={themeColors.brown}
-                />
-                <Text style={styles.buttonText}>Themes</Text>
-              </Pressable>
               {user?.role === "admin" && (
                 <>
                   <View style={styles.separator} />
