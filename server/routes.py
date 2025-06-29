@@ -627,7 +627,7 @@ def verify_obstacle():
             return jsonify({'error': 'User not found'}), 404
 
         user_reputation = user_data.data.get('reputation', 0)
-        reputation_weight = max(1, min(3, user_reputation // 10))  # 1 vote per 10 reputation, max 3
+        reputation_weight = max(1, min(3, (user_reputation + 9) // 10))  # 1 vote per 10 reputation, max 3
 
         # Record the verification action and start cooldown
         supabase.table('verification_cooldowns').upsert({
