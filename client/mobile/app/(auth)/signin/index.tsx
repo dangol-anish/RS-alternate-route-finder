@@ -7,6 +7,7 @@ import {
   Alert,
   Image,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
@@ -20,8 +21,12 @@ const Signin = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
     try {
       const data = await signInUser(email, password);
 
@@ -52,6 +57,8 @@ const Signin = () => {
       }
     } catch (error: any) {
       Alert.alert("Sign In Error", error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -93,10 +100,19 @@ const Signin = () => {
         style={({ pressed }) => [
           styles.button,
           pressed && styles.buttonPressed,
+          isLoading && styles.buttonDisabled,
         ]}
         onPress={handleSignIn}
+        disabled={isLoading}
       >
-        <Text style={styles.buttonText}>Sign In</Text>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#fff" />
+            <Text style={styles.buttonText}>Signing In...</Text>
+          </View>
+        ) : (
+          <Text style={styles.buttonText}>Sign In</Text>
+        )}
       </Pressable>
 
       <View style={styles.signupPrompt}>
@@ -166,6 +182,14 @@ const styles = StyleSheet.create({
   buttonPressed: {
     backgroundColor: themeColors.light_green,
     transform: [{ scale: 0.98 }],
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
 
   signupPrompt: {

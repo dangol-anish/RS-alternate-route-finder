@@ -15,6 +15,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import {
@@ -45,6 +46,8 @@ const ObstacleDetailsPanel = () => {
   const [onCooldown, setOnCooldown] = useState(false);
   const [reputationWeight, setReputationWeight] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const dragY = useRef(new Animated.Value(0)).current;
 
   const isOwner = selectedObstacle?.owner === user?.id;
@@ -323,11 +326,51 @@ const ObstacleDetailsPanel = () => {
               {/* Image Section */}
               <View style={styles.imageSection}>
                 {selectedObstacle.image_url ? (
-                  <Image
-                    source={{ uri: selectedObstacle.image_url }}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
+                  <View style={styles.imageContainer}>
+                    {imageLoading && (
+                      <View style={styles.imageLoadingContainer}>
+                        <ActivityIndicator
+                          size="large"
+                          color={themeColors.green}
+                        />
+                        <Text style={styles.imageLoadingText}>
+                          Loading image...
+                        </Text>
+                      </View>
+                    )}
+                    <Image
+                      source={{ uri: selectedObstacle.image_url }}
+                      style={[
+                        styles.image,
+                        imageLoading && styles.imageLoading,
+                        imageError && styles.imageError,
+                      ]}
+                      resizeMode="cover"
+                      onLoadStart={() => {
+                        setImageLoading(true);
+                        setImageError(false);
+                      }}
+                      onLoadEnd={() => {
+                        setImageLoading(false);
+                      }}
+                      onError={() => {
+                        setImageLoading(false);
+                        setImageError(true);
+                      }}
+                    />
+                    {imageError && (
+                      <View style={styles.imageErrorContainer}>
+                        <MaterialIcons
+                          name="error-outline"
+                          size={48}
+                          color={themeColors.red}
+                        />
+                        <Text style={styles.imageErrorText}>
+                          Failed to load image
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 ) : (
                   <View style={styles.noImage}>
                     <MaterialIcons
@@ -647,24 +690,70 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   imageSection: {},
+  imageContainer: {
+    width: "100%",
+    height: 200,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: themeColors.off_white,
+  },
   image: {
     width: "100%",
     height: 200,
-    borderColor: themeColors.gray,
-    borderWidth: 1,
+    borderRadius: 12,
+  },
+  imageLoading: {
+    opacity: 0.3,
+  },
+  imageError: {
+    opacity: 0.1,
+  },
+  imageLoadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: themeColors.off_white,
+    zIndex: 1,
+  },
+  imageLoadingText: {
+    marginTop: 8,
+    color: themeColors.gray,
+    fontSize: 14,
+  },
+  imageErrorContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: themeColors.off_white,
+    zIndex: 1,
+  },
+  imageErrorText: {
+    marginTop: 8,
+    color: themeColors.red,
+    fontSize: 14,
+    textAlign: "center",
   },
   noImage: {
     width: "100%",
     height: 200,
-    borderRadius: 16,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: themeColors.off_white,
   },
   noImageText: {
     textAlign: "center",
-    color: "#888",
+    color: themeColors.gray,
     fontSize: 16,
+    marginTop: 8,
   },
   contentCards: {
     flex: 1,

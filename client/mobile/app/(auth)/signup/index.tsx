@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter } from "expo-router";
@@ -21,6 +22,7 @@ const Signup = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const isValidNepaliPhone = (number: string) => {
     return (
@@ -31,6 +33,8 @@ const Signup = () => {
   };
 
   const handleSignup = async () => {
+    if (isLoading) return;
+
     if (!fullName || !email || !phoneNumber || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields.");
       return;
@@ -49,6 +53,7 @@ const Signup = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
       const response = await fetch(
         `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signup`,
@@ -88,6 +93,8 @@ const Signup = () => {
       }, 1500);
     } catch (err: any) {
       Alert.alert("Signup Failed", err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -148,8 +155,19 @@ const Signup = () => {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleSignup}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+        <TouchableOpacity
+          style={[styles.button, isLoading && styles.buttonDisabled]}
+          onPress={handleSignup}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#fff" />
+              <Text style={styles.buttonText}>Creating Account...</Text>
+            </View>
+          ) : (
+            <Text style={styles.buttonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.signupPrompt}>
@@ -198,6 +216,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   logoStyle: {
     height: 150,
