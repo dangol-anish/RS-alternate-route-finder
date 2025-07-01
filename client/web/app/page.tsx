@@ -1,6 +1,5 @@
 import React from "react";
 import { Navbar } from "../components/ui/Navbar";
-import Image from "next/image";
 import HeroSection from "@/components/landing/HeroSection";
 
 const page = () => {
