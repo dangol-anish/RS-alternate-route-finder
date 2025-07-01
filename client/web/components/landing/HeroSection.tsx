@@ -1,10 +1,12 @@
+"use client";
 import Image from "next/image";
 import React from "react";
 import { Button } from "../ui/button";
+import ScrollDownIndicator from "../ui/ScrollDownIndicator";
 
 const HeroSection = () => {
   return (
-    <div className="h-screen flex flex-col md:flex-row items-center justify-center px-4">
+    <div className="h-screen flex flex-col md:flex-row items-center justify-center px-4 relative">
       <section className="w-full md:w-1/2 flex flex-col gap-4 items-center md:items-start justify-center">
         <span className="flex items-center justify-start self-start gap-2 ml-2">
           <Image src="/icons/Logo.svg" alt="logo" width={32} height={32} />
@@ -46,6 +48,10 @@ const HeroSection = () => {
           className="w-full  md:max-w-full self-end"
         />
       </section>
+      {/* Scroll Down Indicator - show on all screens */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+        <ScrollDownIndicator />
+      </div>
     </div>
   );
 };
