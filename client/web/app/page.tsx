@@ -1,14 +1,16 @@
 import React from "react";
 import { Navbar } from "../components/ui/Navbar";
+import Image from "next/image";
+import HeroSection from "@/components/landing/HeroSection";
 
 const page = () => {
   return (
     <div
-      className="min-h-screen min-w-full flex flex-col"
+      className=" min-w-full flex flex-col"
       style={{ background: "var(--landing-gradient)" }}
     >
       <Navbar />
-      <div className="flex-1 flex items-center justify-center">page</div>
+      <HeroSection />
     </div>
   );
 };
