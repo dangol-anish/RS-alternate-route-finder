@@ -44,7 +44,7 @@ export function Navbar() {
 
       {/* Mobile: Hamburger and Sidebar, only visible on mobile */}
       <SidebarProvider defaultOpen={false}>
-        <SidebarTrigger className="fixed top-4 left-4 z-50 w-10 h-10 bg-[var(--green)]/40 text-[var(--brown)] hover:text-[var(--light-brown)] cursor-pointer shadow-lg rounded-2xl flex items-center justify-center backdrop-blur-lg hover:bg-[var(--beige)]/80 transition-colors duration-200 md:hidden" />
+        <SidebarTrigger className="fixed top-4 right-4 z-50 w-10 h-10 bg-[var(--green)]/40 text-[var(--brown)] hover:text-[var(--light-brown)] cursor-pointer shadow-lg rounded-2xl flex items-center justify-center backdrop-blur-lg hover:bg-[var(--beige)]/80 transition-colors duration-200 md:hidden" />
         <Sidebar
           variant="sidebar"
           collapsible="offcanvas"
