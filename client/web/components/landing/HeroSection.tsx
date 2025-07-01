@@ -6,7 +6,7 @@ import ScrollDownIndicator from "../ui/ScrollDownIndicator";
 
 const HeroSection = () => {
   return (
-    <div className="h-screen flex flex-col md:flex-row items-center justify-center px-4 relative pt-20 sm:pt-0">
+    <div className="min-h-screen flex flex-col md:flex-row items-center justify-center px-4 relative pt-20 md:pt-0">
       <section className="w-full md:w-1/2 flex flex-col gap-4 items-center md:items-start justify-center">
         <span className="flex items-center justify-start self-start gap-2 ml-2">
           <Image src="/icons/Logo.svg" alt="logo" width={32} height={32} />
