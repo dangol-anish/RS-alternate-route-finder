@@ -6,11 +6,13 @@ import HeroSection from "@/components/landing/HeroSection";
 const page = () => {
   return (
     <div
-      className=" min-w-full flex flex-col"
+      className="min-w-full flex flex-col"
       style={{ background: "var(--landing-gradient)" }}
     >
-      <Navbar />
-      <HeroSection />
+      <div className="w-[90%] mx-auto">
+        <Navbar />
+        <HeroSection />
+      </div>
     </div>
   );
 };
