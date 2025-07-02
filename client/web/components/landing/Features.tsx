@@ -13,28 +13,28 @@ const features = [
     description:
       "Interactive maps with live GPS tracking to guide you every step of the way.",
     iconBg: "bg-[var(--green)]/40",
-    icon: <FiMapPin size={22} className="text-[var(--brown)]" />,
+    icon: <FiMapPin size={26} className="text-[var(--brown)]" />,
   },
   {
     title: "Alternate Route Suggestions",
     description:
       "Smart rerouting based on roadblocks or hazards to keep you moving.",
     iconBg: "bg-[var(--green)]/40",
-    icon: <FiTrendingUp size={22} className="text-[var(--brown)]" />,
+    icon: <FiTrendingUp size={26} className="text-[var(--brown)]" />,
   },
   {
     title: "Obstacle Reporting",
     description:
       "Community-powered reporting of obstacles and road conditions in real-time.",
     iconBg: "bg-[var(--green)]/40",
-    icon: <FiAlertCircle size={22} className="text-[var(--brown)]" />,
+    icon: <FiAlertCircle size={26} className="text-[var(--brown)]" />,
   },
 ];
 
 const Features = () => {
   return (
     <section className="min-h-[80%]  py-20 bg-gradient-to-r from-white to-[var(--beige)]">
-      <div className="w-[90%] mx-auto overflow-x-auto">
+      <div className="w-[90%] max-w-6xl mx-auto">
         <div className="flex flex-col gap-4">
           {" "}
           <h2
@@ -53,11 +53,11 @@ const Features = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 p-12 pt-24">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 sm:p-8 lg:p-12 pt-12 sm:pt-16 lg:pt-24">
           {features.map((feature) => (
             <Card
               key={feature.title}
-              className="h-full border border-[var(--brown)]/10 rounded-xl p-6 shadow-none "
+              className="h-full border border-[var(--brown)]/10 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
             >
               <div
                 className={`w-16 h-16 rounded-lg flex items-center justify-center ${feature.iconBg}`}
