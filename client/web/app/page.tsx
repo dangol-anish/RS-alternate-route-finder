@@ -1,6 +1,8 @@
+"use client";
 import React from "react";
-import { Navbar } from "../components/ui/Navbar";
+import ScrollHideNavbar from "../components/ui/ScrollHideNavbar";
 import HeroSection from "@/components/landing/HeroSection";
+import Features from "@/components/landing/Features";
 
 const page = () => {
   return (
@@ -9,8 +11,9 @@ const page = () => {
       style={{ background: "var(--landing-gradient)" }}
     >
       <div className="w-[90%] mx-auto">
-        <Navbar />
+        <ScrollHideNavbar />
         <HeroSection />
+        <Features />
       </div>
     </div>
   );
