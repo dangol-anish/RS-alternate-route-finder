@@ -3,6 +3,7 @@ import React from "react";
 import ScrollHideNavbar from "../components/ui/ScrollHideNavbar";
 import HeroSection from "@/components/landing/HeroSection";
 import Features from "@/components/landing/Features";
+import HowItWorks from "@/components/landing/HowItWorks";
 
 const page = () => {
   return (
@@ -14,6 +15,7 @@ const page = () => {
         <ScrollHideNavbar />
         <HeroSection />
         <Features />
+        <HowItWorks />
       </div>
     </div>
   );

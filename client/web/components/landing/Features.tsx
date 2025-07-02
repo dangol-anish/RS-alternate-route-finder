@@ -41,7 +41,7 @@ const Features = () => {
             className="
     text-5xl md:text-5xl font-extrabold text-center
  text-[var(--brown)] 
-    bg-clip-text mb-4
+    bg-clip-text mb-2
   "
           >
             Powerful Features for{" "}
