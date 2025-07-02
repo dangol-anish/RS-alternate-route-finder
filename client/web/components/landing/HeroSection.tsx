@@ -39,13 +39,15 @@ const HeroSection = () => {
           *Currently available only for Kathmandu and Lalitpur, Nepal
         </span>
       </section>
-      <section className="w-full md:w-1/2 flex justify-center mt-8 md:mt-0">
+      <section className="w-full md:w-1/2 flex justify-center mt-8 md:mt-0 relative">
+        {/* Highlight circle behind mockup */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[340px] md:h-[340px] lg:w-[420px] lg:h-[420px] rounded-full bg-[var(--light-green)] opacity-80 z-1"></div>
         <Image
           src="/mockup/mockup2.svg"
           alt="mockup"
           width={400}
           height={400}
-          className="w-full  md:max-w-full self-end"
+          className="w-full  md:max-w-full self-end z-10"
         />
       </section>
       {/* Scroll Down Indicator - show on sm and up */}
