@@ -1,7 +1,83 @@
 import React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { FiMapPin, FiTrendingUp, FiAlertCircle } from "react-icons/fi";
+
+const features = [
+  {
+    title: "Real-Time Map Navigation",
+    description:
+      "Interactive maps with live GPS tracking to guide you every step of the way.",
+    iconBg: "bg-[var(--green)]/40",
+    icon: <FiMapPin size={22} className="text-[var(--brown)]" />,
+  },
+  {
+    title: "Alternate Route Suggestions",
+    description:
+      "Smart rerouting based on roadblocks or hazards to keep you moving.",
+    iconBg: "bg-[var(--green)]/40",
+    icon: <FiTrendingUp size={22} className="text-[var(--brown)]" />,
+  },
+  {
+    title: "Obstacle Reporting",
+    description:
+      "Community-powered reporting of obstacles and road conditions in real-time.",
+    iconBg: "bg-[var(--green)]/40",
+    icon: <FiAlertCircle size={22} className="text-[var(--brown)]" />,
+  },
+];
 
 const Features = () => {
-  return <div className="min-h-screen w-screen">Features</div>;
+  return (
+    <section className="min-h-[80%]  py-20 bg-gradient-to-r from-white to-[var(--beige)]">
+      <div className="w-[90%] mx-auto overflow-x-auto">
+        <div className="flex flex-col gap-4">
+          {" "}
+          <h2
+            className="
+    text-5xl md:text-5xl font-extrabold text-center
+ text-[var(--brown)] 
+    bg-clip-text mb-4
+  "
+          >
+            Powerful Features for{" "}
+            <span className="text-[var(--green)] ">Smart Navigation</span>
+          </h2>
+          <p className="text-center text-[var(--brown)] text-xl font-light">
+            Explore how the RoadSense uses algorithms to make your daily commute
+            faster, smarter, and less stressful.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-8 p-12 pt-24">
+          {features.map((feature) => (
+            <Card
+              key={feature.title}
+              className="h-full border border-[var(--brown)]/10 rounded-xl p-6 shadow-none "
+            >
+              <div
+                className={`w-16 h-16 rounded-lg flex items-center justify-center ${feature.iconBg}`}
+              >
+                {feature.icon}
+              </div>
+              <CardHeader className="p-0">
+                <CardTitle className="text-left font-bold text-lg text-[var(--brown)] ">
+                  {feature.title}
+                </CardTitle>
+                <CardDescription className="text-left font-normal text-base text-muted-foreground">
+                  {feature.description}
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Features;
