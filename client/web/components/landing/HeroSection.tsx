@@ -11,7 +11,7 @@ const HeroSection = () => {
         <span className="flex items-center justify-start self-start gap-2 ml-2">
           <Image src="/icons/Logo.svg" alt="logo" width={32} height={32} />
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--brown)]">
-            RoadSense
+            <span className="text-[var(--green)]">Road</span>Sense
           </h1>
         </span>
         <span className="self-start ml-2">
@@ -32,7 +32,7 @@ const HeroSection = () => {
             Download for Android (APK)
           </Button>
           <Button className="bg-[var(--brown)] hover:bg-[var(--light-brown)] text-white text-base md:text-lg self-start cursor-pointer w-full md:w-auto">
-            Download on iOS
+            Download on iOS (IPA)
           </Button>
         </div>
         <span className="italic text-xs ml-2 self-start text-[var(--light-brown)]">

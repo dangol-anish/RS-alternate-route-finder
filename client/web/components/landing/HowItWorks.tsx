@@ -32,17 +32,17 @@ const stepImages = [
 
 const HowItWorks = () => {
   return (
-    <section className="min-h-screen py-20 bg-gradient-to-r from-[var(--light-green)] to-[var(--green)]">
+    <section className="min-h-screen py-20 bg-gradient-to-r from-[var(--beige)]/80 via-[var(--light-green)]/80 to-[var(--green)]/80">
       <div className="flex flex-col gap-4">
         {" "}
         <h2
           className="
     text-5xl md:text-5xl font-extrabold text-center
  text-[var(--brown)] 
-    bg-clip-text mb-2
+    bg-clip-text 
   "
         >
-          How RoadSense Works
+          How <span className="text-[var(--green)]">Road</span>Sense Works
         </h2>
         <p className="text-center text-[var(--brown)] text-xl font-light">
           Make smarter travel choices and skip the roadblocks with RS Alternate

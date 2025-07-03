@@ -5,6 +5,7 @@ import HeroSection from "@/components/landing/HeroSection";
 import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import AppDownload from "@/components/landing/AppDownload";
+import FooterSection from "@/components/landing/FooterSection";
 
 const page = () => {
   return (
@@ -18,6 +19,7 @@ const page = () => {
         <Features />
         <HowItWorks />
         <AppDownload />
+        <FooterSection />
       </div>
     </div>
   );

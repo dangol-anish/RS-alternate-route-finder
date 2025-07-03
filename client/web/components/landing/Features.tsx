@@ -33,26 +33,31 @@ const features = [
 
 const Features = () => {
   return (
-    <section className="min-h-screen flex justify-center items-center  py-20 bg-gradient-to-r from-white to-[var(--beige)]">
+    <section
+      id="features"
+      className="min-h-[80%] py-20 bg-gradient-to-r from-white to-[var(--beige)]"
+    >
       <div className="w-[90%] max-w-6xl mx-auto">
         <div className="flex flex-col gap-4">
-          {" "}
           <h2
             className="
-    text-5xl md:text-5xl font-extrabold text-center
- text-[var(--brown)] 
-    bg-clip-text mb-2
-  "
+              text-5xl md:text-6xl font-extrabold text-center
+              text-[var(--brown)]
+            "
           >
-            Powerful Features for{" "}
-            <span className="text-[var(--green)] ">Smart Navigation</span>
+            Powerful Features for Smart Navigation
           </h2>
-          <p className="text-center text-[var(--brown)] text-xl font-light">
-            Explore how the RoadSense uses algorithms to make your daily commute
-            faster, smarter, and less stressful.
+          <p
+            className="
+              text-lg md:text-xl text-center mb-12
+              bg-gradient-to-r from-[var(--brown)] to-[var(--light-brown)]
+              bg-clip-text text-transparent
+            "
+          >
+            Explore how RoadSense uses advanced technology to make your daily
+            commute faster, smarter, and less stressful.
           </p>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 sm:p-8 lg:p-12 pt-12 sm:pt-16 lg:pt-24">
           {features.map((feature) => (
             <Card
