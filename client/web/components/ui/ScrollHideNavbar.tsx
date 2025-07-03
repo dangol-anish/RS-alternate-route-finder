@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "./Navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ScrollHideNavbar = () => {
   const [show, setShow] = useState(true);
@@ -21,18 +22,23 @@ const ScrollHideNavbar = () => {
   }, []);
 
   return (
-    <div
-      className={`
-        fixed top-0 left-0 w-full z-[100]
-        pointer-events-none bg-none
-        transition-transform transition-opacity duration-300 ease-in-out
-        ${show ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}
-      `}
-    >
-      <div className="pointer-events-auto">
-        <Navbar />
-      </div>
-    </div>
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          key="navbar"
+          initial={{ y: -64, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -64, opacity: 0 }}
+          transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+          className="fixed top-0 left-0 w-full z-[100] pointer-events-none bg-none"
+          style={{ willChange: "transform, opacity" }}
+        >
+          <div className="pointer-events-auto">
+            <Navbar />
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

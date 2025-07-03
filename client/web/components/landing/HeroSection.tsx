@@ -3,11 +3,13 @@ import Image from "next/image";
 import React from "react";
 import { Button } from "../ui/button";
 import ScrollDownIndicator from "../ui/ScrollDownIndicator";
+import AnimateInView from "../ui/AnimateInView";
+import { motion } from "framer-motion";
 
 const HeroSection = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-center justify-center px-4 relative pt-20 md:pt-0 w-[90%] mx-auto">
-      <section className="w-full md:w-1/2 flex flex-col gap-4 items-center md:items-start justify-center">
+      <AnimateInView className="w-full md:w-1/2 flex flex-col gap-4 items-center md:items-start justify-center">
         <span className="flex items-center justify-start self-start gap-2 lg:ml-2">
           <Image src="/icons/Logo.svg" alt="logo" width={32} height={32} />
           <h1 className="text-2xl md:text-3xl font-bold text-[var(--brown)]">
@@ -38,18 +40,38 @@ const HeroSection = () => {
         <span className="italic text-xs lg:ml-2 self-start text-[var(--light-brown)]">
           *Currently available only for Kathmandu and Lalitpur, Nepal
         </span>
-      </section>
-      <section className="w-full md:w-1/2 flex justify-center mt-8 md:mt-0 relative">
-        {/* Highlight circle behind mockup */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[340px] md:h-[340px] lg:w-[420px] lg:h-[420px] rounded-full bg-[var(--light-green)] opacity-80 z-1"></div>
-        <Image
-          src="/mockup/mockup2.svg"
-          alt="mockup"
-          width={400}
-          height={400}
-          className="w-full  md:max-w-full self-end z-10"
+      </AnimateInView>
+      <AnimateInView
+        className="w-full md:w-1/2 flex justify-center mt-8 md:mt-0 relative"
+        delay={0.2}
+      >
+        <motion.div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[340px] md:h-[340px] lg:w-[420px] lg:h-[420px] rounded-full bg-[var(--light-green)] opacity-80 z-1"
+          animate={{
+            scale: [1, 1.04, 1],
+            y: [0, -10, 0],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         />
-      </section>
+        <motion.div
+          className="w-full md:max-w-full self-end z-10"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+        >
+          <Image
+            src="/mockup/mockup2.svg"
+            alt="mockup"
+            width={400}
+            height={400}
+            className="w-full md:max-w-full self-end z-10"
+          />
+        </motion.div>
+      </AnimateInView>
       {/* Scroll Down Indicator - show on sm and up */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 hidden sm:flex">
         <ScrollDownIndicator />
