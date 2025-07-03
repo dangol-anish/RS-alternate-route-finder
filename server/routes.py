@@ -460,7 +460,9 @@ def get_obstacles():
 # ----------------------
 @main_routes.route("/update_profile", methods=["POST"])
 def update_profile():
-    data = request.json
+    data = request.get_json(force=True, silent=True)
+    if not data:
+        return jsonify({"error": "Invalid or missing JSON in request body"}), 400
     user_id = data.get("id")
     full_name = data.get("full_name")
     photo_base64 = data.get("photo")
