@@ -6,7 +6,7 @@ export const fetchShortestPath = async (
 ) => {
   try {
     const response = await axios.post(
-      `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/shortest_path`,
+      `${process.env.EXPO_PUBLIC_IP_ADDRESS}/shortest_path`,
       { source: sourceId, destination: destinationId }
     );
     return response.data;
@@ -17,10 +17,9 @@ export const fetchShortestPath = async (
 
 export const updateObstacles = async (obstacles: string[]) => {
   try {
-    await axios.post(
-      `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacles`,
-      { obstacles }
-    );
+    await axios.post(`${process.env.EXPO_PUBLIC_IP_ADDRESS}/obstacles`, {
+      obstacles,
+    });
   } catch (error) {
     throw new Error("Failed to update obstacles");
   }
@@ -32,7 +31,7 @@ export const verifyObstacle = async (
   action: "verify" | "dispute"
 ) => {
   const response = await axios.post(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verify`,
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/obstacle/verify`,
     { obstacle_id, user_id, action }
   );
   return response.data;
@@ -43,8 +42,8 @@ export const getObstacleVerifications = async (
   user_id?: string
 ) => {
   const url = user_id
-    ? `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle_id}?user_id=${user_id}`
-    : `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/${obstacle_id}`;
+    ? `${process.env.EXPO_PUBLIC_IP_ADDRESS}/obstacle/verifications/${obstacle_id}?user_id=${user_id}`
+    : `${process.env.EXPO_PUBLIC_IP_ADDRESS}/obstacle/verifications/${obstacle_id}`;
 
   const response = await axios.get(url);
   return response.data;
@@ -52,7 +51,7 @@ export const getObstacleVerifications = async (
 
 export const getObstacleVerificationsBatch = async (obstacle_ids: string[]) => {
   const response = await axios.post(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/obstacle/verifications/batch`,
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/obstacle/verifications/batch`,
     { obstacle_ids }
   );
   return response.data;
@@ -60,7 +59,7 @@ export const getObstacleVerificationsBatch = async (obstacle_ids: string[]) => {
 
 export const deleteObstacle = async (id: string, owner: string) => {
   const response = await fetch(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/delete_obstacle`,
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/delete_obstacle`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -76,7 +75,7 @@ export const deleteObstacle = async (id: string, owner: string) => {
 
 export const getModerationList = async (admin_id: string) => {
   const res = await fetch(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/admin/obstacles?admin_id=${admin_id}`
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/admin/obstacles?admin_id=${admin_id}`
   );
   const data = await res.json();
   if (!res.ok) {
@@ -93,7 +92,7 @@ export const performAdminAction = async (
   action: AdminAction
 ) => {
   const res = await fetch(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/admin/obstacle_action`,
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/admin/obstacle_action`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -108,14 +107,11 @@ export const performAdminAction = async (
 };
 
 export const signInUser = async (email: string, password: string) => {
-  const response = await fetch(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signin`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    }
-  );
+  const response = await fetch(`${process.env.EXPO_PUBLIC_IP_ADDRESS}/signin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Sign in failed");
@@ -125,7 +121,7 @@ export const signInUser = async (email: string, password: string) => {
 
 export const signOutUser = async () => {
   const response = await fetch(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signout`,
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/signout`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -141,7 +137,7 @@ export const signOutUser = async () => {
 
 export const fetchUserProfile = async (userId: string) => {
   const response = await fetch(
-    `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/profile/${userId}`
+    `${process.env.EXPO_PUBLIC_IP_ADDRESS}/profile/${userId}`
   );
   if (!response.ok) throw new Error("Failed to fetch user profile");
   return response.json();

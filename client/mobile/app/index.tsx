@@ -28,6 +28,7 @@ import { themeColors } from "./styles/colors";
 import SearchOverlay from "@/app/components/search/SearchOverlay";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import { IP_ADDRESS } from "../constants/IPAddress";
 
 interface FloatingActionComponentProps {
   onLocateCurrentLocation: () => void;
@@ -533,6 +534,62 @@ export default function App() {
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [searchText, setSearchText] = useState("");
   const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    const url = `${IP_ADDRESS}/ping`;
+    console.log("Testing API connectivity. URL:", url);
+    fetch(url)
+      .then(async (res) => {
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+        console.log("Ping success:", data);
+      })
+      .catch((error) => {
+        console.log("Ping error:", error);
+        if (error.response) {
+          console.log("Error response:", error.response);
+        }
+        if (error.request) {
+          console.log("Error request:", error.request);
+        }
+        if (error.config) {
+          console.log("Error config:", error.config);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    const url = `${IP_ADDRESS}/map_boundary`;
+    console.log("Testing /map_boundary. URL:", url);
+    fetch(url)
+      .then(async (res) => {
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+        console.log("Boundary result:", data);
+      })
+      .catch((error) => {
+        console.log("Boundary error:", error);
+        if (error.response) {
+          console.log("Error response:", error.response);
+        }
+        if (error.request) {
+          console.log("Error request:", error.request);
+        }
+        if (error.config) {
+          console.log("Error config:", error.config);
+        }
+      });
+  }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: themeColors.off_white }}>

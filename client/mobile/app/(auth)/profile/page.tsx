@@ -87,7 +87,7 @@ const ProfileEditPage = () => {
 
     try {
       const response = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/update_profile`,
+        `${process.env.EXPO_PUBLIC_IP_ADDRESS}/update_profile`,
         {
           method: "POST",
           headers: {
@@ -116,7 +116,7 @@ const ProfileEditPage = () => {
 
       // Fetch the latest user info from the backend
       const userResponse = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/get_user`,
+        `${process.env.EXPO_PUBLIC_IP_ADDRESS}/get_user`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

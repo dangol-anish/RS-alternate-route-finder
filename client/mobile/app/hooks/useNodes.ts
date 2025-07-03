@@ -11,7 +11,7 @@ export const useNodes = () => {
     const fetchNodes = async () => {
       try {
         const response = await axios.get(
-          `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/nodes`
+          `${process.env.EXPO_PUBLIC_IP_ADDRESS}/nodes`
         );
 
         const parsedData =

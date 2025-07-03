@@ -18,7 +18,7 @@ export const useObstacles = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/get_obstacles`
+        `${process.env.EXPO_PUBLIC_IP_ADDRESS}/get_obstacles`
       );
 
       const parsedData =

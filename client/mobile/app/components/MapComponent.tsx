@@ -144,7 +144,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
       const image = formData.image === null ? undefined : formData.image;
 
       const response = await axios.post(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/save_obstacles`,
+        `${process.env.EXPO_PUBLIC_IP_ADDRESS}/save_obstacles`,
         {
           node_id: selectedNode.id,
           latitude: selectedNode.geometry.coordinates[1],
@@ -175,7 +175,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     const fetchBoundary = async () => {
       try {
         const res = await axios.get(
-          `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/map_boundary`
+          `${process.env.EXPO_PUBLIC_IP_ADDRESS}/map_boundary`
         );
         const coords = res.data.boundary.map(
           ([lat, lon]: [number, number]) => ({

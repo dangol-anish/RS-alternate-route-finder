@@ -55,9 +55,9 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
 
       try {
         const response = await fetch(
-          `http://${
+          `${
             process.env.EXPO_PUBLIC_IP_ADDRESS
-          }:5000/search_place?q=${encodeURIComponent(searchText)}`
+          }/search_place?q=${encodeURIComponent(searchText)}`
         );
         const data = await response.json();
 

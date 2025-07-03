@@ -56,7 +56,7 @@ const Signup = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/signup`,
+        `${process.env.EXPO_PUBLIC_IP_ADDRESS}/signup`,
         {
           method: "POST",
           headers: {
