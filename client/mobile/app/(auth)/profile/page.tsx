@@ -101,7 +101,20 @@ const ProfileEditPage = () => {
         }
       );
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        const text = await response.text();
+        console.error("Non-JSON response from server:", text);
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Server error: " + text.slice(0, 100),
+        });
+        setIsSaving(false);
+        return;
+      }
 
       if (!response.ok) {
         console.error("Failed to update profile:", result.error);

@@ -508,6 +508,7 @@ def update_profile():
             }
         })
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
     
 # ----------------------
