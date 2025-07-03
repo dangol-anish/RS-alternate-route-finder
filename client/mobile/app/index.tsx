@@ -143,6 +143,7 @@ export default function App() {
     userLocation,
     setUserLocation,
     selectionMode,
+    setSelectionMode,
     selectedObstacleCoord,
   } = useMapStore();
 
@@ -166,6 +167,7 @@ export default function App() {
   );
 
   const mapZoomedToUser = useRef(false);
+  const [justCleared, setJustCleared] = useState(false);
 
   // Debug: log obstacle statuses
   console.log(
@@ -191,6 +193,8 @@ export default function App() {
     setExploredEdges([]);
     setObstacles(new Set());
     setInitialPathObstacles(new Set());
+    setJustCleared(true);
+    setSelectionMode("none");
   };
 
   // Get user location
@@ -222,6 +226,7 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (justCleared) return;
     if (source && destination) {
       if (source.id === destination.id) {
         Toast.show({
@@ -233,7 +238,7 @@ export default function App() {
       }
       findShortestPath();
     }
-  }, [source, destination]);
+  }, [source, destination, justCleared]);
 
   const getRoutingSource = () => {
     if (userLocation) {
@@ -590,6 +595,13 @@ export default function App() {
         }
       });
   }, []);
+
+  // When user selects a new source or destination, reset justCleared
+  useEffect(() => {
+    if (justCleared && (source || destination)) {
+      setJustCleared(false);
+    }
+  }, [source, destination]);
 
   return (
     <View style={{ flex: 1, backgroundColor: themeColors.off_white }}>

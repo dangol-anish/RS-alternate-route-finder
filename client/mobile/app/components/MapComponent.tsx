@@ -220,6 +220,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
         initialRegion={mapRegion} // Dynamically controlled by the state
         onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it
         onPress={(event: MapPressEvent) => {
+          if (selectionMode === "none") return;
           const { latitude, longitude } = event.nativeEvent.coordinate;
           // If a route exists and the tap is near the route, show route info
           if (
