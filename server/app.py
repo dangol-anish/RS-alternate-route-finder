@@ -19,8 +19,8 @@ def ping():
 def keep_alive():
     while True:
         try:
-            # Replace with your deployed server URL
-            requests.get("https://your-deployed-url.com/ping")
+            # Use the actual deployed server URL
+            requests.get("https://roadsense-server.onrender.com/ping")
         except Exception as e:
             print("Keep-alive ping failed:", e)
         time.sleep(300)  # 5 minutes
