@@ -17,7 +17,7 @@ export function Navbar() {
   return (
     <>
       {/* Desktop/Tablet Navbar: original design, visible on md and up */}
-      <nav className="fixed top-2 left-1/2 -translate-x-1/2 z-40 backdrop-blur-lg bg-white/70 border border-white/30 rounded-3xl shadow-md px-6 py-3 my-6 mx-auto  items-center justify-between gap-4 hidden md:flex max-w-[40vw]  ">
+      <nav className="fixed top-2 left-1/2 -translate-x-1/2 z-40 backdrop-blur-lg bg-white/90 border border-white/30 rounded-3xl shadow-md px-6 py-3 my-6 mx-auto  items-center justify-between gap-4 hidden md:flex max-w-[40vw]  ">
         <Link href="/" className="cursor-pointer">
           <Image
             src="/icons/Logo.svg"
