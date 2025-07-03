@@ -872,3 +872,25 @@ def admin_obstacle_action():
     else:
         return jsonify({'error': 'Invalid action'}), 400
 
+@main_routes.route("/get_user", methods=["POST"])
+def get_user():
+    data = request.get_json(force=True, silent=True)
+    user_id = data.get("id")
+    if not user_id:
+        return jsonify({"error": "User ID is required"}), 400
+
+    profile_response = supabase.table("profiles").select("*").eq("id", user_id).single().execute()
+    if not profile_response or not profile_response.data:
+        return jsonify({"error": "User not found"}), 404
+
+    profile = profile_response.data
+    return jsonify({
+        "id": profile.get("id"),
+        "full_name": profile.get("full_name"),
+        "photo": profile.get("photo"),
+        "phone": profile.get("phone"),
+        "email": profile.get("email"),
+        "role": profile.get("role"),
+        "reputation": profile.get("reputation", 0)
+    }), 200
+
