@@ -33,7 +33,7 @@ const features = [
 
 const Features = () => {
   return (
-    <section className="min-h-[80%]  py-20 bg-gradient-to-r from-white to-[var(--beige)]">
+    <section className="min-h-screen flex justify-center items-center  py-20 bg-gradient-to-r from-white to-[var(--beige)]">
       <div className="w-[90%] max-w-6xl mx-auto">
         <div className="flex flex-col gap-4">
           {" "}
