@@ -60,7 +60,7 @@ const ProfileEditPage = () => {
   };
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user || !user.id) return;
 
     setIsSaving(true);
 
@@ -95,7 +95,7 @@ const ProfileEditPage = () => {
           },
           body: JSON.stringify({
             id: user.id,
-            full_name: fullName,
+            full_name: fullName || user.full_name,
             photo: base64Image,
           }),
         }
@@ -138,6 +138,8 @@ const ProfileEditPage = () => {
       );
       const updatedUser = await userResponse.json();
       setUser(updatedUser);
+      setFullName(updatedUser.full_name || "");
+      setPhoto(updatedUser.photo || null);
 
       Toast.show({
         type: "success",
@@ -195,7 +197,7 @@ const ProfileEditPage = () => {
         <View style={{ marginTop: 20, width: "100%" }}>
           <Pressable
             onPress={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || !user || !user.id}
             style={({ pressed }) => [
               styles.saveButton,
               isSaving && { opacity: 0.6 },

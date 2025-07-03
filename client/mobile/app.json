@@ -10,10 +10,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourapp.mobile", // Replace with your actual bundle identifier
+      "bundleIdentifier": "com.yourapp.mobile",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "We need access to your location for mapping features.",
-        "NSLocationAlwaysUsageDescription": "We need access to your location for mapping features even when the app is in the background."
+        "NSLocationAlwaysUsageDescription": "We need access to your location for mapping features even when the app is in the background.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -21,7 +22,13 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.yourapp.roadsense"
     },
     "web": {
       "bundler": "metro",
@@ -57,6 +64,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "ea083ca8-2398-48e6-b521-cfb794d14ab6"
+      }
+    },
+    "owner": "anishdangol"
   }
 }
