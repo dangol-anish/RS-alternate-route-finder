@@ -99,7 +99,7 @@ def get_obstacles_from_cache():
 
 @main_routes.route('/')
 def index():
-    return render_template('map.html')
+    return jsonify({"status": "API running"})
 
 @main_routes.route('/edges')
 def get_edges():
