@@ -32,7 +32,10 @@ const stepImages = [
 
 const HowItWorks = () => {
   return (
-    <section className="min-h-screen py-20 bg-gradient-to-r from-[var(--beige)]/80 via-[var(--light-green)]/80 to-[var(--green)]/80">
+    <section
+      id="demo"
+      className="min-h-screen py-20 bg-gradient-to-r from-[var(--beige)]/80 via-[var(--light-green)]/80 to-[var(--green)]/80 scroll-mt-24"
+    >
       <div className="flex flex-col gap-4">
         {" "}
         <h2
