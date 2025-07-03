@@ -1,9 +1,10 @@
+import Link from "next/link";
 import React from "react";
 
 const FooterSection = () => {
   return (
     <footer className="bg-[var(--brown)] text-[var(--beige)] py-12 pb-4 px-4 ">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-around items-start md:items-start gap-8 pb-12">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-start gap-8 pb-12">
         {/* Left: Brand and tagline */}
         <div>
           <div className="text-3xl font-bold mb-2">
@@ -44,8 +45,14 @@ const FooterSection = () => {
         </div>
       </div>
       <div className="w-full border-b border-[var(--light-brown)]"></div>
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-center items-center pt-2 text-base text-[var(--beige)]">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center pt-2 text-base text-[var(--beige)]">
         <div>© {new Date().getFullYear()} RoadSense. All rights reserved.</div>
+        <div>
+          Made by{" "}
+          <Link href="https://www.dangolanish.com.np/" target="_blank">
+            Anish Dangol
+          </Link>
+        </div>
       </div>
     </footer>
   );
