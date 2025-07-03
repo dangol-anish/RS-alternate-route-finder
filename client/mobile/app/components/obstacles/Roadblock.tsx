@@ -205,6 +205,8 @@ const Roadblock: React.FC = () => {
               <Text style={styles.emptyMessage}>
                 No obstacles created by you.
               </Text>
+            ) : activeTab === "all" ? (
+              <Text style={styles.emptyMessage}>No obstacles found.</Text>
             ) : null
           }
         />
