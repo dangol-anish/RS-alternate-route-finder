@@ -533,7 +533,7 @@ export default function App() {
 
   useEffect(() => {
     const url = `${IP_ADDRESS}/map_boundary`;
-    console.log("Testing /map_boundary. URL:", url);
+
     fetch(url)
       .then(async (res) => {
         const text = await res.text();
@@ -543,19 +543,14 @@ export default function App() {
         } catch {
           data = text;
         }
-        console.log("Boundary result:", data);
+
       })
       .catch((error) => {
-        console.log("Boundary error:", error);
-        if (error.response) {
-          console.log("Error response:", error.response);
-        }
-        if (error.request) {
-          console.log("Error request:", error.request);
-        }
-        if (error.config) {
-          console.log("Error config:", error.config);
-        }
+        Toast.show({
+          type: "error",
+          text1: "Connection Error",
+          text2: "Failed to load map boundary. Please check your connection.",
+        });
       });
   }, []);
 
