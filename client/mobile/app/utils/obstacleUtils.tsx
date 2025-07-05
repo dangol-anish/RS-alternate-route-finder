@@ -41,3 +41,9 @@ export const getSeverityColor = (severity: string) => {
       return "gray";
   }
 };
+
+// Default export to satisfy Expo Router's requirement
+export default {
+  getObstacleIcon,
+  getSeverityColor,
+};

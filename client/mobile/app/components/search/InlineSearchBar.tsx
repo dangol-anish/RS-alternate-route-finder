@@ -13,7 +13,7 @@ import {
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { themeColors } from "@/app/styles/colors";
 import SkeletonPlaceholder from "../ui/SkeletonPlaceholder";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 
 interface InlineSearchBarProps {
   mapRef: React.RefObject<any>;

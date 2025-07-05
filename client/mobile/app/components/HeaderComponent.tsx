@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import MapView from "react-native-maps";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import { themeColors } from "../styles/colors";
 
 // Props now accepts the mapRef

@@ -16,3 +16,15 @@
 //     </Stack.Navigator>
 //   );
 // }
+
+// Placeholder component to satisfy Expo Router's default export requirement
+import React from "react";
+import { View, Text } from "react-native";
+
+export default function AuthStack() {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text>Auth Stack - Not Implemented</Text>
+    </View>
+  );
+}

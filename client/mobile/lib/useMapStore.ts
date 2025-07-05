@@ -40,3 +40,6 @@ export const useMapStore = create<MapStore>((set, get) => ({
   selectedObstacleCoord: null,
   setSelectedObstacleCoord: (coord) => set({ selectedObstacleCoord: coord }),
 }));
+
+// Default export to satisfy Expo Router's requirement
+export default useMapStore;

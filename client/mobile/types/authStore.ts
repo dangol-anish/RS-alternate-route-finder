@@ -14,3 +14,6 @@ export type AuthStore = {
   loadSession: () => Promise<void>;
   clearSession: () => Promise<void>;
 };
+
+// Default export to satisfy Expo Router's requirement
+export default AuthStore;

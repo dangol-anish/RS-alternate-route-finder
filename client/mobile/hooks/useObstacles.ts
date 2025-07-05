@@ -2,13 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Alert } from "react-native";
 import { supabase } from "@/lib/supabase"; // adjust path as needed
-import { useMapStore } from "../store/useMapStore";
+import { useMapStore } from "@/lib/useMapStore";
 import { Timestamp } from "react-native-reanimated/lib/typescript/commonTypes";
-import { Obstacle } from "@/app/types/obstacle";
-import { getObstacleVerificationsBatch } from "../utils/api";
+import { Obstacle } from "@/types/obstacle";
+import { getObstacleVerificationsBatch } from "@/app/utils/api";
 
 export const useObstacles = () => {
-  console.log("useObstacles hook initialized");
   const [obstaclesDb, setObstaclesDb] = useState<Obstacle[]>([]);
   const [loading, setLoading] = useState(true);
   const obstaclesRef = useRef<Obstacle[]>([]);
@@ -77,7 +76,6 @@ export const useObstacles = () => {
       );
       setObstacles(obstacleIdSet);
     } catch (error: any) {
-      console.log(error);
       Alert.alert(
         "Error",
         `Failed to load obstacles: ${error.message || "Unknown error"}`
@@ -100,7 +98,6 @@ export const useObstacles = () => {
           table: "obstacles",
         },
         (payload) => {
-          console.log("🔄 Realtime obstacle update:", payload);
           fetchObstacles();
         }
       )
@@ -113,3 +110,6 @@ export const useObstacles = () => {
 
   return { obstaclesDb, obstaclesRef, loading };
 };
+
+// Default export to satisfy Expo Router's requirement
+export default useObstacles;

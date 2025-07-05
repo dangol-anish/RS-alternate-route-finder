@@ -16,3 +16,6 @@ export type Obstacle = {
   status?: string;
   admin_verified?: boolean;
 };
+
+// Default export to satisfy Expo Router's requirement
+export default Obstacle;

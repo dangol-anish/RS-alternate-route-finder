@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { GeoJSONFeature } from "../types/geoJSON";
+import { GeoJSONFeature } from "@/types/geoJSON";
 import { Alert } from "react-native";
 
 export const useNodes = () => {

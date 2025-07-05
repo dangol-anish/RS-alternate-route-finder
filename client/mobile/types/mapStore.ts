@@ -35,3 +35,6 @@ export type MapStore = {
   userLocation: LatLng | null;
   setUserLocation: (location: LatLng) => void;
 };
+
+// Default export to satisfy Expo Router's requirement
+export default MapStore;

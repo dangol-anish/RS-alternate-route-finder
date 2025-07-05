@@ -9,18 +9,18 @@ import {
   Button,
 } from "react-native";
 import MapComponent from "@/app/components/MapComponent";
-import { useNodes } from "@/app/hooks/useNodes";
+import { useNodes } from "@/hooks/useNodes";
 import { updateObstacles, fetchShortestPath } from "./utils/api";
 import { LatLng } from "react-native-maps";
 import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter, usePathname } from "expo-router";
-import { useMapStore } from "./store/useMapStore";
-import { useObstacles } from "./hooks/useObstacles";
+import { useMapStore } from "@/lib/useMapStore";
+import { useObstacles } from "@/hooks/useObstacles";
 // import Menu from "./components/auth/Menu";
 import MapView from "react-native-maps";
 import { MaterialIcons } from "@expo/vector-icons";
-import { GeoJSONFeature } from "./types/geoJSON";
+import { GeoJSONFeature } from "@/types/geoJSON";
 import Toast from "react-native-toast-message";
 import RouteInfoDialog from "./components/RouteInfoDialog";
 import { pathDistance } from "./utils/distance";
@@ -61,14 +61,12 @@ async function fetchPlaceName(
     return placeNameCache[key];
   }
   try {
-    console.log("fetchPlaceName called with:", lat, lon);
     const places = await Location.reverseGeocodeAsync({
       latitude: lat,
       longitude: lon,
     });
     const place = places[0];
     if (!place) {
-      console.log("No place found for:", lat, lon);
       if (retries > 0) {
         // Retry after a short delay
         await new Promise((res) => setTimeout(res, 300));
@@ -103,10 +101,9 @@ async function fetchPlaceName(
     const name =
       uniqueParts.length > 0 ? uniqueParts.join(", ") : `${lat}, ${lon}`;
     placeNameCache[key] = name;
-    console.log("fetchPlaceName result:", name);
+
     return name;
   } catch (e) {
-    console.log("fetchPlaceName error for:", lat, lon, e);
     if (retries > 0) {
       await new Promise((res) => setTimeout(res, 300));
       return fetchPlaceName(lat, lon, retries - 1);
@@ -170,20 +167,12 @@ export default function App() {
   const [justCleared, setJustCleared] = useState(false);
 
   // Debug: log obstacle statuses
-  console.log(
-    "obstaclesDb",
-    obstaclesDb.map((o) => ({ id: o.id, status: o.status }))
-  );
 
   // Filter out expired obstacles
   const activeObstacles = obstaclesDb.filter(
     (obstacle) => obstacle.status !== "expired"
   );
   // Debug: log filtered active obstacles
-  console.log(
-    "activeObstacles",
-    activeObstacles.map((o) => ({ id: o.id, status: o.status }))
-  );
 
   //clear path
   const clearPath = () => {
@@ -266,20 +255,13 @@ export default function App() {
       Alert.alert("Error", "Source or Destination is missing!");
       return;
     }
-    console.log(
-      "🔍 Finding shortest path from",
-      source.id,
-      "to",
-      destination.id
-    );
+
     try {
       const response = await fetchShortestPath(source.id, destination.id);
 
       if (response.error) {
-        console.log("❌ Pathfinding error:", response.error);
         Alert.alert("Error", response.error);
       } else {
-        console.log("✅ Path found with", response.path.length, "coordinates");
         setPath(
           response.path.map(([lat, lon]: [number, number]) => ({
             latitude: lat,
@@ -297,7 +279,6 @@ export default function App() {
         );
       }
     } catch (error) {
-      console.log("❌ Pathfinding exception:", error);
       Alert.alert("Error", "Failed to find shortest path");
     }
   };
@@ -401,7 +382,7 @@ export default function App() {
     let isActive = true;
     if (source && source.geometry) {
       const [lon, lat] = source.geometry.coordinates;
-      console.log("Setting sourceName for:", lat, lon, source);
+
       fetchPlaceName(lat, lon).then((name) => {
         if (isActive) setSourceName(name);
       });
@@ -410,7 +391,7 @@ export default function App() {
     }
     if (destination && destination.geometry) {
       const [lon, lat] = destination.geometry.coordinates;
-      console.log("Setting destinationName for:", lat, lon, destination);
+
       fetchPlaceName(lat, lon).then((name) => {
         if (isActive) setDestinationName(name);
       });
@@ -478,22 +459,14 @@ export default function App() {
 
   // Handle reroute
   const handleReroute = () => {
-    console.log("🔄 Reroute triggered for obstacle:", obstaclePrompt?.id);
     setObstaclePrompt(null);
     if (!obstaclePrompt) {
-      console.log("❌ No obstacle prompt found");
       return;
     }
     setPromptedObstacles((prev) => new Set(prev).add(obstaclePrompt.id));
     if (!source || !destination) {
-      console.log("❌ Source or destination missing:", {
-        source: !!source,
-        destination: !!destination,
-      });
       return;
     }
-
-    console.log("🗺️ Finding new path from", source.id, "to", destination.id);
 
     // Clear current path to trigger new route calculation
     setPath([]);
@@ -542,7 +515,7 @@ export default function App() {
 
   useEffect(() => {
     const url = `${IP_ADDRESS}/ping`;
-    console.log("Testing API connectivity. URL:", url);
+
     fetch(url)
       .then(async (res) => {
         const text = await res.text();
@@ -552,19 +525,9 @@ export default function App() {
         } catch {
           data = text;
         }
-        console.log("Ping success:", data);
       })
       .catch((error) => {
-        console.log("Ping error:", error);
-        if (error.response) {
-          console.log("Error response:", error.response);
-        }
-        if (error.request) {
-          console.log("Error request:", error.request);
-        }
-        if (error.config) {
-          console.log("Error config:", error.config);
-        }
+        throw new Error(`Ping failed: ${error.message}`);
       });
   }, []);
 

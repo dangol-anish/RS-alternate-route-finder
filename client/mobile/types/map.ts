@@ -19,3 +19,6 @@ export interface MapComponentProps {
   onRoutePress: () => void;
   mapZoomedToUser: React.MutableRefObject<boolean>;
 }
+
+// Default export to satisfy Expo Router's requirement
+export default MapComponentProps;

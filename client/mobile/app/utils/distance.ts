@@ -30,3 +30,9 @@ export function pathDistance(path: { latitude: number; longitude: number }[]) {
   }
   return dist;
 }
+
+// Default export to satisfy Expo Router's requirement
+export default {
+  haversineDistance,
+  pathDistance,
+};

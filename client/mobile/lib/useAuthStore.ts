@@ -38,3 +38,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ user: null, isAuthenticated: false });
   },
 }));
+
+// Default export to satisfy Expo Router's requirement
+export default useAuthStore;

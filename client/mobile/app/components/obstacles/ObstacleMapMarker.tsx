@@ -1,6 +1,6 @@
 import React from "react";
 import { Marker } from "react-native-maps";
-import { Obstacle } from "@/app/types/obstacle";
+import { Obstacle } from "@/types/obstacle";
 import { LatLng } from "react-native-maps";
 import { themeColors } from "@/app/styles/colors";
 

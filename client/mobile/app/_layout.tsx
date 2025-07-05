@@ -3,7 +3,7 @@ import FooterComponent from "./components/FooterComponent";
 import { View, StyleSheet } from "react-native";
 import React, { useEffect } from "react";
 import Toast from "react-native-toast-message";
-import { useAuthStore } from "./store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,8 +27,6 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="index" options={{ title: "Home" }} />
-            <Stack.Screen name="roadblock" options={{ title: "RoadBlock" }} />
-            <Stack.Screen name="settings" options={{ title: "Settings" }} />
           </Stack>
         </View>
         <SafeAreaView style={{ flex: 0 }} edges={["bottom"]}>

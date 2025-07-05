@@ -10,13 +10,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { themeColors } from "@/app/styles/colors";
-import { useObstacles } from "@/app/hooks/useObstacles";
-import { Obstacle } from "@/app/types/obstacle";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { useObstacles } from "@/hooks/useObstacles";
+import { Obstacle } from "@/types/obstacle";
+import { useAuthStore } from "@/lib/useAuthStore";
 import { getSeverityColor } from "@/app/utils/obstacleUtils";
 import { truncateText } from "@/app/utils/truncateText";
 import { AntDesign } from "@expo/vector-icons";
-import { useMapStore } from "@/app/store/useMapStore";
+import { useMapStore } from "@/lib/useMapStore";
 import { useRouter } from "expo-router";
 
 const Roadblock: React.FC = () => {

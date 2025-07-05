@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
-import { ObstacleFormProps } from "@/app/types/obstacleForm";
+import { ObstacleFormProps } from "@/types/obstacleForm";
 import { themeColors } from "@/app/styles/colors";
 import * as FileSystem from "expo-file-system";
 

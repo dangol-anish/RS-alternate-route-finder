@@ -4,8 +4,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Ionicons } from "@expo/vector-icons";
 import ClearPathButton from "./ClearPathButton";
 import CurrentLocationButton from "./CurrentLocationButton";
-import { useMapStore } from "../store/useMapStore";
-import { useAuthStore } from "../store/useAuthStore";
+import { useMapStore } from "@/lib/useMapStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import Toast from "react-native-toast-message";
 import { themeColors } from "../styles/colors";
 

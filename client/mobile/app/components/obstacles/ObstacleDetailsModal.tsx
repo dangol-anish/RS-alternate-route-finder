@@ -1,5 +1,5 @@
-import { useAuthStore } from "@/app/store/useAuthStore";
-import { useMapStore } from "@/app/store/useMapStore";
+import { useAuthStore } from "@/lib/useAuthStore";
+import { useMapStore } from "@/lib/useMapStore";
 import { themeColors } from "@/app/styles/colors";
 import { getSeverityColor } from "@/app/utils/obstacleUtils";
 import { truncateText } from "@/app/utils/truncateText";

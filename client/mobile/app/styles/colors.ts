@@ -9,3 +9,6 @@ export const themeColors = {
   gray: "#b0aca5",
   blue: "#4A90E2",
 };
+
+// Default export to satisfy Expo Router's requirement
+export default themeColors;

@@ -9,3 +9,6 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trimEnd() + "...";
 }
+
+// Default export to satisfy Expo Router's requirement
+export default truncateText;

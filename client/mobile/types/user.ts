@@ -7,3 +7,6 @@ export type User = {
   role?: string; // 'user' or 'admin'
   reputation?: number;
 };
+
+// Default export to satisfy Expo Router's requirement
+export default User;

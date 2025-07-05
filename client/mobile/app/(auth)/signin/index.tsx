@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
 import { signInUser, fetchUserProfile } from "@/app/utils/api";
 

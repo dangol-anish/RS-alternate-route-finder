@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import Toast from "react-native-toast-message";
-import { useAuthStore } from "../store/useAuthStore"; // adjust path
+import { useAuthStore } from "@/lib/useAuthStore"; // adjust path
 
 interface ObstacleToggleButtonProps {
   isObstacleMode: boolean;

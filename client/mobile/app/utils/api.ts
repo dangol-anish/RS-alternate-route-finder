@@ -142,3 +142,18 @@ export const fetchUserProfile = async (userId: string) => {
   if (!response.ok) throw new Error("Failed to fetch user profile");
   return response.json();
 };
+
+// Default export to satisfy Expo Router's requirement
+export default {
+  fetchShortestPath,
+  updateObstacles,
+  verifyObstacle,
+  getObstacleVerifications,
+  getObstacleVerificationsBatch,
+  deleteObstacle,
+  getModerationList,
+  performAdminAction,
+  signInUser,
+  signOutUser,
+  fetchUserProfile,
+};

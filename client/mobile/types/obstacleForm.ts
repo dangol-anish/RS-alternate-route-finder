@@ -10,3 +10,6 @@ export interface ObstacleFormProps {
     image?: string | null;
   }) => void;
 }
+
+// Default export to satisfy Expo Router's requirement
+export default ObstacleFormProps;

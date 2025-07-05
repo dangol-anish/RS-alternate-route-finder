@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import Toast from "react-native-toast-message";
 import { themeColors } from "@/app/styles/colors";
 import { useRouter } from "expo-router"; // <<< NEW

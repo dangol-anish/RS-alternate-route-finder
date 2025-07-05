@@ -7,11 +7,11 @@ import {
   Alert,
   StyleSheet,
 } from "react-native";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getModerationList, performAdminAction } from "@/app/utils/api";
-import { Obstacle } from "@/app/types/obstacle";
+import { Obstacle } from "@/types/obstacle";
 import SkeletonPlaceholder from "@/app/components/ui/SkeletonPlaceholder";
 
 type AdminAction = "approve" | "remove" | "reset";

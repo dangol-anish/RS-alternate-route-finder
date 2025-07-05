@@ -19,16 +19,16 @@ import MapView, {
   Polygon,
   Polyline,
 } from "react-native-maps";
-import { useAuthStore } from "../store/useAuthStore";
-import { useMapStore } from "../store/useMapStore";
+import { useAuthStore } from "@/lib/useAuthStore";
+import { useMapStore } from "@/lib/useMapStore";
 import { themeColors } from "../styles/colors";
-import { GeoJSONFeature } from "../types/geoJSON";
-import { MapComponentProps } from "../types/map";
+import { GeoJSONFeature } from "@/types/geoJSON";
+import { MapComponentProps } from "@/types/map";
 import { darkMapStyle } from "../utils/mapStyles";
 import ObstacleDetailsPanel from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
 import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
-import { Obstacle } from "@/app/types/obstacle";
+import { Obstacle } from "@/types/obstacle";
 // @ts-ignore: Could not find a declaration file for module 'uuid'. This is safe for runtime usage.
 import { v4 as uuidv4 } from "uuid";
 
@@ -76,7 +76,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
   useEffect(() => {
     if (selectedObstacleCoord && mapRef.current) {
       mapZoomedToUser.current = true;
-      console.log("Animating to obstacle:", selectedObstacleCoord);
+
       mapRef.current.animateToRegion(
         {
           ...selectedObstacleCoord,
@@ -158,10 +158,8 @@ const MapComponent: React.FC<MapComponentProps> = ({
           image: image,
         }
       );
-      console.log("Obstacle saved:", response.data);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error("Error saving obstacle:", error.response?.data);
         Alert.alert("Error", error.response?.data?.error || "Unknown error");
       } else {
         console.error("Unexpected error:", error);
@@ -206,10 +204,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
   }
 
   // Debug: log obstacles being rendered on the map
-  console.log(
-    "MapComponent obstaclesDb",
-    obstaclesDb.map((o) => ({ id: o.id, status: o.status }))
-  );
 
   return (
     <View style={{ flex: 1 }}>

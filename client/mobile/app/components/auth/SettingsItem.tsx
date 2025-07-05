@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React from "react";
-import { useMapStore } from "@/app/store/useMapStore";
+import { useMapStore } from "@/lib/useMapStore";
 import { Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useAuthStore } from "@/app/store/useAuthStore";
+import { useAuthStore } from "@/lib/useAuthStore";
 import { themeColors } from "@/app/styles/colors";
 import Toast from "react-native-toast-message";
 import { signOutUser } from "@/app/utils/api";

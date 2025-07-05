@@ -136,3 +136,8 @@ export const darkMapStyle = [
     ],
   },
 ];
+
+// Default export to satisfy Expo Router's requirement
+export default {
+  darkMapStyle,
+};

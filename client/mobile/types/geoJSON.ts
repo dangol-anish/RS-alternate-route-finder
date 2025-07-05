@@ -9,3 +9,6 @@ export interface GeoJSONFeature {
     [key: string]: any;
   };
 }
+
+// Default export to satisfy Expo Router's requirement
+export default GeoJSONFeature;
