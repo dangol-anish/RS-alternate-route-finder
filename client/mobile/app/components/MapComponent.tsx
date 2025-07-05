@@ -12,22 +12,15 @@ import {
   Image,
   StyleSheet,
 } from "react-native";
-import MapView, {
-  LatLng,
-  MapPressEvent,
-  Marker,
-  Polygon,
-  Polyline,
-} from "react-native-maps";
+import { WebView } from "react-native-webview";
 import { useAuthStore } from "@/lib/useAuthStore";
 import { useMapStore } from "@/lib/useMapStore";
 import { themeColors } from "../styles/colors";
 import { GeoJSONFeature } from "@/types/geoJSON";
 import { MapComponentProps } from "@/types/map";
-import { darkMapStyle } from "../utils/mapStyles";
 import ObstacleDetailsPanel from "./obstacles/ObstacleDetailsModal";
 import ObstacleForm from "./obstacles/ObstacleForm";
-import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
+// import ObstacleMapMarker from "./obstacles/ObstacleMapMarker";
 import { Obstacle } from "@/types/obstacle";
 // @ts-ignore: Could not find a declaration file for module 'uuid'. This is safe for runtime usage.
 import { v4 as uuidv4 } from "uuid";
@@ -58,7 +51,7 @@ const MapComponent: React.FC<MapComponentProps> = ({
     setDestination,
     obstacles,
     isObstacleMode,
-    selectionMode, // ← ADD THIS
+    selectionMode,
     setSelectionMode,
     clearPath,
   } = useMapStore();
@@ -73,18 +66,37 @@ const MapComponent: React.FC<MapComponentProps> = ({
     (state) => state.selectedObstacleCoord
   );
 
+  const webViewRef = useRef<WebView>(null);
+  const isUserInteracting = useRef(false);
+
+  // Connect the mapRef to the webViewRef so external functions can access it
   useEffect(() => {
-    if (selectedObstacleCoord && mapRef.current) {
+    if (mapRef && webViewRef.current) {
+      // @ts-ignore
+      mapRef.current = {
+        injectJavaScript: (script: string) => {
+          webViewRef.current?.injectJavaScript(script);
+        },
+        animateToRegion: (region: any) => {
+          webViewRef.current?.injectJavaScript(`
+            map.flyTo([${region.latitude}, ${region.longitude}], 16);
+            true;
+          `);
+        },
+      };
+    }
+  }, [mapRef]);
+
+  useEffect(() => {
+    if (selectedObstacleCoord && webViewRef.current) {
       mapZoomedToUser.current = true;
 
-      mapRef.current.animateToRegion(
-        {
-          ...selectedObstacleCoord,
-          latitudeDelta: 0.002,
-          longitudeDelta: 0.002,
-        },
-        1000
-      );
+      // Fly to the selected obstacle location with high zoom
+      webViewRef.current?.injectJavaScript(`
+        map.flyTo([${selectedObstacleCoord.latitude}, ${selectedObstacleCoord.longitude}], 18);
+        true;
+      `);
+
       // Clear after short delay to allow repeated selection
       setTimeout(() => {
         const { setSelectedObstacleCoord } = useMapStore.getState();
@@ -126,7 +138,36 @@ const MapComponent: React.FC<MapComponentProps> = ({
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       });
+
+      // Fly to user location with higher zoom
+      webViewRef.current?.injectJavaScript(`
+        map.flyTo([${userLocation.latitude}, ${userLocation.longitude}], 16);
+        true;
+      `);
     }
+  };
+
+  // Function to zoom to a specific location
+  const zoomToLocation = (
+    latitude: number,
+    longitude: number,
+    zoomLevel: number = 16
+  ) => {
+    webViewRef.current?.injectJavaScript(`
+      map.flyTo([${latitude}, ${longitude}], ${zoomLevel});
+      true;
+    `);
+  };
+
+  // Function to zoom to fit all markers
+  const zoomToFitAll = () => {
+    webViewRef.current?.injectJavaScript(`
+      if (markers.length > 0) {
+        var group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+      true;
+    `);
   };
 
   const handleFormSubmit = async (formData: {
@@ -167,7 +208,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
     }
   };
 
-  const [boundary, setBoundary] = useState<LatLng[]>([]);
+  const [boundary, setBoundary] = useState<
+    { latitude: number; longitude: number }[]
+  >([]);
 
   useEffect(() => {
     const fetchBoundary = async () => {
@@ -203,116 +246,344 @@ const MapComponent: React.FC<MapComponentProps> = ({
     );
   }
 
-  // Debug: log obstacles being rendered on the map
+  // Static HTML template - only loads once
+  const mapHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+      <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+      <style>
+        body { margin: 0; padding: 0; }
+        #map { width: 100%; height: 100vh; }
+        .custom-marker { background: transparent; border: none; }
+      </style>
+    </head>
+    <body>
+      <div id="map"></div>
+      <script>
+        var map = L.map('map', {
+          zoomControl: true,
+          doubleClickZoom: true,
+          scrollWheelZoom: true,
+          dragging: true,
+          touchZoom: true,
+          boxZoom: false,
+          keyboard: false
+        }).setView([${mapRegion.latitude}, ${mapRegion.longitude}], 16);
+        var markers = [];
+        var polylines = [];
+        var polygons = [];
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        function clearMap() {
+          markers.forEach(marker => map.removeLayer(marker));
+          polylines.forEach(polyline => map.removeLayer(polyline));
+          polygons.forEach(polygon => map.removeLayer(polygon));
+          markers = [];
+          polylines = [];
+          polygons = [];
+        }
+
+        function updateMap(data) {
+          clearMap();
+          
+          // Add source marker
+          if (data.source) {
+            var sourceMarker = L.marker([data.source.lat, data.source.lng])
+              .addTo(map)
+              .bindPopup('Source')
+              .setIcon(L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background-color: ${themeColors.green}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white;"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              }));
+            markers.push(sourceMarker);
+          }
+
+          // Add destination marker
+          if (data.destination) {
+            var destMarker = L.marker([data.destination.lat, data.destination.lng])
+              .addTo(map)
+              .bindPopup('Destination')
+              .setIcon(L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background-color: ${themeColors.brown}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white;"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              }));
+            markers.push(destMarker);
+          }
+
+          // Add user location marker
+          if (data.userLocation) {
+            var userMarker = L.marker([data.userLocation.lat, data.userLocation.lng])
+              .addTo(map)
+              .bindPopup('Your Location')
+              .setIcon(L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background-color: ${themeColors.blue}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white;"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+              }));
+            markers.push(userMarker);
+          }
+
+          // Add path polyline
+          if (data.path && data.path.length > 0) {
+            var pathCoords = data.path.map(coord => [coord.lat, coord.lng]);
+            var polyline = L.polyline(pathCoords, {color: '${themeColors.red}', weight: 5}).addTo(map);
+            polylines.push(polyline);
+          }
+
+          // Add boundary polygon
+          if (data.boundary && data.boundary.length > 0) {
+            var boundaryCoords = data.boundary.map(coord => [coord.lat, coord.lng]);
+            var polygon = L.polygon(boundaryCoords, {color: 'black', weight: 1, fillOpacity: 0}).addTo(map);
+            polygons.push(polygon);
+          }
+
+          // Add obstacle markers
+          if (data.obstacles) {
+            data.obstacles.forEach(function(obstacle, index) {
+              var obstacleMarker = L.marker([obstacle.lat, obstacle.lng])
+                .addTo(map)
+                .bindPopup(obstacle.name || 'Obstacle')
+                .setIcon(L.divIcon({
+                  className: 'custom-marker',
+                  html: '<div style="background-color: ${themeColors.red}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white;"></div>',
+                  iconSize: [24, 24],
+                  iconAnchor: [12, 12]
+                }))
+                .on('click', function() {
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'obstacleClick',
+                    obstacleId: obstacle.id || index,
+                    obstacle: obstacle
+                  }));
+                });
+              markers.push(obstacleMarker);
+            });
+          }
+
+          // Add selected obstacle coordinate marker
+          if (data.selectedObstacleCoord) {
+            var selectedMarker = L.marker([data.selectedObstacleCoord.lat, data.selectedObstacleCoord.lng])
+              .addTo(map)
+              .setIcon(L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="background-color: ${themeColors.red}; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white;"></div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+              }));
+            markers.push(selectedMarker);
+          }
+        }
+
+        map.on('click', function(e) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'mapClick',
+            lat: e.latlng.lat,
+            lng: e.latlng.lng
+          }));
+        });
+
+        // Track user interactions to prevent updates during panning/zooming
+        map.on('movestart', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'userInteractionStart'
+          }));
+        });
+
+        map.on('moveend', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'userInteractionEnd'
+          }));
+        });
+
+        map.on('zoomstart', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'userInteractionStart'
+          }));
+        });
+
+        map.on('zoomend', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'userInteractionEnd'
+          }));
+        });
+
+        // Initial map update
+        updateMap({});
+      </script>
+    </body>
+    </html>
+  `;
+
+  // Function to update map data without reloading
+  const updateMapData = (forceUpdate = false) => {
+    console.log(
+      "updateMapData called, forceUpdate:",
+      forceUpdate,
+      "isUserInteracting:",
+      isUserInteracting.current
+    );
+
+    // Don't update if user is currently interacting with the map (unless forced)
+    if (isUserInteracting.current && !forceUpdate) {
+      console.log("Skipping update due to user interaction");
+      return;
+    }
+
+    const mapData = {
+      source: source
+        ? {
+            lat: source.geometry.coordinates[1],
+            lng: source.geometry.coordinates[0],
+          }
+        : null,
+      destination: destination
+        ? {
+            lat: destination.geometry.coordinates[1],
+            lng: destination.geometry.coordinates[0],
+          }
+        : null,
+      userLocation: userLocation
+        ? { lat: userLocation.latitude, lng: userLocation.longitude }
+        : null,
+      path: path.map((coord) => ({
+        lat: coord.latitude,
+        lng: coord.longitude,
+      })),
+      boundary: boundary.map((coord) => ({
+        lat: coord.latitude,
+        lng: coord.longitude,
+      })),
+      obstacles: obstaclesDb.map((obstacle) => ({
+        lat: obstacle.latitude,
+        lng: obstacle.longitude,
+        name: obstacle.name || "Obstacle",
+      })),
+      selectedObstacleCoord: selectedObstacleCoord
+        ? {
+            lat: selectedObstacleCoord.latitude,
+            lng: selectedObstacleCoord.longitude,
+          }
+        : null,
+    };
+
+    webViewRef.current?.injectJavaScript(`
+      updateMap(${JSON.stringify(mapData)});
+      true;
+    `);
+  };
+
+  // Update map when data changes (but not on map movement)
+  useEffect(() => {
+    // Only update if the WebView is ready
+    if (webViewRef.current) {
+      console.log("Updating map data:", {
+        source,
+        destination,
+        userLocation,
+        path,
+        boundary,
+        obstaclesDb,
+      });
+      updateMapData();
+    }
+  }, [
+    source,
+    destination,
+    userLocation,
+    path,
+    boundary,
+    obstaclesDb,
+    selectedObstacleCoord,
+  ]);
+
+  const handleWebViewMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+
+      if (data.type === "mapClick") {
+        if (selectionMode === "none") return;
+
+        const latitude = data.lat;
+        const longitude = data.lng;
+
+        // If a route exists and the tap is near the route, show route info
+        if (path.length > 0 && isPointNearPath({ latitude, longitude }, path)) {
+          if (onRoutePress) onRoutePress();
+          return;
+        }
+
+        const closestNode = findNearestNode(latitude, longitude);
+
+        if (!closestNode) {
+          Alert.alert("Error", "No closest node found!");
+          return;
+        }
+
+        switch (selectionMode) {
+          case "obstacle":
+            setSelectedNode(closestNode);
+            setShowForm(true);
+            break;
+          case "source":
+            setSource(closestNode);
+            setSelectionMode("none");
+            break;
+          case "destination":
+            setDestination(closestNode);
+            setSelectionMode("none");
+            break;
+          default:
+            break;
+        }
+      } else if (data.type === "obstacleClick") {
+        // Find the obstacle in obstaclesDb and set it as selected
+        const clickedObstacle =
+          obstaclesDb.find((obs) => obs.id === data.obstacleId) ||
+          obstaclesDb[data.obstacleId]; // fallback to index
+        if (clickedObstacle) {
+          setSelectedObstacle(clickedObstacle);
+        }
+      } else if (data.type === "userInteractionStart") {
+        isUserInteracting.current = true;
+      } else if (data.type === "userInteractionEnd") {
+        isUserInteracting.current = false;
+      }
+    } catch (error) {
+      console.error("Error parsing WebView message:", error);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
-      <MapView
-        ref={mapRef}
-        customMapStyle={darkMapStyle}
+      <WebView
+        ref={webViewRef}
+        source={{ html: mapHTML }}
         style={{ flex: 1 }}
-        initialRegion={mapRegion} // Dynamically controlled by the state
-        onRegionChangeComplete={(newRegion) => setMapRegion(newRegion)} // Update the region when the user manually changes it
-        onPress={(event: MapPressEvent) => {
-          if (selectionMode === "none") return;
-          const { latitude, longitude } = event.nativeEvent.coordinate;
-          // If a route exists and the tap is near the route, show route info
-          if (
-            path.length > 0 &&
-            isPointNearPath({ latitude, longitude }, path)
-          ) {
-            if (onRoutePress) onRoutePress();
-            return;
-          }
-          const closestNode = findNearestNode(latitude, longitude);
-
-          if (!closestNode) {
-            Alert.alert("Error", "No closest node found!");
-            return;
-          }
-
-          // if (isObstacleMode) {
-          //   setSelectedNode(closestNode);
-          //   setShowForm(true); // Show the form
-          // } else if (!source) {
-          //   setSource(closestNode);
-          // } else if (!destination) {
-          //   setDestination(closestNode);
-          // }
-
-          switch (selectionMode) {
-            case "obstacle":
-              setSelectedNode(closestNode);
-              setShowForm(true);
-              break;
-            case "source":
-              setSource(closestNode);
-              setSelectionMode("none"); // optionally reset
-              break;
-            case "destination":
-              setDestination(closestNode);
-              setSelectionMode("none"); // optionally reset
-              break;
-            default:
-              break;
-          }
+        onMessage={handleWebViewMessage}
+        onLoad={() => {
+          // Force initial data load when WebView is ready
+          setTimeout(() => {
+            updateMapData(true);
+          }, 500);
         }}
-      >
-        {source && (
-          <Marker
-            coordinate={{
-              latitude: source.geometry.coordinates[1],
-              longitude: source.geometry.coordinates[0],
-            }}
-            pinColor={themeColors.green}
-          />
-        )}
-
-        {destination && (
-          <Marker
-            coordinate={{
-              latitude: destination.geometry.coordinates[1],
-              longitude: destination.geometry.coordinates[0],
-            }}
-            pinColor={themeColors.brown}
-          />
-        )}
-
-        {/* Render confirmed obstacles only */}
-        {obstaclesDb.map((obstacle, index) => (
-          <ObstacleMapMarker
-            key={`db-obstacle-${obstacle.id}`}
-            obstacle={obstacle}
-            onPress={() => setSelectedObstacle(obstacle)}
-          />
-        ))}
-
-        {path.length > 0 && (
-          <Polyline
-            coordinates={path}
-            strokeColor={themeColors.red}
-            strokeWidth={5}
-          />
-        )}
-
-        {/* User Location Marker */}
-        {userLocation && (
-          <Marker coordinate={userLocation} pinColor={themeColors.blue} />
-        )}
-
-        {boundary.length > 0 && (
-          <Polygon coordinates={boundary} strokeColor="black" strokeWidth={1} />
-        )}
-
-        {/* Always render selectedObstacleCoord marker last so it appears on top */}
-        {selectedObstacleCoord && (
-          <Marker
-            coordinate={selectedObstacleCoord}
-            pinColor={themeColors.red}
-            zIndex={999}
-          />
-        )}
-      </MapView>
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        scalesPageToFit={true}
+        bounces={false}
+        scrollEnabled={false}
+      />
       <ObstacleForm
         visible={showForm}
         onClose={() => setShowForm(false)}

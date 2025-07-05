@@ -48,14 +48,28 @@ const InlineSearchBar: React.FC<InlineSearchBarProps> = ({ mapRef }) => {
             process.env.EXPO_PUBLIC_IP_ADDRESS
           }/search_place?q=${encodeURIComponent(searchText)}`
         );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
+
+        // Check if data is an array and not empty
+        if (!Array.isArray(data)) {
+          console.error("Search error: Response is not an array:", data);
+          setResults([]);
+          return;
+        }
+
         const parsedResults: PlaceResult[] = data.map((place: any) => ({
-          name: place.display_name,
-          latitude: Number(place.lat),
-          longitude: Number(place.lon),
+          name: place.display_name || place.name || "Unknown location",
+          latitude: Number(place.lat) || 0,
+          longitude: Number(place.lon) || 0,
         }));
         setResults(parsedResults);
       } catch (error) {
+        console.error("Search error:", error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -76,12 +90,10 @@ const InlineSearchBar: React.FC<InlineSearchBarProps> = ({ mapRef }) => {
     setResults([]);
     Keyboard.dismiss();
     if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: item.latitude,
-        longitude: item.longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      });
+      mapRef.current.injectJavaScript(`
+        map.flyTo([${item.latitude}, ${item.longitude}], 16);
+        true;
+      `);
     }
   };
 

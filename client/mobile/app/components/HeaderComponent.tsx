@@ -10,12 +10,12 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
-import MapView from "react-native-maps";
+
 import { useAuthStore } from "@/lib/useAuthStore";
 import { themeColors } from "../styles/colors";
 
 // Props now accepts the mapRef
-const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<MapView> }) => {
+const HeaderComponent = ({ mapRef }: { mapRef: React.RefObject<any> }) => {
   const user = useAuthStore((state) => state.user);
   const inputRef = useRef<TextInput>(null);
 

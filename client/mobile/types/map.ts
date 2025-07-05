@@ -1,7 +1,10 @@
-import { LatLng } from "react-native-maps";
-import MapView from "react-native-maps";
 import { GeoJSONFeature } from "./geoJSON";
 import { Obstacle } from "./obstacle";
+
+export interface LatLng {
+  latitude: number;
+  longitude: number;
+}
 
 export interface MapComponentProps {
   toggleObstacle: (nodeId: string) => void;
@@ -15,7 +18,7 @@ export interface MapComponentProps {
   };
   setMapRegion: (region: any) => void;
   obstaclesDb: Obstacle[];
-  mapRef: React.RefObject<MapView>;
+  mapRef: React.RefObject<any>;
   onRoutePress: () => void;
   mapZoomedToUser: React.MutableRefObject<boolean>;
 }

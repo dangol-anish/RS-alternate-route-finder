@@ -11,14 +11,14 @@ import {
 import MapComponent from "@/app/components/MapComponent";
 import { useNodes } from "@/hooks/useNodes";
 import { updateObstacles, fetchShortestPath } from "./utils/api";
-import { LatLng } from "react-native-maps";
+// import { LatLng } from "react-native-maps";
 import FloatingActionComponent from "./components/FloatingActionComponent";
 import * as Location from "expo-location";
 import { useRouter, usePathname } from "expo-router";
 import { useMapStore } from "@/lib/useMapStore";
 import { useObstacles } from "@/hooks/useObstacles";
 // import Menu from "./components/auth/Menu";
-import MapView from "react-native-maps";
+// import MapView from "react-native-maps";
 import { MaterialIcons } from "@expo/vector-icons";
 import { GeoJSONFeature } from "@/types/geoJSON";
 import Toast from "react-native-toast-message";
@@ -120,7 +120,7 @@ export default function App() {
   const pathname = usePathname();
   const { nodes } = useNodes();
   const { obstaclesDb } = useObstacles();
-  const mapRef = useRef<MapView | null>(null);
+  const mapRef = useRef<any>(null);
 
   const {
     source,
@@ -543,7 +543,6 @@ export default function App() {
         } catch {
           data = text;
         }
-
       })
       .catch((error) => {
         Toast.show({

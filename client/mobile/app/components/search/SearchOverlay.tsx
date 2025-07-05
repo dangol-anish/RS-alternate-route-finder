@@ -59,17 +59,30 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
             process.env.EXPO_PUBLIC_IP_ADDRESS
           }/search_place?q=${encodeURIComponent(searchText)}`
         );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
 
+        // Check if data is an array and not empty
+        if (!Array.isArray(data)) {
+          console.error("Search error: Response is not an array:", data);
+          setResults([]);
+          return;
+        }
+
         const parsedResults: PlaceResult[] = data.map((place: any) => ({
-          name: place.display_name,
-          latitude: place.lat,
-          longitude: place.lon,
+          name: place.display_name || place.name || "Unknown location",
+          latitude: parseFloat(place.lat) || 0,
+          longitude: parseFloat(place.lon) || 0,
         }));
 
         setResults(parsedResults);
       } catch (error) {
         console.error("Search error:", error);
+        setResults([]);
       } finally {
         setLoading(false); // Stop loading
       }
