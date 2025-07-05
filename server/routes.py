@@ -575,13 +575,18 @@ def search_place():
             'limit': 5,
             'countrycodes': 'np'
         }
-
         headers = {
-            'User-Agent': 'YourAppName/1.0 (your@email.com)'
+            'User-Agent': 'RoadSenseApp/1.0 (contact@yourdomain.com)'
         }
-
         response = requests.get(nominatim_url, params=params, headers=headers)
-        results = response.json()
+        print("Nominatim status:", response.status_code)
+        print("Nominatim response:", response.text)
+        if response.status_code != 200:
+            return jsonify({"error": f"Nominatim error: {response.status_code}", "raw": response.text}), 502
+        try:
+            results = response.json()
+        except Exception as e:
+            return jsonify({"error": f"Upstream JSON error: {str(e)}", "raw": response.text}), 502
 
         places = [{
             "display_name": place.get("display_name"),
