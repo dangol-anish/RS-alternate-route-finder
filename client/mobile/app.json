@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "RoadSense",
-    "slug": "RoadSense",
+    "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo/logo.png",
