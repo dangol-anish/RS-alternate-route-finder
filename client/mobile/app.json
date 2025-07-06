@@ -4,7 +4,7 @@
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo/logo.png",
+    "icon": "./assets/logo/appicon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo/logo.png",
+        "foregroundImage": "./assets/logo/appicon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -40,7 +40,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/logo/logo.png",
+          "image": "./assets/logo/appicon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -75,7 +75,7 @@
     },
     "owner": "anishdangol",
     "splash": {
-      "image": "./assets/logo/logo.png",
+      "image": "./assets/logo/appicon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     }
