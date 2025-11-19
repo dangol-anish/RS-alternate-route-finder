@@ -7,7 +7,7 @@ def bidirectional_astar(graph, source, destination, obstacles, obstacle_radius=0
     """Optimized Bidirectional A* Algorithm with spatial indexing and configurable obstacle avoidance."""
 
     # 1. Check cache first
-    cache_key = get_cache_key(source, destination, obstacles)
+    cache_key = get_cache_key(source, destination, obstacles, obstacle_radius)
     cached_result = get_cached_path(cache_key)
     if cached_result:
         print(f"Cache hit for {source}-{destination}")

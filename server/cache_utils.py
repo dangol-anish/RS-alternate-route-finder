@@ -6,13 +6,13 @@ CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache')
 if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR)
 
-def get_cache_key(source, destination, obstacles):
+def get_cache_key(source, destination, obstacles, obstacle_radius=0.1):
     """Creates a unique hash for a given pathfinding request."""
     # Convert obstacles set to a sorted tuple to ensure consistent ordering
     obstacle_tuple = tuple(sorted(list(obstacles)))
     
     # Create a string representation of the request
-    key_string = f"{source}-{destination}-{obstacle_tuple}"
+    key_string = f"{source}-{destination}-{obstacle_tuple}-{obstacle_radius}"
     
     # Return a SHA256 hash of the string
     return hashlib.sha256(key_string.encode()).hexdigest()
