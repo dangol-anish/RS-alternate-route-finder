@@ -1,0 +1,27 @@
+# 1. Introduction
+
+Efficient real-time navigation is a critical component of modern intelligent transportation systems, yet the dynamic nature of urban environments presents significant challenges to traditional pathfinding algorithms. While heuristic search algorithms like A* have long served as a foundation for route planning, their performance can degrade in large-scale networks. As noted in the systematic literature review by **Foead et al. (2021)**, even variants like Bidirectional A* struggle with efficiency on larger grids, highlighting the need for further enhancement.
+
+The primary challenge arises from the fact that real-world urban pathfinding is not a static problem. The optimal path is rarely the shortest geometric one, as it is constantly influenced by dynamic variables such as traffic congestion and unexpected incidents like accidents or road closures. Research in dynamic vehicle routing has consistently shown that incorporating real-time data is essential for effective navigation. For instance, **Fleischmann et al. (2004)** demonstrated significant performance gains by using online traffic information to update travel times, while **Jerbi et al. (2006)** developed a routing protocol for vehicular networks (VANETs) that uses real-time traffic density as a primary factor in selecting optimal junctions. This body of work establishes that any robust urban navigation system must be capable of adapting to a constantly changing environment.
+
+A common approach for handling such dynamic constraints is to model them as a "penalty" that is integrated into the pathfinding algorithm's cost function. This concept is well-established in the field of constrained optimization, where penalty functions are used to guide search heuristics away from infeasible solutions, as discussed by **Avella et al. (2002)**. In the context of navigation, a practical example is provided by **Hu et al. (2016)**, who developed a "translation module" to convert time delays from traffic lights into an equivalent distance penalty for their A* heuristic. This demonstrates the viability of translating real-world constraints into a unified cost metric.
+
+Another prevalent strategy involves hybrid architectures that combine a global planner with a local, reactive one. As shown by **Zhang et al. (2025)** and **Liu et al. (2022)**, a global algorithm like A* can be used to compute an optimal route, which is then passed as a series of waypoints to a local method like the Dynamic Window Approach (DWA) or Artificial Potential Field (APF) to handle immediate, unforeseen collisions.
+
+However, while these approaches address dynamic traffic and local collisions, a gap remains in the literature regarding global path planners that offer a *configurable and explicitly quantifiable* method for avoiding discrete obstacles. There is a need for systems that not only find a safe path but also allow for a clear understanding of the trade-offs between the chosen level of safety and other critical performance metrics like path length, computational cost, and the very reliability of finding a path in a cluttered environment.
+
+This paper addresses this gap by proposing and evaluating an enhanced Bidirectional A* algorithm that incorporates a spatially-indexed, hard exclusion mechanism with a configurable avoidance radius. Our primary contribution is not just the algorithm itself, but the comprehensive, quantitative analysis of its performance across the competing objectives of safety, efficiency, and reliability. This work provides a practical framework for building tunable, risk-aware navigation systems that can adapt to varying real-world conditions and user preferences.
+
+The remainder of this paper is structured as follows: Section 2 details the methodology, including the road network representation, the core pathfinding algorithm, and the obstacle avoidance mechanism. Section 3 presents the experimental setup. Section 4 provides a detailed analysis of the results. Finally, Section 5 discusses the implications of the findings and outlines directions for future work.
+
+---
+
+### References
+
+*   Avella, P., Boccia, M., & Sforza, A. (2002). A penalty function heuristic for the resource constrained shortest path problem. *European Journal of Operational Research*, *142*(2), 221–230.
+*   Fleischmann, B., Gnutzmann, S., & Sandvoß, E. (2004). Dynamic Vehicle Routing Based on Online Traffic Information. *Transportation Science*, *38*(4), 420–433.
+*   Foead, D., Ghifari, A., Kusuma, M. B., Hanafiah, N., & Gunawan, E. (2021). A Systematic Literature Review of A\* Pathfinding. *Procedia Computer Science*, *179*, 507–514.
+*   Hu, L., Yang, J., & Huang, J. (2016). The real-time shortest path algorithm with a consideration of traffic-light. *Journal of Intelligent & Fuzzy Systems*, *31*(5), 2403-2410.
+*   Jerbi, M., Meraihi, R., Senouci, S.-M., & Ghamri-Doudane, Y. (2006). GyTAR: improved Greedy Traffic Aware Routing Protocol for Vehicular Ad Hoc Networks in City Environments. In *VANET'06* (pp. 88-91). ACM.
+*   Liu, L., Wang, B., & Xu, H. (2022). Research on Path-Planning Algorithm Integrating Optimization A-Star Algorithm and Artificial Potential Field Method. *Electronics*, *11*(22), 3660.
+*   Zhang, Y., Li, B., Huo, T., & Liu, R. (2025). Research on Robot Dynamic Obstacle Avoidance Method Based on Improved A\* and Dynamic Window Algorithm. *Journal of System Simulation*, *37*(6), 1555-1564.
