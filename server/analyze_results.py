@@ -5,7 +5,7 @@ import seaborn as sns
 
 # Define the path to the results CSV file
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-RESULTS_FILE = os.path.join(SCRIPT_DIR, "experiment_results.csv")
+RESULTS_FILE = os.path.join(SCRIPT_DIR, "research-paper-new", "experiment_results.csv")
 
 def load_data(file_path):
     """Loads the experiment results into a pandas DataFrame."""
